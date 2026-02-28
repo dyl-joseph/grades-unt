@@ -90,7 +90,7 @@ async function main() {
            RETURNING id`,
           [prefix, number, title]
         );
-        courseId = res.rows[0].id;
+        courseId = res.rows[0].id as number;
         courseCache.set(courseKey, courseId);
       }
 
@@ -105,7 +105,7 @@ async function main() {
            RETURNING id`,
           [firstName, lastName]
         );
-        instructorId = res.rows[0].id;
+        instructorId = res.rows[0].id as number;
         instructorCache.set(instrKey, instructorId);
       }
 
