@@ -72,6 +72,7 @@ export default function GradeChart({
           stroke={chartColors.axisStroke}
         />
         <Tooltip
+          cursor={false}
           content={
             <CustomTooltip
               tooltipBg={chartColors.tooltipBg}
