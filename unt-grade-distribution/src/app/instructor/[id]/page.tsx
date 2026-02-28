@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { aggregateGrades, calculateGPA } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
+import type { Section, Course } from "@prisma/client";
 
 interface InstructorPageProps {
   params: Promise<{ id: string }>;
@@ -91,7 +92,7 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
             </span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {sections.map((section) => (
+            {sections.map((section: Section & { course: Course }) => (
               <SectionCard
                 key={section.id}
                 section={{ ...section, instructor }}
