@@ -7,7 +7,7 @@ export default function NotFound() {
         404
       </h1>
       <p className="mt-4 text-lg text-gray-600 dark:text-green-200/70">
-        Lost in the jungle... page not found 🌿
+        Lost in the jungle... page not found 🌴
       </p>
       <Link
         href="/"

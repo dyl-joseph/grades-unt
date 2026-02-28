@@ -63,7 +63,7 @@ export default function CartPage() {
           href="/"
           className="mt-6 inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-jungle-moss"
         >
-          🌿 Browse Courses
+          Browse Courses
         </Link>
       </div>
     );

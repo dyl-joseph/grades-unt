@@ -20,7 +20,7 @@ export default function Home() {
       {/* Subtitle */}
       <p className="mt-8 text-center text-sm text-jungle-vine dark:text-accent">
         Search by course (e.g., &ldquo;ACCT 2010&rdquo;) or professor name
-        (e.g., &ldquo;Moore&rdquo;) 🍃
+        (e.g., &ldquo;Moore&rdquo;)
       </p>
     </div>
   );

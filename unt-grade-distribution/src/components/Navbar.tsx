@@ -17,7 +17,7 @@ export default function Navbar() {
           href="/"
           className="shrink-0 text-lg font-bold text-primary dark:text-jungle-leaf"
         >
-          🌿 UNT Grades
+          UNT Grades
         </Link>
         {!isHome && (
           <div className="hidden max-w-md flex-1 sm:block">
