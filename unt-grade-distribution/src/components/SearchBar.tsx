@@ -158,7 +158,7 @@ export default function SearchBar({
               {results!.courses.map((course, i) => (
                 <button
                   key={`c-${course.id}`}
-                  className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                  className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                     highlightIdx === i
                       ? "bg-gray-50 dark:bg-gray-800"
                       : ""
@@ -188,7 +188,7 @@ export default function SearchBar({
                 return (
                   <button
                     key={`i-${instructor.id}`}
-                    className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                    className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                       highlightIdx === idx
                         ? "bg-gray-50 dark:bg-gray-800"
                         : ""
