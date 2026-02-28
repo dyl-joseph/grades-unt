@@ -19,13 +19,13 @@ export default function SectionCard({
   const chartData = toChartData(section);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
+    <div className="rounded-xl border border-green-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-green-900 dark:bg-jungle-canopy/60">
       <div className="mb-3 flex items-center justify-between">
         <div>
           {showCourse && (
             <Link
               href={`/course/${section.course.prefix}/${section.course.number}`}
-              className="text-sm font-medium text-primary hover:underline dark:text-primary-light"
+              className="text-sm font-medium text-primary hover:underline dark:text-jungle-leaf"
             >
               {section.course.prefix} {section.course.number}
             </Link>
@@ -37,7 +37,7 @@ export default function SectionCard({
             <span className="text-gray-300 dark:text-gray-600">·</span>
             <Link
               href={`/instructor/${section.instructorId}`}
-              className="text-sm font-medium text-gray-900 hover:text-primary dark:text-gray-100 dark:hover:text-primary-light"
+              className="text-sm font-medium text-gray-900 hover:text-primary dark:text-green-100 dark:hover:text-jungle-leaf"
             >
               {section.instructor.lastName}, {section.instructor.firstName}
             </Link>

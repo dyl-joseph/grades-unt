@@ -39,7 +39,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} font-sans antialiased bg-white text-gray-900 transition-colors duration-200 dark:bg-gray-950 dark:text-gray-100`}
+        className={`${inter.variable} font-sans antialiased bg-green-50/30 text-gray-900 transition-colors duration-200 dark:bg-jungle-canopy dark:text-green-100`}
       >
         <Navbar />
         <main>{children}</main>

@@ -62,10 +62,10 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
           {instructor.firstName} {instructor.lastName}
         </h1>
-        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
           <span className="flex items-center gap-1.5">
             Overall GPA: <GpaBadge gpa={overallGPA} />
           </span>
@@ -83,11 +83,11 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
           <h2 className="mb-4 text-lg font-semibold">
             <Link
               href={`/course/${course.prefix}/${course.number}`}
-              className="text-primary hover:underline dark:text-primary-light"
+              className="text-primary hover:underline dark:text-jungle-leaf"
             >
               {course.prefix} {course.number}
             </Link>
-            <span className="ml-2 text-gray-500 dark:text-gray-400">
+            <span className="ml-2 text-gray-500 dark:text-green-300/60">
               — {course.title}
             </span>
           </h2>

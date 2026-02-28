@@ -10,13 +10,13 @@ export default function Navbar() {
   const isHome = pathname === "/";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-700 dark:bg-gray-950/80">
+    <nav className="sticky top-0 z-50 border-b border-green-200 bg-green-50/90 backdrop-blur-md dark:border-green-900 dark:bg-jungle-canopy/90">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
         <Link
           href="/"
-          className="shrink-0 text-lg font-bold text-primary dark:text-primary-light"
+          className="shrink-0 text-lg font-bold text-primary dark:text-jungle-leaf"
         >
-          UNT Grades
+          🌿 UNT Grades
         </Link>
         {!isHome && (
           <div className="hidden max-w-md flex-1 sm:block">
@@ -28,7 +28,7 @@ export default function Navbar() {
         </div>
       </div>
       {!isHome && (
-        <div className="border-t border-gray-100 px-4 py-2 sm:hidden dark:border-gray-800">
+        <div className="border-t border-green-100 px-4 py-2 sm:hidden dark:border-green-900">
           <SearchBar compact />
         </div>
       )}

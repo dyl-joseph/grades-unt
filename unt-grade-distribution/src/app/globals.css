@@ -3,11 +3,18 @@
 /* Enable class-based dark mode (for manual toggle) */
 @variant dark (&:where(.dark, .dark *));
 
-/* Custom UNT theme colors — change these to rebrand */
+/* Jungle theme colors */
 @theme {
-  --color-primary: #00853E;
-  --color-primary-light: #00A94F;
-  --color-primary-dark: #006B32;
-  --color-accent: #00853E;
-  --color-accent-light: #00A94F;
+  --color-primary: #1B5E20;
+  --color-primary-light: #2E7D32;
+  --color-primary-dark: #0D3B13;
+  --color-accent: #A5D6A7;
+  --color-accent-light: #C8E6C9;
+  --color-jungle-canopy: #0A2F11;
+  --color-jungle-leaf: #388E3C;
+  --color-jungle-moss: #33691E;
+  --color-jungle-earth: #3E2723;
+  --color-jungle-bark: #4E342E;
+  --color-jungle-gold: #F9A825;
+  --color-jungle-vine: #558B2F;
 }

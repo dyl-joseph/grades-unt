@@ -151,10 +151,10 @@ export default function SearchBar({
       </div>
 
       {isOpen && items.length > 0 && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
+        <div className="absolute z-50 mt-2 w-full rounded-xl border border-green-200 bg-white shadow-xl dark:border-green-900 dark:bg-jungle-canopy">
           {results!.courses.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-accent">
                 Courses
               </div>
               {results!.courses.map((course, i) => (
@@ -162,17 +162,17 @@ export default function SearchBar({
                   key={`c-${course.id}`}
                   className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                     highlightIdx === i
-                      ? "bg-gray-50 dark:bg-gray-800"
+                      ? "bg-green-50 dark:bg-green-900/30"
                       : ""
                   }`}
                   onClick={() =>
                     navigate("course", `${course.prefix}/${course.number}`)
                   }
                 >
-                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                  <span className="font-medium text-gray-900 dark:text-green-100">
                     {course.prefix} {course.number}
                   </span>
-                  <span className="ml-2 text-gray-500 dark:text-gray-400">
+                  <span className="ml-2 text-gray-500 dark:text-green-300/60">
                     — {course.title}
                   </span>
                 </button>
@@ -182,7 +182,7 @@ export default function SearchBar({
 
           {results!.instructors.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-accent">
                 Instructors
               </div>
               {results!.instructors.map((instructor, i) => {
@@ -192,7 +192,7 @@ export default function SearchBar({
                     key={`i-${instructor.id}`}
                     className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                       highlightIdx === idx
-                        ? "bg-gray-50 dark:bg-gray-800"
+                        ? "bg-green-50 dark:bg-green-900/30"
                         : ""
                     }`}
                     onClick={() =>
@@ -211,7 +211,7 @@ export default function SearchBar({
       )}
 
       {isOpen && items.length === 0 && debouncedQuery.length >= 2 && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-gray-200 bg-white p-4 text-center text-sm text-gray-500 shadow-xl dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+        <div className="absolute z-50 mt-2 w-full rounded-xl border border-green-200 bg-white p-4 text-center text-sm text-gray-500 shadow-xl dark:border-green-900 dark:bg-jungle-canopy dark:text-green-200/70">
           No results found for &ldquo;{debouncedQuery}&rdquo;
         </div>
       )}
