@@ -146,12 +146,12 @@ export default function SearchBar({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoFocus={autoFocus}
-          className={`w-full rounded-xl border border-gray-300 bg-white pl-9 pr-4 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-light dark:focus:ring-primary-light/20 ${compact ? "py-1.5 text-sm" : "py-3 pl-10"}`}
+          className={`w-full rounded-2xl border border-white/30 bg-white/40 pl-9 pr-4 text-gray-900 shadow-lg shadow-black/5 backdrop-blur-xl placeholder:text-gray-500/70 focus:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 dark:border-white/10 dark:bg-white/5 dark:text-green-100 dark:shadow-black/20 dark:placeholder:text-green-200/40 dark:focus:border-white/20 dark:focus:ring-white/10 ${compact ? "py-1.5 text-sm" : "py-3 pl-10"}`}
         />
       </div>
 
       {isOpen && items.length > 0 && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-green-200 bg-white shadow-xl dark:border-green-900 dark:bg-jungle-canopy">
+        <div className="absolute z-50 mt-2 w-full rounded-2xl border border-white/30 bg-white/60 shadow-xl shadow-black/10 backdrop-blur-2xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/30">
           {results!.courses.length > 0 && (
             <div>
               <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-accent">
@@ -211,7 +211,7 @@ export default function SearchBar({
       )}
 
       {isOpen && items.length === 0 && debouncedQuery.length >= 2 && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-green-200 bg-white p-4 text-center text-sm text-gray-500 shadow-xl dark:border-green-900 dark:bg-jungle-canopy dark:text-green-200/70">
+        <div className="absolute z-50 mt-2 w-full rounded-2xl border border-white/30 bg-white/60 p-4 text-center text-sm text-gray-500 shadow-xl shadow-black/10 backdrop-blur-2xl dark:border-white/10 dark:bg-white/5 dark:text-green-200/70 dark:shadow-black/30">
           No results found for &ldquo;{debouncedQuery}&rdquo;
         </div>
       )}
