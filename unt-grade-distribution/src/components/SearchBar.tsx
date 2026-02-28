@@ -8,11 +8,13 @@ import type { SearchResult } from "@/lib/types";
 interface SearchBarProps {
   placeholder?: string;
   autoFocus?: boolean;
+  compact?: boolean;
 }
 
 export default function SearchBar({
   placeholder = "Search course or professor...",
   autoFocus = false,
+  compact = false,
 }: SearchBarProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -120,10 +122,10 @@ export default function SearchBar({
   const items = allItems();
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-xl">
+    <div ref={containerRef} className={`relative w-full ${compact ? "" : "max-w-xl"}`}>
       <div className="relative">
         <svg
-          className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+          className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${compact ? "h-4 w-4" : "h-5 w-5"}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -144,7 +146,7 @@ export default function SearchBar({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoFocus={autoFocus}
-          className="w-full rounded-xl border border-gray-300 bg-white py-3 pl-10 pr-4 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-light dark:focus:ring-primary-light/20"
+          className={`w-full rounded-xl border border-gray-300 bg-white pl-9 pr-4 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-light dark:focus:ring-primary-light/20 ${compact ? "py-1.5 text-sm" : "py-3 pl-10"}`}
         />
       </div>
 
