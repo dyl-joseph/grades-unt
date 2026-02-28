@@ -4,9 +4,14 @@ import { PrismaPg } from "@prisma/adapter-pg";
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 function createPrismaClient() {
-  const adapter = new PrismaPg({
-    connectionString: process.env.DIRECT_URL || process.env.DATABASE_URL,
-  });
+  // In production (Vercel), always use pooler URL for serverless compatibility
+  // In dev, prefer direct URL for speed if available
+  const connectionString =
+    process.env.NODE_ENV === "production"
+      ? process.env.DATABASE_URL
+      : process.env.DIRECT_URL || process.env.DATABASE_URL;
+
+  const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter });
 }
 
