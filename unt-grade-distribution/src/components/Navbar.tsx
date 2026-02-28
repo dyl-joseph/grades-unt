@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
 import SearchBar from "./SearchBar";
+import CartIcon from "./CartIcon";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -23,7 +24,8 @@ export default function Navbar() {
             <SearchBar compact />
           </div>
         )}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <CartIcon />
           <ThemeToggle />
         </div>
       </div>

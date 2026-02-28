@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
+import Providers from "@/components/Providers";
 import "./globals.css";
 
 const inter = Inter({
@@ -41,8 +42,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans antialiased bg-green-50/30 text-gray-900 transition-colors duration-200 dark:bg-jungle-canopy dark:text-green-100`}
       >
-        <Navbar />
-        <main>{children}</main>
+        <Providers>
+          <Navbar />
+          <main>{children}</main>
+        </Providers>
       </body>
     </html>
   );

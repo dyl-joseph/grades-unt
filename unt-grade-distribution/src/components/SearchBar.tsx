@@ -146,12 +146,12 @@ export default function SearchBar({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoFocus={autoFocus}
-          className={`w-full rounded-2xl border border-white/30 bg-white/40 pl-9 pr-4 text-gray-900 shadow-lg shadow-black/5 backdrop-blur-xl placeholder:text-gray-500/70 focus:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 dark:border-white/10 dark:bg-white/5 dark:text-green-100 dark:shadow-black/20 dark:placeholder:text-green-200/40 dark:focus:border-white/20 dark:focus:ring-white/10 ${compact ? "py-1.5 text-sm" : "py-3 pl-10"}`}
+          className={`glass-glossy w-full rounded-2xl border border-white/40 pl-9 pr-4 text-gray-900 shadow-lg placeholder:text-gray-500/70 focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/40 dark:border-white/15 dark:text-green-100 dark:placeholder:text-green-200/40 dark:focus:border-white/25 dark:focus:ring-white/15 ${compact ? "py-1.5 text-sm" : "py-3 pl-10"}`}
         />
       </div>
 
       {isOpen && items.length > 0 && (
-        <div className="absolute z-50 mt-2 w-full rounded-2xl border border-white/30 bg-white/60 shadow-xl shadow-black/10 backdrop-blur-2xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/30">
+        <div className="glass-glossy absolute z-50 mt-2 w-full rounded-2xl border border-white/40 shadow-xl dark:border-white/15">
           {results!.courses.length > 0 && (
             <div>
               <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-accent">
@@ -211,7 +211,7 @@ export default function SearchBar({
       )}
 
       {isOpen && items.length === 0 && debouncedQuery.length >= 2 && (
-        <div className="absolute z-50 mt-2 w-full rounded-2xl border border-white/30 bg-white/60 p-4 text-center text-sm text-gray-500 shadow-xl shadow-black/10 backdrop-blur-2xl dark:border-white/10 dark:bg-white/5 dark:text-green-200/70 dark:shadow-black/30">
+        <div className="glass-glossy absolute z-50 mt-2 w-full rounded-2xl border border-white/40 p-4 text-center text-sm text-gray-500 shadow-xl dark:border-white/15 dark:text-green-200/70">
           No results found for &ldquo;{debouncedQuery}&rdquo;
         </div>
       )}
