@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Enable class-based dark mode (for manual toggle) */
+@variant dark (&:where(.dark, .dark *));
+
+/* Custom UNT theme colors — change these to rebrand */
+@theme {
+  --color-primary: #00853E;
+  --color-primary-light: #00A94F;
+  --color-primary-dark: #006B32;
+  --color-accent: #00853E;
+  --color-accent-light: #00A94F;
+}

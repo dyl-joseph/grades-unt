@@ -1,0 +1,41 @@
+# ── Secrets ──
+.env
+.env.*
+!.env.example
+
+# ── Data files (CSV, SQLite, SQL chunks, seed tooling) ──
+*.csv
+*.sqlite
+*.db
+**/prisma/data/
+**/prisma/sql-chunks/
+**/prisma/generate-sql.ts
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── Node ──
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ── Next.js ──
+.next/
+out/
+build/
+
+# ── Misc ──
+*.pem
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.tsbuildinfo
+next-env.d.ts
+.vercel
