@@ -80,10 +80,11 @@
   background-image: linear-gradient(
     105deg,
     currentColor 0%,
-    currentColor 40%,
-    rgba(180, 255, 180, 0.9) 45%,
-    rgba(200, 255, 200, 0.7) 50%,
-    currentColor 55%,
+    currentColor 43%,
+    rgba(0, 65, 18, 1) 46%,
+    rgba(0, 45, 10, 1) 48%,
+    rgba(0, 65, 18, 1) 50%,
+    currentColor 53%,
     currentColor 100%
   );
   background-size: 200% 100%;
@@ -91,6 +92,19 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: sparkle-shift 3s ease-in-out infinite;
+}
+
+:is(.dark, .dark *) .sparkle-text-wide {
+  background-image: linear-gradient(
+    105deg,
+    currentColor 0%,
+    currentColor 41%,
+    rgba(0, 60, 15, 1) 44%,
+    rgba(0, 40, 8, 1) 48%,
+    rgba(0, 60, 15, 1) 52%,
+    currentColor 55%,
+    currentColor 100%
+  );
 }
 
 /* Frosty/opaque navbar search bar */
