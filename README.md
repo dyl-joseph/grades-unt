@@ -33,6 +33,9 @@ We got data from UNT about all the grade distributions from Fall 2025. With this
 ## Contributions: 
 
 [Dylan Joseph](https://github.com/dyl-joseph) (**Main Contributor and Developer/Maintainer**)
+
 [Gautham Nair](https://github.com/GauthamRNair) (**Came up with idea and implementation/tech stack**)
+
 [Akhil Tumati](https://github.com/YouSoMoose) (**Final Front-end design**)
+
 [Sai Are](https://github.com/FrostNinja397) (**Came up with the Share Idea button, built slide presentation**)
