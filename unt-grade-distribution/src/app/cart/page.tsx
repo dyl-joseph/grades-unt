@@ -130,7 +130,7 @@ function CartCourseCard({
   const chartData = toChartData(item);
 
   return (
-    <div className="relative rounded-xl border border-green-200 bg-white p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
+    <div className="relative rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
       {/* Remove button */}
       <button
         onClick={onRemove}

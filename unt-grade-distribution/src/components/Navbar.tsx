@@ -11,11 +11,11 @@ export default function Navbar() {
   const isHome = pathname === "/";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-green-200 bg-green-50/90 backdrop-blur-md dark:border-green-900 dark:bg-jungle-canopy/90">
+    <nav className="sticky top-0 z-50 border-b border-jungle-tan-dark/30 bg-jungle-tan/90 backdrop-blur-md dark:border-green-900/50 dark:bg-black/80">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
         <Link
           href="/"
-          className="shrink-0 text-lg font-bold text-primary dark:text-jungle-leaf"
+          className="shrink-0 text-xl font-bold text-primary dark:text-jungle-leaf"
         >
           UNT Grades
         </Link>

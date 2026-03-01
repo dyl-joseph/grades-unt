@@ -78,7 +78,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
       </div>
 
       {/* Aggregate chart */}
-      <div className="mb-10 rounded-xl border border-green-200 bg-white p-6 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
+      <div className="mb-10 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-6 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
         <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">
           Aggregate Grade Distribution
         </h2>

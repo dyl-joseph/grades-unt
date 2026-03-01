@@ -19,7 +19,7 @@ export default function SectionCard({
   const chartData = toChartData(section);
 
   return (
-    <div className="rounded-xl border border-green-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-green-900 dark:bg-jungle-canopy/60">
+    <div className="rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm transition-shadow hover:shadow-md dark:border-green-900 dark:bg-jungle-canopy/60">
       <div className="mb-3 flex items-center justify-between">
         <div>
           {showCourse && (

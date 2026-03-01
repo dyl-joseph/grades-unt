@@ -17,6 +17,9 @@
   --color-jungle-bark: #4E342E;
   --color-jungle-gold: #F9A825;
   --color-jungle-vine: #558B2F;
+  --color-jungle-tan: #D4C5A9;
+  --color-jungle-tan-light: #E8DCC8;
+  --color-jungle-tan-dark: #BBA882;
 }
 
 /* Glossy glass effects */
@@ -47,3 +50,5 @@
     inset 0 1px 1px rgba(255, 255, 255, 0.15),
     inset 0 -1px 1px rgba(255, 255, 255, 0.03);
 }
+
+/* Vine dark-mode boost is handled in the Vines component via Tailwind classes */

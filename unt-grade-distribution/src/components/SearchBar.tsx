@@ -111,10 +111,12 @@ export default function SearchBar({
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setHighlightIdx((prev) => (prev - 1 + items.length) % items.length);
-    } else if (e.key === "Enter" && highlightIdx >= 0) {
+    } else if (e.key === "Enter") {
       e.preventDefault();
-      const item = items[highlightIdx];
-      navigate(item.type, item.id);
+      // Navigate to highlighted item, or first item if none highlighted
+      const targetIdx = highlightIdx >= 0 ? highlightIdx : 0;
+      const item = items[targetIdx];
+      if (item) navigate(item.type, item.id);
     } else if (e.key === "Escape") {
       setIsOpen(false);
       inputRef.current?.blur();
