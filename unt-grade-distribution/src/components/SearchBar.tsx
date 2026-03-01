@@ -9,12 +9,14 @@ interface SearchBarProps {
   placeholder?: string;
   autoFocus?: boolean;
   compact?: boolean;
+  onFocusChange?: (focused: boolean) => void;
 }
 
 export default function SearchBar({
   placeholder = "Search course or professor...",
   autoFocus = false,
   compact = false,
+  onFocusChange,
 }: SearchBarProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -142,7 +144,10 @@ export default function SearchBar({
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => results && setIsOpen(true)}
+          onFocus={() => {
+            if (results) setIsOpen(true);
+            onFocusChange?.(true);
+          }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoFocus={autoFocus}
