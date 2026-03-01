@@ -52,3 +52,32 @@
 }
 
 /* Vine dark-mode boost is handled in the Vines component via Tailwind classes */
+
+/* Frosty/opaque navbar search bar */
+.glass-navbar-search {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.65) 100%
+  );
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(32px) saturate(2);
+  backdrop-filter: blur(32px) saturate(2);
+}
+
+:is(.dark, .dark *) .glass-navbar-search {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.09) 100%
+  );
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.05);
+}
