@@ -77,9 +77,20 @@
 }
 
 :is(.dark, .dark *) .sparkle-text {
-  background-image: none;
-  -webkit-text-fill-color: unset;
-  animation: none;
+  background-image: linear-gradient(
+    105deg,
+    currentColor 0%,
+    currentColor 40%,
+    rgba(180, 255, 180, 0.9) 45%,
+    rgba(200, 255, 200, 0.7) 50%,
+    currentColor 55%,
+    currentColor 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: sparkle-shift 3s ease-in-out infinite;
 }
 
 /* Frosty/opaque navbar search bar */

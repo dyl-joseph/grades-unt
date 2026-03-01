@@ -158,7 +158,7 @@ export default function SearchBar({
       </div>
 
       {isOpen && items.length > 0 && (
-        <div className="glass-glossy absolute z-50 mt-2 w-full rounded-2xl border border-white/40 shadow-xl dark:border-white/15">
+        <div className={`absolute z-50 mt-2 w-full rounded-2xl border shadow-xl ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
           {results!.courses.length > 0 && (
             <div>
               <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-accent">
@@ -218,7 +218,7 @@ export default function SearchBar({
       )}
 
       {isOpen && items.length === 0 && debouncedQuery.length >= 2 && (
-        <div className="glass-glossy absolute z-50 mt-2 w-full rounded-2xl border border-white/40 p-4 text-center text-sm text-gray-500 shadow-xl dark:border-white/15 dark:text-green-200/70">
+        <div className={`absolute z-50 mt-2 w-full rounded-2xl border p-4 text-center text-sm text-gray-500 shadow-xl dark:text-green-200/70 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
           No results found for &ldquo;{debouncedQuery}&rdquo;
         </div>
       )}
