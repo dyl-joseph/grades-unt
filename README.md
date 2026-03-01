@@ -32,7 +32,8 @@ We got data from UNT about all the grade distributions from Fall 2025. With this
 
 ## File Structure: 
 /unt-grade-distribution: contains all the code. put it all into a folder for "modulization".
-documentation files (any .md files): in the repo's root file. makes it easier to see and read all the documentation docs that have been made. 
+
+documentation files (any .md files): in the repo's root file. makes it easier to see and read all the documentation docs that have been made (e.g. look at [DOCUMENTATION.md](https://github.com/dyl-joseph/grades-unt/blob/main/DOCUMENTATION.md)). 
 
 ## Contributions: 
 
