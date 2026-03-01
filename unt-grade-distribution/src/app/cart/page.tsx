@@ -75,7 +75,7 @@ export default function CartPage() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
-            🛒 My Courses
+            My Courses
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-green-200/60">
             {items.length} course{items.length !== 1 ? "s" : ""} saved
