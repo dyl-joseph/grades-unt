@@ -30,6 +30,10 @@ We got data from UNT about all the grade distributions from Fall 2025. With this
 - Supabase (database)
 - Vercel (hosting the website itself)
 
+## File Structure: 
+/unt-grade-distribution: contains all the code. put it all into a folder for "modulization".
+documentation files (any .md files): in the repo's root file. makes it easier to see and read all the documentation docs that have been made. 
+
 ## Contributions: 
 
 [Dylan Joseph](https://github.com/dyl-joseph) (**Main Contributor and Developer/Maintainer**)
