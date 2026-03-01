@@ -5,6 +5,7 @@ import GpaBadge from "./GpaBadge";
 import GradeChart from "./GradeChart";
 import { calculateGPA, toChartData } from "@/lib/grades";
 import type { SectionWithRelations } from "@/lib/types";
+import ShareButton from "./ShareButton";
 
 interface SectionCardProps {
   section: SectionWithRelations;
@@ -43,7 +44,10 @@ export default function SectionCard({
             </Link>
           </div>
         </div>
-        <GpaBadge gpa={gpa} />
+        <div className="flex items-center gap-2">
+          <ShareButton url={`/instructor/${section.instructorId}`} compact />
+          <GpaBadge gpa={gpa} />
+        </div>
       </div>
       <GradeChart data={chartData} height={200} />
       <div className="mt-2 text-right text-xs text-gray-400 dark:text-gray-500">

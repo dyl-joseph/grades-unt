@@ -153,7 +153,7 @@ export default function SearchBar({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoFocus={autoFocus}
-          className={`w-full rounded-2xl border pl-9 pr-4 text-gray-900 shadow-lg placeholder:text-gray-500/70 focus:outline-none focus:ring-2 ${compact ? "glass-navbar-search border-white/50 bg-white/70 py-1.5 text-sm backdrop-blur-xl focus:border-white/70 focus:ring-white/50 dark:border-white/20 dark:bg-white/10 dark:focus:border-white/30 dark:focus:ring-white/20" : "glass-glossy border-white/40 py-3 pl-10 focus:border-white/60 focus:ring-white/40 dark:border-white/15 dark:focus:border-white/25 dark:focus:ring-white/15"} dark:text-green-100 dark:placeholder:text-green-200/40`}
+          className={`w-full rounded-2xl border pl-9 pr-4 text-gray-900 placeholder:text-gray-500/70 focus:outline-none focus:ring-2 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light py-1.5 text-sm shadow-sm focus:border-primary/40 focus:ring-primary/20 dark:border-green-800/50 dark:bg-jungle-canopy dark:focus:border-green-600/50 dark:focus:ring-green-700/30" : "glass-glossy border-white/40 py-3 pl-10 shadow-lg focus:border-white/60 focus:ring-white/40 dark:border-white/15 dark:focus:border-white/25 dark:focus:ring-white/15"} dark:text-green-100 dark:placeholder:text-green-200/40`}
         />
       </div>
 

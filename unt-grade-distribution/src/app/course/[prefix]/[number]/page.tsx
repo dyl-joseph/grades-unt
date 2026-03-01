@@ -5,6 +5,7 @@ import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
 import CourseCartButton from "@/components/CourseCartButton";
+import ShareButton from "@/components/ShareButton";
 import type { Section, Instructor } from "@prisma/client";
 
 interface CoursePageProps {
@@ -47,6 +48,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
             <span className="text-gray-500 dark:text-green-300/60">—</span>{" "}
             {course.title}
           </h1>
+        <div className="flex items-start gap-2">
+          <ShareButton url={`/course/${course.prefix}/${course.number}`} />
           <CourseCartButton
             item={{
               courseId: course.id,
@@ -68,7 +71,6 @@ export default async function CoursePage({ params }: CoursePageProps) {
             }}
           />
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
           <span className="flex items-center gap-1.5">
             Overall GPA: <GpaBadge gpa={overallGPA} />
           </span>
