@@ -144,18 +144,12 @@ export default function RMPRating({ firstName, lastName }: RMPRatingProps) {
       {professor.tags && professor.tags.length > 0 && (
         <div className="mt-4 border-t border-gray-200 pt-3 dark:border-green-800/30">
           <div className="flex flex-wrap gap-1.5">
-            {professor.tags
-              .sort((a, b) => b.tagCount - a.tagCount)
-              .slice(0, 5)
-              .map((tag) => (
+            {professor.tags.map((tag) => (
                 <span
-                  key={tag.tagName}
-                  className="inline-flex items-center gap-1 rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-700 dark:bg-green-800/40 dark:text-green-200"
+                  key={tag}
+                  className="inline-flex items-center rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-700 dark:bg-green-800/40 dark:text-green-200"
                 >
-                  {tag.tagName}
-                  <span className="text-gray-400 dark:text-green-400/60">
-                    ({tag.tagCount})
-                  </span>
+                  {tag}
                 </span>
               ))}
           </div>
