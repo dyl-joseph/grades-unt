@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { aggregateGrades, calculateGPA } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
+import RMPRating from "@/components/RMPRating";
 import type { Section, Course } from "@prisma/client";
 
 interface InstructorPageProps {
@@ -62,18 +63,30 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
-          {instructor.firstName} {instructor.lastName}
-        </h1>
-        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
-          <span className="flex items-center gap-1.5">
-            Overall GPA: <GpaBadge gpa={overallGPA} />
-          </span>
-          <span>{instructor.sections.length} sections</span>
-          <span>
-            {courseGroups.length} course{courseGroups.length !== 1 ? "s" : ""}{" "}
-            taught
-          </span>
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
+              {instructor.firstName} {instructor.lastName}
+            </h1>
+            <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
+              <span className="flex items-center gap-1.5">
+                Overall GPA: <GpaBadge gpa={overallGPA} />
+              </span>
+              <span>{instructor.sections.length} sections</span>
+              <span>
+                {courseGroups.length} course{courseGroups.length !== 1 ? "s" : ""}{" "}
+                taught
+              </span>
+            </div>
+          </div>
+          
+          {/* RateMyProfessors Integration */}
+          <div className="w-full lg:w-72">
+            <RMPRating
+              firstName={instructor.firstName}
+              lastName={instructor.lastName}
+            />
+          </div>
         </div>
       </div>
 
