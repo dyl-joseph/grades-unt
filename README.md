@@ -16,8 +16,8 @@ We got data from UNT about all the grade distributions from Fall 2025. With this
 - Next.js 16.1.6
 - Typescript 
 - Tailwind CSS (v4) 
-- Recharts (v3.7.0) - draws grade distribution)
-- jsPDF + jspdf-autotable (4.2.0, 5.0.7) - PDF exporter) 
+- Recharts (v3.7.0) - draws grade distribution charts
+- jsPDF + jspdf-autotable (4.2.0, 5.0.7) - PDF exporter
 
 ### Backend:
 - postgress-sql
