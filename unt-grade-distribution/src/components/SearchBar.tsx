@@ -23,18 +23,28 @@ export default function SearchBar({
   const [results, setResults] = useState<SearchResult | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
-  const debouncedQuery = useDebounce(query, 300);
+  const [loading, setLoading] = useState(false);
+  const debouncedQuery = useDebounce(query, 150);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Show loading as soon as user types (before debounce fires)
+  useEffect(() => {
+    if (query.length >= 2 && query !== debouncedQuery) {
+      setLoading(true);
+    }
+  }, [query, debouncedQuery]);
 
   // Fetch results when debounced query changes
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setResults(null);
       setIsOpen(false);
+      setLoading(false);
       return;
     }
 
+    setLoading(true);
     const controller = new AbortController();
     fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`, {
       signal: controller.signal,
@@ -44,6 +54,7 @@ export default function SearchBar({
         setResults(data);
         setIsOpen(true);
         setHighlightIdx(-1);
+        setLoading(false);
       })
       .catch(() => {
         // Abort or network error — ignore
@@ -217,7 +228,19 @@ export default function SearchBar({
         </div>
       )}
 
-      {isOpen && items.length === 0 && debouncedQuery.length >= 2 && (
+      {isOpen && loading && query.length >= 2 && (
+        <div className={`absolute z-50 mt-2 w-full rounded-2xl border p-4 text-center text-sm text-gray-500 shadow-xl dark:text-green-200/70 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
+          <div className="flex items-center justify-center gap-2">
+            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            Searching…
+          </div>
+        </div>
+      )}
+
+      {isOpen && !loading && items.length === 0 && debouncedQuery.length >= 2 && (
         <div className={`absolute z-50 mt-2 w-full rounded-2xl border p-4 text-center text-sm text-gray-500 shadow-xl dark:text-green-200/70 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
           No results found for &ldquo;{debouncedQuery}&rdquo;
         </div>
