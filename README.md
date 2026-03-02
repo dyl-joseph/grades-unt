@@ -1,4 +1,4 @@
-# hackTAMS: grades-unt
+# grades-unt
 
 ## Choosing classes is a gamble. It shouldn't be.
 You don't always know what you're signing up for (easy or hard!) until it's too late. We created a website to view all the grades of every class AND professor at UNT.
@@ -37,10 +37,14 @@ documentation files (any .md files): in the repo's root file. makes it easier to
 
 ## Contributions: 
 
-[Dylan Joseph](https://github.com/dyl-joseph) (**Main Contributor and Developer/Maintainer**)
+### Maintainers:
 
-[Gautham Nair](https://github.com/GauthamRNair) (**Came up with idea and implementation/tech stack**)
+[Dylan Joseph](https://github.com/dyl-joseph)
 
-[Akhil Tumati](https://github.com/YouSoMoose) (**Final Front-end design**)
+[Gautham Nair](https://github.com/GauthamRNair)
 
-[Sai Are](https://github.com/FrostNinja397) (**Came up with the Share Idea button, built slide presentation**)
+### Initial Contributors:
+
+[Akhil Tumati](https://github.com/YouSoMoose)
+
+[Sai Are](https://github.com/FrostNinja397)
