@@ -63,7 +63,7 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
               {instructor.firstName} {instructor.lastName}
@@ -81,7 +81,7 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
           </div>
           
           {/* RateMyProfessors Integration */}
-          <div className="w-full lg:w-72">
+          <div className="w-full shrink-0 lg:w-72">
             <RMPRating
               firstName={instructor.firstName}
               lastName={instructor.lastName}
