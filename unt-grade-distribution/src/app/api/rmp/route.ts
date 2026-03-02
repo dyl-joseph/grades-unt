@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       professor,
     });
   } catch (error) {
-    console.error("RMP API error:", error);
+    console.error("[RMP API] Error:", error);
     return NextResponse.json(
       { error: "Failed to fetch RMP data" },
       { status: 500 }

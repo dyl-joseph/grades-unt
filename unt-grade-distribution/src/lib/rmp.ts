@@ -64,17 +64,18 @@ export async function searchProfessor(
   lastName: string
 ): Promise<RMPProfessor | null> {
   try {
+    // Search by last name only for better results
     const response = await fetch(RMP_GRAPHQL_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Basic dGVzdDp0ZXN0",
+        "Authorization": "Basic dGVzdDp0ZXN0",
       },
       body: JSON.stringify({
         query: SEARCH_QUERY,
         variables: {
           query: {
-            text: `${firstName} ${lastName}`,
+            text: lastName,
             schoolID: UNT_SCHOOL_ID,
           },
         },
@@ -82,7 +83,7 @@ export async function searchProfessor(
     });
 
     if (!response.ok) {
-      console.error("RMP API error:", response.status);
+      console.error("[RMP] API error:", response.status);
       return null;
     }
 
@@ -93,53 +94,65 @@ export async function searchProfessor(
       return null;
     }
 
-    // Find the best match (exact or closest name match)
-    const normalizedFirst = firstName.toLowerCase().split(" ")[0];
-    const normalizedLast = lastName.toLowerCase();
+    // Normalize names for comparison
+    const normalizedFirst = firstName.toLowerCase().split(" ")[0].replace(/[^a-z]/g, "");
+    const normalizedLast = lastName.toLowerCase().replace(/[^a-z]/g, "");
 
+    // First pass: exact last name + first name starts with
     for (const edge of edges) {
       const prof = edge.node;
-      const profFirst = prof.firstName.toLowerCase().split(" ")[0];
-      const profLast = prof.lastName.toLowerCase();
+      const profFirst = prof.firstName.toLowerCase().split(" ")[0].replace(/[^a-z]/g, "");
+      const profLast = prof.lastName.toLowerCase().replace(/[^a-z]/g, "");
 
-      if (profFirst === normalizedFirst && profLast === normalizedLast) {
-        return {
-          id: prof.id,
-          legacyId: prof.legacyId,
-          firstName: prof.firstName,
-          lastName: prof.lastName,
-          avgRating: prof.avgRating,
-          avgDifficulty: prof.avgDifficulty,
-          numRatings: prof.numRatings,
-          wouldTakeAgainPercent: prof.wouldTakeAgainPercent,
-          department: prof.department,
-          tags: prof.teacherRatingTags || [],
-        };
+      if (profLast === normalizedLast && 
+          (profFirst === normalizedFirst || 
+           profFirst.startsWith(normalizedFirst) || 
+           normalizedFirst.startsWith(profFirst))) {
+        return mapProfessor(prof);
       }
     }
 
-    // If no exact match, return the first result if last name matches
-    const firstResult = edges[0]?.node;
-    if (firstResult?.lastName.toLowerCase() === normalizedLast) {
-      return {
-        id: firstResult.id,
-        legacyId: firstResult.legacyId,
-        firstName: firstResult.firstName,
-        lastName: firstResult.lastName,
-        avgRating: firstResult.avgRating,
-        avgDifficulty: firstResult.avgDifficulty,
-        numRatings: firstResult.numRatings,
-        wouldTakeAgainPercent: firstResult.wouldTakeAgainPercent,
-        department: firstResult.department,
-        tags: firstResult.teacherRatingTags || [],
-      };
+    // Second pass: just last name match
+    for (const edge of edges) {
+      const prof = edge.node;
+      const profLast = prof.lastName.toLowerCase().replace(/[^a-z]/g, "");
+
+      if (profLast === normalizedLast) {
+        return mapProfessor(prof);
+      }
     }
 
     return null;
   } catch (error) {
-    console.error("Error fetching RMP data:", error);
+    console.error("[RMP] Error:", error);
     return null;
   }
+}
+
+function mapProfessor(prof: {
+  id: string;
+  legacyId: number;
+  firstName: string;
+  lastName: string;
+  avgRating: number;
+  avgDifficulty: number;
+  numRatings: number;
+  wouldTakeAgainPercent: number;
+  department: string;
+  teacherRatingTags?: { tagName: string; tagCount: number }[];
+}): RMPProfessor {
+  return {
+    id: prof.id,
+    legacyId: prof.legacyId,
+    firstName: prof.firstName,
+    lastName: prof.lastName,
+    avgRating: prof.avgRating,
+    avgDifficulty: prof.avgDifficulty,
+    numRatings: prof.numRatings,
+    wouldTakeAgainPercent: prof.wouldTakeAgainPercent,
+    department: prof.department,
+    tags: prof.teacherRatingTags || [],
+  };
 }
 
 /**
