@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
 import Vines from "@/components/Vines";
@@ -51,6 +52,7 @@ export default function RootLayout({
           <Navbar />
           <main className="relative z-20">{children}</main>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
