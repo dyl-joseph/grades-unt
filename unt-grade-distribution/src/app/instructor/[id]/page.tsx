@@ -62,7 +62,7 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-4">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
