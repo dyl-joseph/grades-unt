@@ -137,10 +137,10 @@ export default function SearchBar({
   const items = allItems();
 
   return (
-    <div ref={containerRef} className={`relative w-full ${compact ? "" : "max-w-xl"}`}>
+    <div ref={containerRef} className={`relative w-full ${compact ? "" : "max-w-2xl"}`}>
       <div className="relative">
         <svg
-          className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${compact ? "h-4 w-4" : "h-5 w-5"}`}
+          className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${compact ? "h-4 w-4" : "h-6 w-6 left-4"}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -164,7 +164,7 @@ export default function SearchBar({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoFocus={autoFocus}
-          className={`w-full rounded-2xl border pl-9 pr-9 text-gray-900 placeholder:text-gray-500/70 focus:outline-none focus:ring-2 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light py-1.5 text-sm shadow-sm focus:border-primary/40 focus:ring-primary/20 dark:border-green-800/50 dark:bg-jungle-canopy dark:focus:border-green-600/50 dark:focus:ring-green-700/30" : "glass-glossy border-white/40 py-3 pl-10 shadow-lg focus:border-white/60 focus:ring-white/40 dark:border-white/15 dark:focus:border-white/25 dark:focus:ring-white/15"} dark:text-green-100 dark:placeholder:text-green-200/40`}
+          className={`w-full rounded-2xl border pl-9 pr-9 text-gray-900 placeholder:text-gray-500/70 focus:outline-none focus:ring-2 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light py-1.5 text-sm shadow-sm focus:border-primary/40 focus:ring-primary/20 dark:border-green-800/50 dark:bg-jungle-canopy dark:focus:border-green-600/50 dark:focus:ring-green-700/30" : "glass-glossy border-white/40 py-4 pl-12 text-lg shadow-lg focus:border-white/60 focus:ring-white/40 dark:border-white/15 dark:focus:border-white/25 dark:focus:ring-white/15"} dark:text-green-100 dark:placeholder:text-green-200/40`}
         />
         {loading && query.length >= 2 && (
           <svg
