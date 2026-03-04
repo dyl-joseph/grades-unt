@@ -11,7 +11,14 @@ function createPrismaClient() {
       ? process.env.DATABASE_URL
       : process.env.DIRECT_URL || process.env.DATABASE_URL;
 
-  const adapter = new PrismaPg({ connectionString });
+  const adapter = new PrismaPg({
+    connectionString,
+    pool: {
+      max: 5,                    // Keep low for serverless (PgBouncer free tier = 20 slots)
+      idleTimeoutMillis: 30000,  // Close idle connections after 30s
+      connectionTimeoutMillis: 5000, // Fail fast if can't connect in 5s
+    },
+  });
   return new PrismaClient({ adapter });
 }
 
