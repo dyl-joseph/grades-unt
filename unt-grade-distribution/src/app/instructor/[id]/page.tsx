@@ -1,10 +1,27 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { aggregateGrades, calculateGPA } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import type { Section, Course } from "@prisma/client";
+
+const getInstructor = unstable_cache(
+  async (instructorId: number) => {
+    return prisma.instructor.findUnique({
+      where: { id: instructorId },
+      include: {
+        sections: {
+          include: { course: true },
+          orderBy: [{ course: { prefix: "asc" } }, { course: { number: "asc" } }],
+        },
+      },
+    });
+  },
+  ["instructor-detail"],
+  { revalidate: 3600 } // 1 hour
+);
 
 interface InstructorPageProps {
   params: Promise<{ id: string }>;
@@ -18,15 +35,7 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
     notFound();
   }
 
-  const instructor = await prisma.instructor.findUnique({
-    where: { id: instructorId },
-    include: {
-      sections: {
-        include: { course: true },
-        orderBy: [{ course: { prefix: "asc" } }, { course: { number: "asc" } }],
-      },
-    },
-  });
+  const instructor = await getInstructor(instructorId);
 
   if (!instructor) {
     notFound();
