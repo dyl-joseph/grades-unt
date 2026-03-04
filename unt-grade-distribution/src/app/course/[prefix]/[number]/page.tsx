@@ -9,9 +9,6 @@ import CourseCartButton from "@/components/CourseCartButton";
 import ShareButton from "@/components/ShareButton";
 import type { Section, Instructor } from "@prisma/client";
 
-/** ISR: serve static HTML from CDN, regenerate every hour */
-export const revalidate = 3600;
-
 const getCourse = unstable_cache(
   async (prefix: string, number: string) => {
     return prisma.course.findUnique({

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import GpaBadge from "./GpaBadge";
-import GradeChart from "./GradeChart";
+import LazyChart from "./LazyChart";
 import { calculateGPA, toChartData } from "@/lib/grades";
 import type { SectionWithRelations } from "@/lib/types";
 import ShareButton from "./ShareButton";
@@ -49,7 +49,7 @@ export default function SectionCard({
           <GpaBadge gpa={gpa} />
         </div>
       </div>
-      <GradeChart data={chartData} height={200} />
+      <LazyChart data={chartData} height={200} />
       <div className="mt-2 text-right text-xs text-gray-400 dark:text-gray-500">
         {section.totalEnroll} students
       </div>

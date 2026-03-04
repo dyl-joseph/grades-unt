@@ -95,9 +95,5 @@ export async function GET(request: NextRequest) {
   // Cache the result
   setInCache(cacheKey, result);
 
-  return NextResponse.json(result, {
-    headers: {
-      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-    },
-  });
+  return NextResponse.json(result);
 }
