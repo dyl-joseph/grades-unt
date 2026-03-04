@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
-import Vines from "@/components/Vines";
 import "./globals.css";
 
 const inter = Inter({
@@ -44,8 +43,6 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans antialiased bg-jungle-tan text-gray-900 transition-colors duration-200 dark:bg-black dark:text-green-100`}
       >
-        {/* Vine decorations */}
-        <Vines />
         {/* Dark mode gradient overlay */}
         <div className="pointer-events-none fixed inset-0 z-0 hidden dark:block" style={{ background: 'linear-gradient(to top, rgba(10,47,17,0.6) 0%, rgba(0,0,0,0.95) 100%)' }} />
         <Providers>
