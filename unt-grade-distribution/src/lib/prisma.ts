@@ -11,7 +11,12 @@ function createPrismaClient() {
       ? process.env.DATABASE_URL
       : process.env.DIRECT_URL || process.env.DATABASE_URL;
 
-  const adapter = new PrismaPg({ connectionString });
+  const adapter = new PrismaPg({
+    connectionString,
+    max: 5,
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 10_000,
+  });
   return new PrismaClient({ adapter });
 }
 
