@@ -36,6 +36,10 @@
 │  │ (client) │  │ (API Route)  │  │ (course, instruc.)│ │
 │  └──────────┘  └──────┬───────┘  └────────┬──────────┘ │
 │                       │                    │            │
+│                ┌──────▼───────┐            │            │
+│                │  LRU Cache   │            │            │
+│                │ (in-memory)  │            │            │
+│                └──────┬───────┘            │            │
 │  ┌────────────────────┴────────────────────┘            │
 │  │           Prisma ORM (PrismaPg adapter)              │
 │  └────────────────────┬─────────────────────            │
@@ -51,7 +55,8 @@ The app follows a **hybrid rendering model**:
 
 - **Server Components** (default): Course detail pages and instructor detail pages are rendered on the server. They call Prisma directly — no API route needed. This means the database query, data aggregation, and HTML generation all happen server-side before the page reaches the browser.
 - **Client Components** (`"use client"`): Interactive elements like the search bar, theme toggle, cart, and charts are client-rendered. The search bar calls a Next.js API route (`/api/search`) which queries the database and returns JSON.
-- **API Routes**: A single API route (`/api/search/route.ts`) handles autocomplete search queries.
+- **API Routes**: A single API route (`/api/search/route.ts`) handles autocomplete search queries. Responses are stored in an in-memory LRU cache (500 entries, 5-minute TTL) so repeat searches skip the database entirely.
+- **Analytics**: Vercel Analytics (`@vercel/analytics/next`) is loaded in the root layout for privacy-friendly page-view and Web Vitals tracking.
 
 ---
 
@@ -68,6 +73,7 @@ The app follows a **hybrid rendering model**:
 | **Recharts** | 3.7.0 | Responsive SVG bar charts for grade distributions |
 | **jsPDF** | 4.2.0 | Client-side PDF generation |
 | **jspdf-autotable** | 5.0.7 | Table layout plugin for jsPDF |
+| **@vercel/analytics** | latest | Privacy-friendly page-view & Web Vitals analytics |
 
 ### Backend
 
@@ -84,6 +90,7 @@ The app follows a **hybrid rendering model**:
 |---|---|
 | **Vercel** | Hosting, serverless functions, auto-deploy on push |
 | **Supabase** | Managed PostgreSQL with connection pooling (PgBouncer) |
+| **Vercel Analytics** | Page-view tracking and Web Vitals monitoring |
 | **ESLint** | v9 with `eslint-config-next` for code linting |
 | **React Compiler** | `babel-plugin-react-compiler` 1.0.0 for automatic memoization |
 
@@ -128,6 +135,7 @@ unt-grade-distribution/
     │   ├── ThemeToggle.tsx        # Dark/light mode switch
     │   ├── Vines.tsx              # Decorative SVG vine overlays
     │   ├── GradeChart.tsx         # Recharts bar chart wrapper
+    │   ├── LazyChart.tsx          # IntersectionObserver wrapper for lazy-loading charts
     │   ├── SectionCard.tsx        # Individual section display card
     │   ├── GpaBadge.tsx           # Color-coded GPA pill badge
     │   ├── AddToCartButton.tsx    # Add/remove course from cart
@@ -271,9 +279,10 @@ The app uses Next.js App Router with file-based routing under `src/app/`.
 **File:** `src/app/page.tsx` (Client Component)
 
 The landing page features:
-- **Title Section:** "University of North Texas" subtitle + "Grade Explorer" main heading, both with a sparkle shimmer animation
-- **Centered Search Bar:** Full-width (max 640px) glass-styled search with autofocus
-- **Hint Text:** "Search by course (e.g., 'ACCT 2010') or professor name (e.g., 'Moore')"
+- **Title Section:** "University of North Texas" subtitle (`text-xl sm:text-2xl`) + "Grade Explorer" main heading (`text-5xl sm:text-7xl`), both with a sparkle shimmer animation
+- **Tagline:** "Explore the jungle of grades" — a muted subtitle below the heading (`text-lg sm:text-xl`, `text-jungle-bark/70` / `dark:text-green-300/50`)
+- **Centered Search Bar:** Full-width (max 672px / `max-w-2xl`) glass-styled search with autofocus, larger input (`py-4 text-lg`)
+- **Hint Text:** "Search by course (e.g., 'ACCT 2010') or professor name (e.g., 'Moore')" (`text-base`)
 
 The page is a client component because the `SearchBar` requires client-side state management.
 
@@ -283,7 +292,7 @@ The page is a client component because the `SearchBar` requires client-side stat
 
 Displays complete grade distribution for a single course:
 
-1. **Database Query:** `prisma.course.findUnique()` using the `(prefix, number)` compound unique constraint, with all sections and their instructors eager-loaded
+1. **Cached Database Query:** Uses `unstable_cache` (1-hour TTL, tag `"course-detail"`) wrapping `prisma.course.findUnique()` with the `(prefix, number)` compound unique constraint, with all sections and their instructors eager-loaded. Repeat visits within the TTL skip the database entirely.
 2. **Aggregation:** Calls `aggregateGrades()` to sum all section grades into a combined distribution, then `calculateGPA()` for the overall GPA
 3. **Rendered Content:**
    - Course title with prefix and number
@@ -301,7 +310,7 @@ If the course is not found, calls `notFound()` which renders the custom 404 page
 
 Displays all sections taught by a specific instructor, grouped by course:
 
-1. **Database Query:** `prisma.instructor.findUnique()` by ID, with all sections and their courses eager-loaded, ordered by course prefix and number
+1. **Cached Database Query:** Uses `unstable_cache` (1-hour TTL, tag `"instructor-detail"`) wrapping `prisma.instructor.findUnique()` by ID, with all sections and their courses eager-loaded, ordered by course prefix and number
 2. **Grouping:** Uses a `Map<courseId, { course, sections[] }>` to group sections by course
 3. **Rendered Content:**
    - Instructor name
@@ -335,7 +344,8 @@ Wraps all pages with:
 3. **Vines Component:** Fixed SVG vine decorations on both sides
 4. **Dark Mode Gradient Overlay:** A fixed full-screen gradient (transparent in light mode, dark green-to-black in dark mode)
 5. **Providers:** Wraps children in `CartProvider` for cart state
-6. **Navbar:** Sticky navigation bar
+6. **Navbar:** Sticky navigation bar (`h-16`, `text-2xl` brand)
+7. **Analytics:** `<Analytics />` from `@vercel/analytics/next` — renders after Providers inside `<body>` for page-view and Web Vitals tracking
 
 ---
 
@@ -362,19 +372,24 @@ A client component with the following features:
 
 ### Search API Route (`src/app/api/search/route.ts`)
 
-A Next.js Route Handler that processes search queries:
+A Next.js Route Handler that processes search queries with an in-memory LRU cache:
 
 1. **Input Validation:** Trims query, rejects anything shorter than 2 characters
-2. **Query Heuristic:** Regex `/^[A-Za-z]{1,4}\s?\d/` detects course-like queries (e.g., "CS 3" or "ACCT2"). This determines result prioritization:
+2. **LRU Cache Check:** Normalises the query to lowercase and checks the in-memory cache. On a hit, returns the cached JSON immediately — no database call at all.
+   - **Max entries:** 500 (oldest evicted when full)
+   - **TTL:** 5 minutes (stale entries are purged on access)
+   - **LRU reordering:** On hit, the entry is deleted and re-inserted at the end of the `Map` iteration order
+3. **Query Heuristic:** Regex `/^[A-Za-z]{1,4}\s?\d/` detects course-like queries (e.g., "CS 3" or "ACCT2"). This determines result prioritization:
    - **Course query:** 10 courses + 5 instructors
    - **Name query:** 5 courses + 10 instructors
-3. **Course Search:** Uses Prisma `findMany` with `OR`:
+4. **Parallel Queries:** Course and instructor searches run simultaneously via `Promise.all`, cutting latency roughly in half compared to sequential execution.
+5. **Course Search:** Uses Prisma `findMany` with `OR`:
    - **Pattern match:** `prefix.startsWith` + `number.startsWith` — catches queries like "CS 31" (prefix "CS", number starts with "31")
    - **Title search:** `title.contains` with case-insensitive mode — catches queries like "accounting"
-4. **Instructor Search:** Uses Prisma `findMany` with `OR`:
+6. **Instructor Search:** Uses Prisma `findMany` with `OR`:
    - `lastName.contains` OR `firstName.contains` — catches partial name matches
-5. **Limits:** Both queries use `take: 10` to cap results
-6. **Sequential Queries:** The two queries run one after the other (not in parallel). This avoids holding two database connections simultaneously, which matters for serverless deployments with connection pooling (PgBouncer).
+7. **Limits:** Both queries use `take: 10` to cap results
+8. **Cache Store:** After a successful DB query, the result is written to the LRU cache for future requests.
 
 ### Database Indexes Used
 
@@ -385,7 +400,19 @@ A Next.js Route Handler that processes search queries:
 | `title.contains("accounting")` | `WHERE title ILIKE '%accounting%'` | No index — sequential scan (fine at ~2K rows) |
 | `lastName.contains("moore")` | `WHERE last_name ILIKE '%moore%'` | `@@index([lastName])` cannot be used for `%prefix` — sequential scan |
 
-At the current dataset size (~2K courses, ~2K instructors), these sequential scans complete in single-digit milliseconds. For significantly larger datasets, `pg_trgm` GIN indexes or PostgreSQL full-text search would be needed.
+At the current dataset size (~2K courses, ~2K instructors), these sequential scans complete in single-digit milliseconds. For larger datasets, `pg_trgm` GIN indexes can be added:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX idx_courses_title_trgm ON courses USING GIN (title gin_trgm_ops);
+CREATE INDEX idx_courses_prefix_trgm ON courses USING GIN (prefix gin_trgm_ops);
+CREATE INDEX idx_instructors_last_trgm ON instructors USING GIN (last_name gin_trgm_ops);
+CREATE INDEX idx_instructors_first_trgm ON instructors USING GIN (first_name gin_trgm_ops);
+```
+
+These allow PostgreSQL to use index scans for `ILIKE '%…%'` patterns instead of sequential scans.
+
+Additionally, the **LRU cache** (500 entries, 5-minute TTL) ensures that repeat queries bypass the database entirely, providing sub-millisecond responses for popular searches.
 
 ---
 
@@ -524,11 +551,10 @@ The `Vines` component renders hand-drawn SVG vine patterns fixed to both sides o
 
 ### `Navbar`
 
-Sticky navigation bar with:
-- "UNT Grades" brand link (home)
+Sticky navigation bar (`h-16`) with:
+- "UNT Grades" brand link (home) — `text-2xl` bold
 - Search bar (hidden on home page, collapses on scroll past 40px)
-- Cart icon with badge
-- Theme toggle
+- Cart icon with badge and theme toggle (`gap-4`)
 
 The scroll-hide behavior uses `useState` + `scroll` event listener. The search bar transitions with `opacity-0 max-h-0 pointer-events-none` when `scrolled` is true.
 
@@ -552,8 +578,18 @@ Displays a single course section with:
 - Section number and instructor name (linked)
 - Share button (copies instructor page URL)
 - GPA badge
-- Grade distribution chart (200px height)
+- **Lazy-loaded** grade distribution chart (200px height) via `LazyChart`
 - Total enrollment count
+
+### `LazyChart`
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `data` | `ChartDataPoint[]` | — | Chart data points |
+| `height` | `number` | `200` | Chart height in pixels |
+| `mode` | `"count" \| "percentage"` | `"count"` | Y-axis value |
+
+IntersectionObserver-based wrapper around `GradeChart`. Only renders the actual Recharts chart once the element scrolls within 200px of the viewport. Before that, shows a lightweight spinner placeholder at the specified height. After becoming visible once, the chart stays rendered permanently (`observer.disconnect()` on intersection). This dramatically reduces initial paint time on pages with many sections.
 
 ### `GpaBadge`
 

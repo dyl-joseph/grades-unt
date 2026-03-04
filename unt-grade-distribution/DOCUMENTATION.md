@@ -135,6 +135,7 @@ unt-grade-distribution/
     │   ├── ThemeToggle.tsx        # Dark/light mode switch
     │   ├── Vines.tsx              # Decorative SVG vine overlays
     │   ├── GradeChart.tsx         # Recharts bar chart wrapper
+    │   ├── LazyChart.tsx          # IntersectionObserver wrapper for lazy-loading charts
     │   ├── SectionCard.tsx        # Individual section display card
     │   ├── GpaBadge.tsx           # Color-coded GPA pill badge
     │   ├── AddToCartButton.tsx    # Add/remove course from cart
@@ -291,7 +292,7 @@ The page is a client component because the `SearchBar` requires client-side stat
 
 Displays complete grade distribution for a single course:
 
-1. **Database Query:** `prisma.course.findUnique()` using the `(prefix, number)` compound unique constraint, with all sections and their instructors eager-loaded
+1. **Cached Database Query:** Uses `unstable_cache` (1-hour TTL, tag `"course-detail"`) wrapping `prisma.course.findUnique()` with the `(prefix, number)` compound unique constraint, with all sections and their instructors eager-loaded. Repeat visits within the TTL skip the database entirely.
 2. **Aggregation:** Calls `aggregateGrades()` to sum all section grades into a combined distribution, then `calculateGPA()` for the overall GPA
 3. **Rendered Content:**
    - Course title with prefix and number
@@ -309,7 +310,7 @@ If the course is not found, calls `notFound()` which renders the custom 404 page
 
 Displays all sections taught by a specific instructor, grouped by course:
 
-1. **Database Query:** `prisma.instructor.findUnique()` by ID, with all sections and their courses eager-loaded, ordered by course prefix and number
+1. **Cached Database Query:** Uses `unstable_cache` (1-hour TTL, tag `"instructor-detail"`) wrapping `prisma.instructor.findUnique()` by ID, with all sections and their courses eager-loaded, ordered by course prefix and number
 2. **Grouping:** Uses a `Map<courseId, { course, sections[] }>` to group sections by course
 3. **Rendered Content:**
    - Instructor name
@@ -577,8 +578,18 @@ Displays a single course section with:
 - Section number and instructor name (linked)
 - Share button (copies instructor page URL)
 - GPA badge
-- Grade distribution chart (200px height)
+- **Lazy-loaded** grade distribution chart (200px height) via `LazyChart`
 - Total enrollment count
+
+### `LazyChart`
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `data` | `ChartDataPoint[]` | — | Chart data points |
+| `height` | `number` | `200` | Chart height in pixels |
+| `mode` | `"count" \| "percentage"` | `"count"` | Y-axis value |
+
+IntersectionObserver-based wrapper around `GradeChart`. Only renders the actual Recharts chart once the element scrolls within 200px of the viewport. Before that, shows a lightweight spinner placeholder at the specified height. After becoming visible once, the chart stays rendered permanently (`observer.disconnect()` on intersection). This dramatically reduces initial paint time on pages with many sections.
 
 ### `GpaBadge`
 
