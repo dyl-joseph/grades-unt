@@ -7,6 +7,9 @@ import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import type { Section, Course } from "@prisma/client";
 
+/** ISR: serve static HTML from CDN, regenerate every hour */
+export const revalidate = 3600;
+
 const getInstructor = unstable_cache(
   async (instructorId: number) => {
     return prisma.instructor.findUnique({
