@@ -125,7 +125,7 @@ export default function Stars() {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-[1] hidden dark:block"
+      className="pointer-events-none fixed inset-0 z-[1] opacity-0 transition-opacity duration-700 dark:opacity-100"
       aria-hidden="true"
     />
   );

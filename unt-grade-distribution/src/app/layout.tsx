@@ -42,10 +42,10 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} font-sans antialiased bg-jungle-tan text-gray-900 transition-colors duration-200 dark:bg-black dark:text-green-100`}
+        className={`${inter.variable} font-sans antialiased bg-jungle-tan text-gray-900 transition-colors duration-700 dark:bg-black dark:text-green-100`}
       >
         {/* Dark mode gradient overlay */}
-        <div className="pointer-events-none fixed inset-0 z-0 hidden dark:block" style={{ background: 'linear-gradient(to top, rgba(10,47,17,0.6) 0%, rgba(0,0,0,0.95) 100%)' }} />
+        <div className="pointer-events-none fixed inset-0 z-0 opacity-0 transition-opacity duration-700 dark:opacity-100" style={{ background: 'linear-gradient(to top, rgba(10,47,17,0.6) 0%, rgba(0,0,0,0.95) 100%)' }} />
         {/* Faint twinkling stars (dark mode only) */}
         <Stars />
         <Providers>
