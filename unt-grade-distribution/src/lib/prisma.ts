@@ -11,11 +11,18 @@ function createPrismaClient() {
       ? process.env.DATABASE_URL
       : process.env.DIRECT_URL || process.env.DATABASE_URL;
 
+  if (!connectionString) {
+    throw new Error(
+      "Missing database connection string. Set DATABASE_URL (and optionally DIRECT_URL)."
+    );
+  }
+
   const adapter = new PrismaPg({
     connectionString,
     max: 5,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
+    ssl: { rejectUnauthorized: false },
   });
   return new PrismaClient({ adapter });
 }
