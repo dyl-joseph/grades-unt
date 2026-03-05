@@ -4,12 +4,10 @@ import { PrismaPg } from "@prisma/adapter-pg";
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 function createPrismaClient() {
-  // In production (Vercel), always use pooler URL for serverless compatibility
-  // In dev, prefer direct URL for speed if available
+  // Use DIRECT_URL (bypasses PgBouncer) since PrismaPg manages its own pool.
+  // PgBouncer transaction mode breaks pg's prepared statements.
   const connectionString =
-    process.env.NODE_ENV === "production"
-      ? process.env.DATABASE_URL
-      : process.env.DIRECT_URL || process.env.DATABASE_URL;
+    process.env.DIRECT_URL || process.env.DATABASE_URL;
 
   if (!connectionString) {
     throw new Error(
