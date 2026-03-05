@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
+import Stars from "@/components/Stars";
 import "./globals.css";
 
 const inter = Inter({
@@ -45,6 +46,8 @@ export default function RootLayout({
       >
         {/* Dark mode gradient overlay */}
         <div className="pointer-events-none fixed inset-0 z-0 hidden dark:block" style={{ background: 'linear-gradient(to top, rgba(10,47,17,0.6) 0%, rgba(0,0,0,0.95) 100%)' }} />
+        {/* Faint twinkling stars (dark mode only) */}
+        <Stars />
         <Providers>
           <Navbar />
           <main className="relative z-20">{children}</main>
