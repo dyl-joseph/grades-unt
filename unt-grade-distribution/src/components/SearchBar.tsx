@@ -144,10 +144,10 @@ export default function SearchBar({
   const items = allItems();
 
   return (
-    <div ref={containerRef} className={`relative w-full ${compact ? "" : "max-w-xl"}`}>
+    <div ref={containerRef} className={`relative w-full ${compact ? "" : "max-w-2xl"}`}>
       <div className="relative">
         <svg
-          className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${compact ? "h-4 w-4" : "h-5 w-5"}`}
+          className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${compact ? "h-4 w-4" : "h-6 w-6 left-4"}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -171,8 +171,18 @@ export default function SearchBar({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoFocus={autoFocus}
-          className={`w-full rounded-2xl border pl-9 pr-4 text-gray-900 placeholder:text-gray-500/70 focus:outline-none focus:ring-2 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light py-1.5 text-sm shadow-sm focus:border-primary/40 focus:ring-primary/20 dark:border-green-800/50 dark:bg-jungle-canopy dark:focus:border-green-600/50 dark:focus:ring-green-700/30" : "glass-glossy border-white/40 py-3 pl-10 shadow-lg focus:border-white/60 focus:ring-white/40 dark:border-white/15 dark:focus:border-white/25 dark:focus:ring-white/15"} dark:text-green-100 dark:placeholder:text-green-200/40`}
+          className={`w-full rounded-2xl border pl-9 pr-9 text-gray-900 placeholder:text-gray-500/70 focus:outline-none focus:ring-2 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light py-1.5 text-sm shadow-sm focus:border-primary/40 focus:ring-primary/20 dark:border-green-800/50 dark:bg-jungle-canopy dark:focus:border-green-600/50 dark:focus:ring-green-700/30" : "glass-glossy border-white/40 py-4 pl-12 text-lg shadow-lg focus:border-white/60 focus:ring-white/40 dark:border-white/15 dark:focus:border-white/25 dark:focus:ring-white/15"} dark:text-green-100 dark:placeholder:text-green-200/40`}
         />
+        {loading && query.length >= 2 && (
+          <svg
+            className={`absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400 dark:text-green-300/60 ${compact ? "h-4 w-4" : "h-5 w-5"}`}
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        )}
       </div>
 
       {isOpen && items.length > 0 && (
@@ -232,18 +242,6 @@ export default function SearchBar({
               })}
             </div>
           )}
-        </div>
-      )}
-
-      {isOpen && loading && query.length >= 2 && (
-        <div className={`absolute z-50 mt-2 w-full rounded-2xl border p-4 text-center text-sm text-gray-500 shadow-xl dark:text-green-200/70 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
-          <div className="flex items-center justify-center gap-2">
-            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            Searching…
-          </div>
         </div>
       )}
 

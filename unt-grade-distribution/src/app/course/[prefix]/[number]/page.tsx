@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+
+export const revalidate = 3600; // ISR: regenerate every hour
 import { aggregateGrades, calculateGPA, toChartData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
@@ -8,6 +11,24 @@ import CourseCartButton from "@/components/CourseCartButton";
 import ShareButton from "@/components/ShareButton";
 import type { Section, Instructor } from "@prisma/client";
 
+const getCourse = unstable_cache(
+  async (prefix: string, number: string) => {
+    return prisma.course.findUnique({
+      where: {
+        prefix_number: { prefix, number },
+      },
+      include: {
+        sections: {
+          include: { instructor: true },
+          orderBy: { instructor: { lastName: "asc" } },
+        },
+      },
+    });
+  },
+  ["course-detail"],
+  { revalidate: 3600 } // 1 hour
+);
+
 interface CoursePageProps {
   params: Promise<{ prefix: string; number: string }>;
 }
@@ -15,20 +36,7 @@ interface CoursePageProps {
 export default async function CoursePage({ params }: CoursePageProps) {
   const { prefix, number } = await params;
 
-  const course = await prisma.course.findUnique({
-    where: {
-      prefix_number: {
-        prefix: prefix.toUpperCase(),
-        number: number,
-      },
-    },
-    include: {
-      sections: {
-        include: { instructor: true },
-        orderBy: { instructor: { lastName: "asc" } },
-      },
-    },
-  });
+  const course = await getCourse(prefix.toUpperCase(), number);
 
   if (!course) {
     notFound();

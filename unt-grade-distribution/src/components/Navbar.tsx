@@ -20,11 +20,11 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-jungle-tan-dark/30 bg-jungle-tan/90 backdrop-blur-md dark:border-green-900/50 dark:bg-black/80">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
+    <nav className="sticky top-0 z-50 border-b border-jungle-tan-dark/30 bg-jungle-tan/90 backdrop-blur-md transition-colors duration-700 dark:border-green-900/50 dark:bg-black/80">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-5 px-5">
         <Link
           href="/"
-          className="shrink-0 text-xl font-bold text-primary dark:text-jungle-leaf"
+          className="shrink-0 text-2xl font-bold text-primary dark:text-jungle-leaf"
         >
           UNT Grades
         </Link>
@@ -33,7 +33,7 @@ export default function Navbar() {
             <SearchBar compact />
           </div>
         )}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <CartIcon />
           <ThemeToggle />
         </div>
