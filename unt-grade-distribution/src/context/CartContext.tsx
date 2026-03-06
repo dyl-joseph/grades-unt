@@ -53,6 +53,61 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null);
 
 const STORAGE_KEY = "unt-grades-cart";
+const MAX_CART_ITEMS = 25;
+
+function isNonNegativeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0;
+}
+
+function isValidGpa(value: unknown): value is number | null {
+  return value === null || (typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 4);
+}
+
+function isValidCartItem(value: unknown): value is CartItem {
+  if (!value || typeof value !== "object") return false;
+
+  const item = value as Record<string, unknown>;
+
+  return (
+    isNonNegativeInteger(item.courseId) &&
+    typeof item.prefix === "string" &&
+    item.prefix.trim().length > 0 &&
+    item.prefix.length <= 10 &&
+    typeof item.number === "string" &&
+    item.number.trim().length > 0 &&
+    item.number.length <= 16 &&
+    typeof item.title === "string" &&
+    item.title.trim().length > 0 &&
+    item.title.length <= 200 &&
+    isValidGpa(item.gpa) &&
+    isNonNegativeInteger(item.gradeA) &&
+    isNonNegativeInteger(item.gradeB) &&
+    isNonNegativeInteger(item.gradeC) &&
+    isNonNegativeInteger(item.gradeD) &&
+    isNonNegativeInteger(item.gradeF) &&
+    isNonNegativeInteger(item.gradeP) &&
+    isNonNegativeInteger(item.gradeNP) &&
+    isNonNegativeInteger(item.gradeW) &&
+    isNonNegativeInteger(item.gradeI) &&
+    isNonNegativeInteger(item.totalEnroll) &&
+    isNonNegativeInteger(item.sectionCount)
+  );
+}
+
+function sanitizeCartItems(value: unknown): CartItem[] {
+  if (!Array.isArray(value)) return [];
+
+  const seen = new Set<number>();
+
+  return value
+    .filter(isValidCartItem)
+    .filter((item) => {
+      if (seen.has(item.courseId)) return false;
+      seen.add(item.courseId);
+      return true;
+    })
+    .slice(0, MAX_CART_ITEMS);
+}
 
 /* ── Provider ────────────────────────────────────────── */
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -63,9 +118,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as CartItem[];
-        if (Array.isArray(parsed)) {
-          dispatch({ type: "HYDRATE", items: parsed });
+        const parsed = JSON.parse(raw);
+        const sanitizedItems = sanitizeCartItems(parsed);
+        if (sanitizedItems.length > 0) {
+          dispatch({ type: "HYDRATE", items: sanitizedItems });
         }
       }
     } catch {
@@ -75,10 +131,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Persist to localStorage on every change (skip initial empty state)
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(sanitizeCartItems(state.items))
+    );
   }, [state.items]);
 
-  const addCourse = (item: CartItem) => dispatch({ type: "ADD", item });
+  const addCourse = (item: CartItem) => {
+    if (!isValidCartItem(item)) return;
+    dispatch({ type: "ADD", item });
+  };
   const removeCourse = (courseId: number) =>
     dispatch({ type: "REMOVE", courseId });
   const clearCart = () => dispatch({ type: "CLEAR" });

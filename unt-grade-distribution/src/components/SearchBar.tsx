@@ -49,7 +49,13 @@ export default function SearchBar({
     fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`, {
       signal: controller.signal,
     })
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) {
+          return { courses: [], instructors: [] } satisfies SearchResult;
+        }
+
+        return res.json() as Promise<SearchResult>;
+      })
       .then((data: SearchResult) => {
         setResults(data);
         setIsOpen(true);
@@ -58,6 +64,7 @@ export default function SearchBar({
       })
       .catch(() => {
         // Abort or network error — ignore
+        setLoading(false);
       });
 
     return () => controller.abort();
