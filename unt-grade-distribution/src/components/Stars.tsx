@@ -48,7 +48,7 @@ export default function Stars() {
       const count = Math.min(Math.floor(area / 12000), 200);
       flies = Array.from({ length: count }, () => {
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 0.25 + 0.1; // px per frame
+        const speed = Math.random() * 0.25 + 0.25; // px per frame
         return {
           x: Math.random() * w,
           y: Math.random() * h,
