@@ -17,7 +17,7 @@
   --color-jungle-bark: #4E342E;
   --color-jungle-gold: #F9A825;
   --color-jungle-vine: #558B2F;
-  --color-jungle-tan: #D4C5A9;
+  --color-jungle-tan: #E8DCCA;
   --color-jungle-tan-light: #E8DCC8;
   --color-jungle-tan-dark: #BBA882;
 }
@@ -63,10 +63,11 @@
   background-image: linear-gradient(
     105deg,
     currentColor 0%,
-    currentColor 40%,
-    rgba(255, 255, 255, 0.9) 45%,
-    rgba(255, 255, 220, 0.8) 50%,
-    currentColor 55%,
+    currentColor 44%,
+    rgba(134, 239, 172, 0.9) 47%,
+    rgba(134, 239, 172, 1) 49%,
+    rgba(134, 239, 172, 0.9) 51%,
+    currentColor 54%,
     currentColor 100%
   );
   background-size: 200% 100%;

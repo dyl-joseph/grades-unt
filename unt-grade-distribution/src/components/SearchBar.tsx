@@ -235,7 +235,7 @@ export default function SearchBar({
               })}
             </div>
           )}
-        </div>
+          </div>
       )}
 
       {isOpen && !loading && items.length === 0 && debouncedQuery.length >= 2 && (

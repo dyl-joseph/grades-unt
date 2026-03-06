@@ -4,7 +4,7 @@ import SearchBar from "@/components/SearchBar";
 
 export default function Home() {
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4">
+    <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center overflow-hidden px-4">
       {/* Title */}
       <div className="mb-12 text-center">
         <p className="sparkle-text text-xl font-medium tracking-wide text-jungle-vine sm:text-2xl dark:text-green-400 dark:[text-shadow:0_0_20px_rgba(85,139,47,0.4),0_0_40px_rgba(85,139,47,0.2)]">
