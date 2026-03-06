@@ -12,7 +12,7 @@ function createPrismaClient() {
 
   const adapter = new PrismaPg({
     connectionString,
-    ssl: { rejectUnauthorized: false },
+    ssl: false,
   });
   return new PrismaClient({ adapter });
 }
