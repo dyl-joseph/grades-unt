@@ -52,5 +52,4 @@ documentation files (any .md files): in the repo's root file. makes it easier to
 ## Planned Features
 
 - **SPOT Evaluations** — Integrate Student Perceptions of Teaching data for instructors
-- **Light Mode Background** — Add a thematic background effect for light mode (complementing the dark-mode fireflies)
 - **More Semesters** — Expand grade distribution data to cover additional semesters
