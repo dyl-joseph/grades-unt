@@ -24,6 +24,7 @@ export default function SearchBar({
   const [isOpen, setIsOpen] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
   const [loading, setLoading] = useState(false);
+  const [navigatingId, setNavigatingId] = useState<string | null>(null);
   const debouncedQuery = useDebounce(query, 150);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -103,8 +104,8 @@ export default function SearchBar({
   }, [results]);
 
   const navigate = (type: "course" | "instructor", id: string) => {
-    setIsOpen(false);
-    setQuery("");
+    const navId = `${type}-${id}`;
+    setNavigatingId(navId);
     if (type === "course") {
       router.push(`/course/${id}`);
     } else {
@@ -196,6 +197,7 @@ export default function SearchBar({
                   onClick={() =>
                     navigate("course", `${course.prefix}/${course.number}`)
                   }
+                  disabled={navigatingId !== null}
                 >
                   <span className="font-medium text-gray-900 dark:text-green-100">
                     {course.prefix} {course.number}
@@ -203,6 +205,12 @@ export default function SearchBar({
                   <span className="ml-2 text-gray-500 dark:text-green-300/60">
                     — {course.title}
                   </span>
+                  {navigatingId === `course-${course.prefix}/${course.number}` && (
+                    <svg className="ml-auto h-4 w-4 animate-spin text-gray-400 dark:text-green-300/60" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  )}
                 </button>
               ))}
             </div>
@@ -226,18 +234,24 @@ export default function SearchBar({
                     onClick={() =>
                       navigate("instructor", String(instructor.id))
                     }
+                    disabled={navigatingId !== null}
                   >
                     <span className="font-medium text-gray-900 dark:text-gray-100">
                       {instructor.lastName}, {instructor.firstName}
                     </span>
+                    {navigatingId === `instructor-${instructor.id}` && (
+                      <svg className="ml-auto h-4 w-4 animate-spin text-gray-400 dark:text-green-300/60" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    )}
                   </button>
                 );
               })}
             </div>
-          )}
-          </div>
+        )}
+        </div>
       )}
-
       {isOpen && !loading && items.length === 0 && debouncedQuery.length >= 2 && (
         <div className={`absolute z-50 mt-2 w-full rounded-2xl border p-4 text-center text-sm text-gray-500 shadow-xl dark:text-green-200/70 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
           No results found for &ldquo;{debouncedQuery}&rdquo;

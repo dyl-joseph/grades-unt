@@ -14,6 +14,7 @@ function createPrismaClient() {
     connectionString,
     ssl: false,
   });
+  
   return new PrismaClient({ adapter });
 }
 
