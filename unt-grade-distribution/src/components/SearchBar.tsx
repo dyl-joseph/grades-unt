@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { SearchResult } from "@/lib/types";
 
@@ -19,6 +19,7 @@ export default function SearchBar({
   onFocusChange,
 }: SearchBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -28,6 +29,15 @@ export default function SearchBar({
   const debouncedQuery = useDebounce(query, 150);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Close dropdown and reset state when route changes after a navigation click
+  useEffect(() => {
+    if (navigatingId) {
+      setNavigatingId(null);
+      setIsOpen(false);
+      setQuery("");
+    }
+  }, [pathname]);
 
   // Show loading as soon as user types (before debounce fires)
   useEffect(() => {
