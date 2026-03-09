@@ -56,7 +56,7 @@ The app follows a **hybrid rendering model**:
 - **Server Components** (default): Course detail pages and instructor detail pages are rendered on the server. They call Prisma directly — no API route needed. This means the database query, data aggregation, and HTML generation all happen server-side before the page reaches the browser.
 - **Client Components** (`"use client"`): Interactive elements like the search bar, theme toggle, cart, and charts are client-rendered. The search bar calls a Next.js API route (`/api/search`) which queries the database and returns JSON.
 - **API Routes**: A single API route (`/api/search/route.ts`) handles autocomplete search queries. Responses are stored in an in-memory LRU cache (500 entries, 5-minute TTL) so repeat searches skip the database entirely.
-- **Analytics**: Vercel Analytics (`@vercel/analytics/next`) is loaded in the root layout for privacy-friendly page-view and Web Vitals tracking.
+- **Observability**: Vercel Analytics (`@vercel/analytics/next`) and Vercel Speed Insights (`@vercel/speed-insights/next`) are loaded in the root layout for privacy-friendly page-view tracking, Web Vitals, and real-user route performance monitoring.
 
 ---
 
@@ -74,6 +74,7 @@ The app follows a **hybrid rendering model**:
 | **jsPDF** | 4.2.0 | Client-side PDF generation |
 | **jspdf-autotable** | 5.0.7 | Table layout plugin for jsPDF |
 | **@vercel/analytics** | latest | Privacy-friendly page-view & Web Vitals analytics |
+| **@vercel/speed-insights** | latest | Real-user route performance and Web Vitals monitoring |
 
 ### Backend
 
@@ -91,6 +92,7 @@ The app follows a **hybrid rendering model**:
 | **Vercel** | Hosting, serverless functions, auto-deploy on push |
 | **Supabase** | Managed PostgreSQL with connection pooling (PgBouncer) |
 | **Vercel Analytics** | Page-view tracking and Web Vitals monitoring |
+| **Vercel Speed Insights** | Real-user route performance monitoring across pages and navigations |
 | **ESLint** | v9 with `eslint-config-next` for code linting |
 | **React Compiler** | `babel-plugin-react-compiler` 1.0.0 for automatic memoization |
 
@@ -346,6 +348,12 @@ Wraps all pages with:
 5. **Providers:** Wraps children in `CartProvider` for cart state
 6. **Navbar:** Sticky navigation bar (`h-16`, `text-2xl` brand)
 7. **Analytics:** `<Analytics />` from `@vercel/analytics/next` — renders after Providers inside `<body>` for page-view and Web Vitals tracking
+8. **Speed Insights:** `<SpeedInsights />` from `@vercel/speed-insights/next` — renders in the root layout for real-user route performance monitoring on the home page, search navigation, and database-backed detail pages
+
+### Performance Monitoring Notes
+
+- **Useful coverage:** Best for spotting slow real-user visits to the landing page, course pages, instructor pages, cart page, and navigation from search results.
+- **What it does not do by itself:** It can indicate that a route feels slow, but it does not directly attribute that slowdown to a specific Prisma query or Supabase operation without extra server-side instrumentation.
 
 ---
 
