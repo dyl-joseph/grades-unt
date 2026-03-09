@@ -1,29 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useCart } from "@/context/CartContext";
+import { useSavedCourses } from "@/context/SavedCoursesContext";
 
-export default function CartIcon() {
-  const { items } = useCart();
+export default function BookmarkIcon() {
+  const { items } = useSavedCourses();
   const count = items.length;
 
   return (
     <Link
       href="/cart"
-      className="relative inline-flex items-center rounded-lg p-1.5 text-gray-600 transition-colors hover:text-primary dark:text-green-300 dark:hover:text-jungle-leaf"
-      aria-label={`Shopping cart with ${count} items`}
+      className="relative inline-flex items-center rounded-lg p-2 text-gray-600 transition-colors hover:text-primary dark:text-green-300 dark:hover:text-jungle-leaf"
+      aria-label={`Saved courses with ${count} items`}
     >
       <svg
-        className="h-5 w-5"
+        className="h-[30px] w-[32px]"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth={2}
+        style={{ transform: "scaleX(1.1)" }}
       >
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
+          d="M17 21l-5-3-5 3V5a2 2 0 012-2h6a2 2 0 012 2v16z"
         />
       </svg>
       {count > 0 && (

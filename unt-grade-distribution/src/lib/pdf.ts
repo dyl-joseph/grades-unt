@@ -11,7 +11,7 @@ export function downloadCartPDF(items: CartItem[]) {
   // Title
   doc.setFontSize(20);
   doc.setTextColor(27, 94, 32); // #1B5E20 — UNT green / jungle primary
-  doc.text("UNT Grade Distribution — My Courses", 14, 18);
+  doc.text("UNT Grade Distribution — Saved Courses", 14, 18);
 
   // Subtitle
   doc.setFontSize(10);
@@ -73,5 +73,5 @@ export function downloadCartPDF(items: CartItem[]) {
     },
   });
 
-  doc.save("unt-grades-my-courses.pdf");
+  doc.save("unt-grades-saved-courses.pdf");
 }

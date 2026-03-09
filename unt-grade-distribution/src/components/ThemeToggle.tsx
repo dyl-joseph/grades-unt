@@ -42,19 +42,19 @@ export default function ThemeToggle() {
 
   // Avoid hydration mismatch — render nothing until mounted
   if (!mounted) {
-    return <div className="h-9 w-9" />;
+    return <div className="h-[46px] w-[46px]" />;
   }
 
   return (
     <button
       onClick={toggle}
-      className="rounded-lg p-2 text-gray-600 transition-colors dark:text-gray-300"
+      className="rounded-lg p-[8px] text-gray-600 transition-colors dark:text-gray-300"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDark ? (
         // Sun icon
         <svg
-          className="h-5 w-5"
+          className="h-[30px] w-[30px]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -69,7 +69,7 @@ export default function ThemeToggle() {
       ) : (
         // Moon icon
         <svg
-          className="h-5 w-5"
+          className="h-[30px] w-[30px]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

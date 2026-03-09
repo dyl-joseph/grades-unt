@@ -4,7 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
-import Stars from "@/components/Stars";
+import Fireflies from "@/components/Fireflies";
 import FallingLeaves from "@/components/FallingLeaves";
 import "./globals.css";
 
@@ -50,8 +50,8 @@ export default function RootLayout({
         <div className="pointer-events-none fixed inset-0 z-0 opacity-0 transition-opacity duration-700 dark:opacity-100" style={{ background: 'linear-gradient(to top, rgba(10,47,17,0.6) 0%, rgba(0,0,0,0.95) 100%)' }} />
         {/* Light mode gradient overlay — warm orange at bottom */}
         <div className="pointer-events-none fixed inset-0 z-0 opacity-100 transition-opacity duration-700 dark:opacity-0" style={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(210,140,70,0.18) 100%)' }} />
-        {/* Faint twinkling stars (dark mode only) */}
-        <Stars />
+        {/* Fireflies (dark mode only) */}
+        <Fireflies />
         {/* Falling leaves (light mode only) */}
         <FallingLeaves />
         <Providers>

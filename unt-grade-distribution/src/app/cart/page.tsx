@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCart } from "@/context/CartContext";
+import { useSavedCourses } from "@/context/SavedCoursesContext";
 import { downloadCartPDF } from "@/lib/pdf";
 import GpaBadge from "@/components/GpaBadge";
 import GradeChart from "@/components/GradeChart";
@@ -9,7 +9,7 @@ import { toChartData, calculateGPA } from "@/lib/grades";
 import type { CartItem } from "@/lib/types";
 
 export default function CartPage() {
-  const { items, removeCourse, clearCart } = useCart();
+  const { items, removeCourse, clearCart } = useSavedCourses();
 
   const handleDownload = () => {
     if (items.length === 0) return;
@@ -52,12 +52,11 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 text-center">
-        <div className="text-6xl">🛒</div>
         <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-green-100">
-          Your cart is empty
+          No saved courses yet
         </h1>
         <p className="mt-2 text-gray-500 dark:text-green-200/60">
-          Add courses to compare grade distributions and download a PDF summary.
+          Save courses to compare grade distributions and download a PDF summary.
         </p>
         <Link
           href="/"
@@ -75,10 +74,10 @@ export default function CartPage() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
-            My Courses
+            Saved Courses
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-green-200/60">
-            {items.length} course{items.length !== 1 ? "s" : ""} saved
+            {items.length} bookmark{items.length !== 1 ? "s" : ""}
             {overallGPA !== null && (
               <>
                 {" · "}Combined GPA: <GpaBadge gpa={overallGPA} />
@@ -135,10 +134,21 @@ function CartCourseCard({
       <button
         onClick={onRemove}
         className="absolute right-2 top-2 rounded-md p-1 text-gray-400 transition-colors hover:text-red-500 dark:text-green-300/50 dark:hover:text-red-400"
-        aria-label="Remove from cart"
+        aria-label="Remove saved course"
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="h-4 w-[18px]"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+          style={{ transform: "scaleX(1.125)" }}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M17 21l-5-3-5 3V5a2 2 0 012-2h6a2 2 0 012 2v16z"
+          />
         </svg>
       </button>
 

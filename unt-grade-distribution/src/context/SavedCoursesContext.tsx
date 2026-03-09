@@ -10,19 +10,22 @@ import {
 import type { CartItem } from "@/lib/types";
 
 /* ── State shape ─────────────────────────────────────── */
-interface CartState {
+interface SavedCoursesState {
   items: CartItem[];
 }
 
 /* ── Actions ─────────────────────────────────────────── */
-type CartAction =
+type SavedCoursesAction =
   | { type: "ADD"; item: CartItem }
   | { type: "REMOVE"; courseId: number }
   | { type: "CLEAR" }
   | { type: "HYDRATE"; items: CartItem[] };
 
 /* ── Reducer ─────────────────────────────────────────── */
-function cartReducer(state: CartState, action: CartAction): CartState {
+function savedCoursesReducer(
+  state: SavedCoursesState,
+  action: SavedCoursesAction
+): SavedCoursesState {
   switch (action.type) {
     case "ADD":
       if (state.items.some((i) => i.courseId === action.item.courseId))
@@ -42,21 +45,21 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 }
 
 /* ── Context value ───────────────────────────────────── */
-interface CartContextValue {
+interface SavedCoursesContextValue {
   items: CartItem[];
   addCourse: (item: CartItem) => void;
   removeCourse: (courseId: number) => void;
   clearCart: () => void;
-  isInCart: (courseId: number) => boolean;
+  isSaved: (courseId: number) => boolean;
 }
 
-const CartContext = createContext<CartContextValue | null>(null);
+const SavedCoursesContext = createContext<SavedCoursesContextValue | null>(null);
 
-const STORAGE_KEY = "unt-grades-cart";
+const STORAGE_KEY = "unt-grades-saved-courses";
 
 /* ── Provider ────────────────────────────────────────── */
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, { items: [] });
+export function SavedCoursesProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(savedCoursesReducer, { items: [] });
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -82,21 +85,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const removeCourse = (courseId: number) =>
     dispatch({ type: "REMOVE", courseId });
   const clearCart = () => dispatch({ type: "CLEAR" });
-  const isInCart = (courseId: number) =>
+  const isSaved = (courseId: number) =>
     state.items.some((i) => i.courseId === courseId);
 
   return (
-    <CartContext.Provider
-      value={{ items: state.items, addCourse, removeCourse, clearCart, isInCart }}
+    <SavedCoursesContext.Provider
+      value={{ items: state.items, addCourse, removeCourse, clearCart, isSaved }}
     >
       {children}
-    </CartContext.Provider>
+    </SavedCoursesContext.Provider>
   );
 }
 
 /* ── Hook ────────────────────────────────────────────── */
-export function useCart(): CartContextValue {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used within CartProvider");
+export function useSavedCourses(): SavedCoursesContextValue {
+  const ctx = useContext(SavedCoursesContext);
+  if (!ctx) {
+    throw new Error(
+      "useSavedCourses must be used within SavedCoursesProvider"
+    );
+  }
   return ctx;
 }

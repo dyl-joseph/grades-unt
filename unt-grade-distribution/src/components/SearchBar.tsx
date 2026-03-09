@@ -13,7 +13,7 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({
-  placeholder = "Search course or professor...",
+  placeholder = "Search course, professor, or class code...",
   autoFocus = false,
   compact = false,
   onFocusChange,
@@ -148,7 +148,8 @@ export default function SearchBar({
   const items = allItems();
 
   return (
-    <div ref={containerRef} className={`relative w-full ${compact ? "" : "max-w-2xl"}`}>
+    <div ref={containerRef} className={`relative w-full ${compact ? "" : "max-w-3xl mx-auto"}`}>
+
       <div className="relative">
         <svg
           className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${compact ? "h-4 w-4" : "h-6 w-6 left-4"}`}

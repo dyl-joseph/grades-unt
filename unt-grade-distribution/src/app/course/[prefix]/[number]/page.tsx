@@ -7,7 +7,7 @@ import { aggregateGrades, calculateGPA, toChartData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
-import CourseCartButton from "@/components/CourseCartButton";
+import CourseSaveButton from "@/components/CourseSaveButton";
 import ShareButton from "@/components/ShareButton";
 import type { Section, Instructor } from "@prisma/client";
 
@@ -58,7 +58,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
           </h1>
         <div className="flex items-start gap-2">
           <ShareButton url={`/course/${course.prefix}/${course.number}`} />
-          <CourseCartButton
+          <CourseSaveButton
             item={{
               courseId: course.id,
               prefix: course.prefix,

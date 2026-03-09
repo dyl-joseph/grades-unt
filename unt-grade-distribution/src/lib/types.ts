@@ -12,7 +12,7 @@ export interface SearchResult {
   instructors: Pick<Instructor, "id" | "firstName" | "lastName">[];
 }
 
-/** Shopping cart item — stored in localStorage */
+/** Saved course item — stored in localStorage */
 export interface CartItem {
   courseId: number;
   prefix: string;

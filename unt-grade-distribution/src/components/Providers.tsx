@@ -1,7 +1,7 @@
 "use client";
 
-import { CartProvider } from "@/context/CartContext";
+import { SavedCoursesProvider } from "@/context/SavedCoursesContext";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  return <CartProvider>{children}</CartProvider>;
+  return <SavedCoursesProvider>{children}</SavedCoursesProvider>;
 }

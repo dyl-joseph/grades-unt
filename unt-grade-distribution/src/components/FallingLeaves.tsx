@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 interface Leaf {
   x: number;
@@ -61,6 +62,8 @@ function drawLeafShape(ctx: CanvasRenderingContext2D, size: number, shape: numbe
  */
 export default function FallingLeaves() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -81,7 +84,18 @@ export default function FallingLeaves() {
     }
 
     function makeLeaf(startAtTop: boolean): Leaf {
-      const size = Math.random() * 8 + 6; // 6–14 px
+      const sizeScale = isHome ? 1 : 0.82;
+      const alphaScale = isHome ? 1 : 0.45;
+      const size = (Math.random() * 8 + 6) * sizeScale; // 6–14 px
+      const colorPool = isHome
+        ? LEAF_COLORS
+        : [
+            "rgb(125, 96, 66)",
+            "rgb(145, 112, 78)",
+            "rgb(160, 98, 58)",
+            "rgb(148, 84, 58)",
+            "rgb(152, 118, 70)",
+          ];
       return {
         x: Math.random() * w,
         y: startAtTop ? -size - Math.random() * h * 0.3 : Math.random() * h,
@@ -94,16 +108,17 @@ export default function FallingLeaves() {
         swayAmp: Math.random() * 0.4 + 0.15,      // gentler sway
         swaySpeed: Math.random() * 0.005 + 0.002,  // slower sway cycle
         driftX: (Math.random() - 0.4) * 0.15,     // slight rightward wind bias
-        alpha: Math.random() * 0.25 + 0.15,       // 0.15–0.40
-        color: LEAF_COLORS[Math.floor(Math.random() * LEAF_COLORS.length)],
+        alpha: (Math.random() * 0.25 + 0.15) * alphaScale, // 0.15–0.40
+        color: colorPool[Math.floor(Math.random() * colorPool.length)],
         shape: Math.floor(Math.random() * 3),
       };
     }
 
     function generateLeaves() {
       const area = w * h;
-      // ~1 leaf per 12000 px² — visible but not overwhelming
-      const count = Math.min(Math.floor(area / 12000), 150);
+      const density = isHome ? 35000 : 50000;
+      const maxLeaves = isHome ? 75 : 25;
+      const count = Math.min(Math.floor(area / density), maxLeaves);
       leaves = Array.from({ length: count }, () => makeLeaf(false));
     }
 
@@ -161,12 +176,14 @@ export default function FallingLeaves() {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", resize);
     };
-  }, []);
+  }, [isHome]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-[1] opacity-100 transition-opacity duration-700 dark:opacity-0"
+      className={`pointer-events-none fixed inset-0 z-[1] transition-opacity duration-700 dark:opacity-0 ${
+        isHome ? "opacity-100" : "opacity-45"
+      }`}
       aria-hidden="true"
     />
   );
