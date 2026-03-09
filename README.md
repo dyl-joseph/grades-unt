@@ -18,6 +18,7 @@ We got data from UNT about all the grade distributions from Fall 2025. With this
 - Tailwind CSS (v4) 
 - Recharts (v3.7.0) - draws grade distribution charts
 - jsPDF + jspdf-autotable (4.2.0, 5.0.7) - PDF exporter
+- Vercel Analytics + Vercel Speed Insights - real-user page views, Web Vitals, and route performance monitoring
 
 ### Backend:
 - postgress-sql
@@ -29,6 +30,10 @@ We got data from UNT about all the grade distributions from Fall 2025. With this
 ### Hosting: 
 - Supabase (database)
 - Vercel (hosting the website itself)
+
+### Observability:
+- Vercel Speed Insights helps monitor real-user loading performance across the home page, search-driven navigation, and the database-backed course and instructor pages.
+- Speed Insights is useful for finding slow routes and poor Web Vitals, but it does not replace direct database query profiling by itself.
 
 ## File Structure: 
 /unt-grade-distribution: contains all the code. put it all into a folder for "modulization".
