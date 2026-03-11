@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
 import Fireflies from "@/components/Fireflies";
 import FallingLeaves from "@/components/FallingLeaves";
+import KofiWidget from "@/components/KofiWidget";
 import "./globals.css";
 
 const inter = Inter({
@@ -58,6 +59,7 @@ export default function RootLayout({
           <Navbar />
           <main className="relative z-20">{children}</main>
         </Providers>
+        <KofiWidget />
         <Analytics />
         <SpeedInsights />
       </body>
