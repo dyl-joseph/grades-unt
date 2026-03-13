@@ -24,7 +24,7 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-5 px-5">
         <Link
           href="/"
-          className="shrink-0 text-[34px] font-bold text-primary dark:text-jungle-leaf"
+          className="shrink-0 select-none text-[34px] font-bold text-primary dark:text-jungle-leaf"
         >
           UNT Grades
         </Link>

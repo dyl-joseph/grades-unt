@@ -35,7 +35,7 @@ export default function ShareButton({ url, compact = false }: ShareButtonProps) 
   return (
     <button
       onClick={handleCopy}
-      className={`inline-flex items-center gap-1.5 rounded-lg border transition-all ${
+      className={`inline-flex select-none items-center gap-1.5 rounded-lg border transition-all ${
         copied
           ? "border-green-400 bg-green-50 text-green-700 dark:border-green-600 dark:bg-green-900/30 dark:text-green-300"
           : "border-jungle-tan-dark/30 bg-jungle-tan-light text-gray-600 hover:border-primary/40 hover:text-primary dark:border-green-800/50 dark:bg-jungle-canopy/60 dark:text-green-300 dark:hover:border-green-600 dark:hover:text-green-200"

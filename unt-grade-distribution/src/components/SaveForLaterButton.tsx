@@ -19,7 +19,7 @@ export default function SaveForLaterButton({
         isBookmarked ? removeCourse(item.courseId) : addCourse(item)
       }
       aria-label={isBookmarked ? "Remove bookmark" : "Save bookmark"}
-      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-all ${
+      className={`inline-flex select-none items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-all ${
         isBookmarked
           ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
           : "border-green-300 bg-green-50 text-green-800 hover:bg-green-100 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50"
