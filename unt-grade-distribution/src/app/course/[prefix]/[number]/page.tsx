@@ -88,7 +88,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
             </a>
           </div>
         </div>
-        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
           <span className="flex items-center gap-1.5">
             Overall GPA: <GpaBadge gpa={overallGPA} />
           </span>

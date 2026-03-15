@@ -5,9 +5,7 @@ import { aggregateGrades, toChartData } from "@/lib/grades";
 
   // Supported: type=course|instructor, a
   const { type, a } = searchParams;
-  if (!type || !a || (type !== "course" && type !== "instructor")) {
-    return notFound();
-  }
+  const invalidParams = !type || !a || (type !== "course" && type !== "instructor");
 
 
   // State for right-side search and selection
@@ -99,6 +97,15 @@ import { aggregateGrades, toChartData } from "@/lib/grades";
     setResults([]);
     setSearch("");
   };
+
+  if (invalidParams) {
+    return (
+      <main className="flex flex-col items-center p-4">
+        <h1 className="text-2xl font-bold mb-4">Compare</h1>
+        <div className="text-red-600">Invalid compare parameters</div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex flex-col items-center p-4">

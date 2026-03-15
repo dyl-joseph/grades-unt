@@ -58,3 +58,8 @@ documentation files (any .md files): in the repo's root file. makes it easier to
 
 - **SPOT Evaluations** — Integrate Student Perceptions of Teaching data for instructors
 - **More Semesters** — Expand grade distribution data to cover additional semesters
+- **Add API endpoints** — Aggregate course and instructor data:
+  - `/api/course?aggregate=<prefix>:<number>`: Returns aggregate grade data for a course by summing all its sections.
+  - `/api/instructor?aggregate=<id>`: Returns aggregate grade data for an instructor by summing all their sections.
+  - For now, aggregation is performed manually by summing all section grade counts and enrollment.
+  - Integrate these endpoints with the compare page for efficient aggregate graph rendering.

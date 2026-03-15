@@ -104,9 +104,7 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
         <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">
           Aggregate Grade Distribution
         </h2>
-        {/* TODO: Replace with actual chart data for professor */}
-        {/* Example: <GradeChart data={aggregateChartData} /> */}
-        <div className="text-center text-gray-500">Aggregate graph for professor</div>
+        <GradeChart data={overallAggregate ? toChartData(overallAggregate) : []} />
       </div>
 
       {/* Course groups */}
