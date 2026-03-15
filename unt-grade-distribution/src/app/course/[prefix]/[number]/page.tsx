@@ -56,28 +56,38 @@ export default async function CoursePage({ params }: CoursePageProps) {
             <span className="text-gray-500 dark:text-green-300/60">—</span>{" "}
             {course.title}
           </h1>
-        <div className="flex items-start gap-2">
-          <ShareButton url={`/course/${course.prefix}/${course.number}`} />
-          <CourseSaveButton
-            item={{
-              courseId: course.id,
-              prefix: course.prefix,
-              number: course.number,
-              title: course.title,
-              gpa: overallGPA,
-              gradeA: aggregate.gradeA,
-              gradeB: aggregate.gradeB,
-              gradeC: aggregate.gradeC,
-              gradeD: aggregate.gradeD,
-              gradeF: aggregate.gradeF,
-              gradeP: aggregate.gradeP,
-              gradeNP: aggregate.gradeNP,
-              gradeW: aggregate.gradeW,
-              gradeI: aggregate.gradeI,
-              totalEnroll: aggregate.totalEnroll,
-              sectionCount: course.sections.length,
-            }}
-          />
+          <div className="flex items-start gap-2">
+            <ShareButton url={`/course/${course.prefix}/${course.number}`} />
+            <CourseSaveButton
+              item={{
+                courseId: course.id,
+                prefix: course.prefix,
+                number: course.number,
+                title: course.title,
+                gpa: overallGPA,
+                gradeA: aggregate.gradeA,
+                gradeB: aggregate.gradeB,
+                gradeC: aggregate.gradeC,
+                gradeD: aggregate.gradeD,
+                gradeF: aggregate.gradeF,
+                gradeP: aggregate.gradeP,
+                gradeNP: aggregate.gradeNP,
+                gradeW: aggregate.gradeW,
+                gradeI: aggregate.gradeI,
+                totalEnroll: aggregate.totalEnroll,
+                sectionCount: course.sections.length,
+              }}
+            />
+            {/* Compare Button */}
+            <a
+              href={`/compare?type=course&a=${course.prefix}:${course.number}`}
+              className="inline-block px-3 py-1 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+              title="Compare with another course"
+            >
+              Compare
+            </a>
+          </div>
+        </div>
         </div>
           <span className="flex items-center gap-1.5">
             Overall GPA: <GpaBadge gpa={overallGPA} />

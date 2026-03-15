@@ -73,9 +73,21 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
-          {instructor.firstName} {instructor.lastName}
-        </h1>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
+            {instructor.firstName} {instructor.lastName}
+          </h1>
+          <div className="flex items-start gap-2">
+            {/* Compare Button (aggregate only) */}
+            <a
+              href={`/compare?type=instructor&a=${instructor.id}`}
+              className="inline-block px-3 py-1 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+              title="Compare with another instructor"
+            >
+              Compare
+            </a>
+          </div>
+        </div>
         <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
           <span className="flex items-center gap-1.5">
             Overall GPA: <GpaBadge gpa={overallGPA} />
@@ -86,6 +98,15 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
             taught
           </span>
         </div>
+      </div>
+      {/* Aggregate graph for professor */}
+      <div className="mb-10 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-6 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">
+          Aggregate Grade Distribution
+        </h2>
+        {/* TODO: Replace with actual chart data for professor */}
+        {/* Example: <GradeChart data={aggregateChartData} /> */}
+        <div className="text-center text-gray-500">Aggregate graph for professor</div>
       </div>
 
       {/* Course groups */}
