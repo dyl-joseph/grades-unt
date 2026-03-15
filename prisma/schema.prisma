@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model Course {
+  id       Int       @id @default(autoincrement())
+  prefix   String    // "CS", "AARS", "ACCT"
+  number   String    // "311", "6840", "408C" (String: UNT uses alphanumeric)
+  title       String    // "ORG AGING & HEALTH"
+  sections    Section[]
+
+  @@unique([prefix, number])
+  @@index([prefix])
+  @@map("courses")
+}
+
+model Instructor {
+  id        Int       @id @default(autoincrement())
+  firstName String    @map("first_name")  // "Ami R"
+  lastName  String    @map("last_name")   // "Moore"
+  sections  Section[]
+
+  @@unique([firstName, lastName])
+  @@index([lastName])
+  @@map("instructors")
+}
+
+model Section {
+  id            Int        @id @default(autoincrement())
+  sectionNumber String     @map("section_number") // "1", "2", "501", etc.
+
+  courseId      Int        @map("course_id")
+  course        Course     @relation(fields: [courseId], references: [id])
+
+  instructorId  Int        @map("instructor_id")
+  instructor    Instructor @relation(fields: [instructorId], references: [id])
+
+  // Grade counts (9 columns)
+  gradeA       Int        @default(0) @map("grade_a")
+  gradeB       Int        @default(0) @map("grade_b")
+  gradeC       Int        @default(0) @map("grade_c")
+  gradeD       Int        @default(0) @map("grade_d")
+  gradeF       Int        @default(0) @map("grade_f")
+  gradeP       Int        @default(0) @map("grade_p")
+  gradeNP      Int        @default(0) @map("grade_np")
+  gradeW       Int        @default(0) @map("grade_w")
+  gradeI       Int        @default(0) @map("grade_i")
+  totalEnroll  Int        @default(0) @map("total_enroll")
+
+  @@unique([courseId, sectionNumber])
+  @@index([courseId])
+  @@index([instructorId])
+  @@map("sections")
+}
