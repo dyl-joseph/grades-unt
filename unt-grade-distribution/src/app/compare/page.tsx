@@ -1,12 +1,14 @@
 
+"use client";
 import { useState, useEffect } from "react";
 import { aggregateGrades, toChartData } from "@/lib/grades";
 // TODO: Import GpaBadge
+import GradeChart from "@/components/GradeChart";
 
+export default function ComparePage({ searchParams }: { searchParams: any }) {
   // Supported: type=course|instructor, a
   const { type, a } = searchParams;
   const invalidParams = !type || !a || (type !== "course" && type !== "instructor");
-
 
   // State for right-side search and selection
   const [search, setSearch] = useState("");
