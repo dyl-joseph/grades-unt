@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# grades-unt
 
-## Getting Started
+## Choosing classes is a gamble. It shouldn't be.
+You don't always know what you're signing up for (easy or hard!) until it's too late. We created a website to view all the grades of every class AND professor at UNT.
 
-First, run the development server:
+## View (almost) any class at UNT from last semester: 
+We got data from UNT about all the grade distributions from Fall 2025. With this data, we made an app to easily view all the data. 
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### **Links:** 
+- [untgrades.app](https://untgrades.app) (if you are **NOT** on school Wi-Fi)
+- [unt-grades.vercel.app](https://unt-grades.vercel.app) (If you **ARE** on school Wi-Fi)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Technical Implementation
+### Frontend: 
+- React v19.2.3
+- Next.js 16.1.6
+- Typescript 
+- Tailwind CSS (v4) 
+- Recharts (v3.7.0) - draws grade distribution charts
+- jsPDF + jspdf-autotable (4.2.0, 5.0.7) - PDF exporter
+- Vercel Analytics + Vercel Speed Insights - real-user page views, Web Vitals, and route performance monitoring
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Backend:
+- postgress-sql
+- Next.js API (16.1.6) - routes data 
+- Prisma ORM (7.4.2) - fetches data from Supabase and gives it to the website
+- PostgreSQL - database manager in Supabase
+- pg [node-postgress] (8.19.0) - allow the website to use postgress and process postrgress data
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Hosting: 
+- Supabase (database)
+- Vercel (hosting the website itself)
 
-## Learn More
+### Observability:
+- Vercel Speed Insights helps monitor real-user loading performance across the home page, search-driven navigation, and the database-backed course and instructor pages.
+- Speed Insights is useful for finding slow routes and poor Web Vitals, but it does not replace direct database query profiling by itself.
 
-To learn more about Next.js, take a look at the following resources:
+## File Structure: 
+/unt-grade-distribution: contains all the code. put it all into a folder for "modulization".
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+documentation files (any .md files): in the repo's root file. makes it easier to see and read all the documentation docs that have been made (e.g. look at [DOCUMENTATION.md](https://github.com/dyl-joseph/grades-unt/blob/main/DOCUMENTATION.md)). 
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Contributions: 
 
-## Deploy on Vercel
+### Maintainers:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+[Dylan Joseph](https://github.com/dyl-joseph)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[Gautham Nair](https://github.com/GauthamRNair)
+
+[Akhil Tumati](https://github.com/YouSoMoose)
+
+### Initial Contributors:
+
+[Sai Are](https://github.com/FrostNinja397)
+
+## Planned Features
+
+- **SPOT Evaluations** — Integrate Student Perceptions of Teaching data for instructors
+- **More Semesters** — Expand grade distribution data to cover additional semesters
