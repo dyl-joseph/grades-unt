@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: NextRequest, { params }: { params: { prefix: string; number: string } }) {
+export async function GET(request: NextRequest, context: { params: any }) {
+  const params = await Promise.resolve(context.params) as { prefix: string; number: string };
   const { prefix, number } = params;
   const course = await prisma.course.findUnique({
     where: { prefix_number: { prefix, number } },

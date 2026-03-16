@@ -7,6 +7,8 @@ export const revalidate = 3600; // ISR: regenerate every hour
 import { aggregateGrades, calculateGPA } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
+import GradeChart from "@/components/GradeChart";
+import { toChartData } from "@/lib/grades";
 import type { Section, Course } from "@prisma/client";
 
 const getInstructor = unstable_cache(
