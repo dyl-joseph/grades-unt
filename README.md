@@ -7,8 +7,7 @@ You don't always know what you're signing up for (easy or hard!) until it's too 
 We got data from UNT about all the grade distributions from Fall 2025. With this data, we made an app to easily view all the data. 
 
 ### **Links:** 
-- [untgrades.app](https://untgrades.app) (if you are **NOT** on school Wi-Fi)
-- [unt-grades.vercel.app](https://unt-grades.vercel.app) (If you **ARE** on school Wi-Fi)
+- [untgrades.app](https://untgrades.app)
 
 ## Technical Implementation
 ### Frontend: 
