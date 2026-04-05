@@ -1,21 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
+
+function subscribe(onStoreChange: () => void) {
+  if (typeof document === "undefined") {
+    return () => {};
+  }
+
+  const observer = new MutationObserver(onStoreChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === "theme") {
+      onStoreChange();
+    }
+  };
+
+  window.addEventListener("storage", onStorage);
+
+  return () => {
+    observer.disconnect();
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
+function getSnapshot() {
+  return document.documentElement.classList.contains("dark");
+}
 
 export function useTheme() {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const check = () => document.documentElement.classList.contains("dark");
-    setIsDark(check());
-
-    const observer = new MutationObserver(() => setIsDark(check()));
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => observer.disconnect();
-  }, []);
+  const isDark = useSyncExternalStore(subscribe, getSnapshot, () => false);
 
   return {
     isDark,

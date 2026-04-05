@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { SearchResult } from "@/lib/types";
 
@@ -19,7 +19,6 @@ export default function SearchBar({
   onFocusChange,
 }: SearchBarProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -30,32 +29,10 @@ export default function SearchBar({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Close dropdown and reset state when route changes after a navigation click
-  useEffect(() => {
-    if (navigatingId) {
-      setNavigatingId(null);
-      setIsOpen(false);
-      setQuery("");
-    }
-  }, [pathname]);
-
-  // Show loading as soon as user types (before debounce fires)
-  useEffect(() => {
-    if (query.length >= 2 && query !== debouncedQuery) {
-      setLoading(true);
-    }
-  }, [query, debouncedQuery]);
-
   // Fetch results when debounced query changes
   useEffect(() => {
-    if (debouncedQuery.length < 2) {
-      setResults(null);
-      setIsOpen(false);
-      setLoading(false);
-      return;
-    }
+    if (debouncedQuery.length < 2) return;
 
-    setLoading(true);
     const controller = new AbortController();
     fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`, {
       signal: controller.signal,
@@ -69,6 +46,7 @@ export default function SearchBar({
       })
       .catch(() => {
         // Abort or network error — ignore
+        setLoading(false);
       });
 
     return () => controller.abort();
@@ -116,6 +94,11 @@ export default function SearchBar({
   const navigate = (type: "course" | "instructor", id: string) => {
     const navId = `${type}-${id}`;
     setNavigatingId(navId);
+    setIsOpen(false);
+    setQuery("");
+    setResults(null);
+    setHighlightIdx(-1);
+    setLoading(false);
     if (type === "course") {
       router.push(`/course/${id}`);
     } else {
@@ -168,7 +151,18 @@ export default function SearchBar({
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setQuery(value);
+            if (value.length < 2) {
+              setResults(null);
+              setIsOpen(false);
+              setHighlightIdx(-1);
+              setLoading(false);
+            } else {
+              setLoading(true);
+            }
+          }}
           onFocus={() => {
             if (results) setIsOpen(true);
             onFocusChange?.(true);

@@ -1,36 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false);
+  const { isDark } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    // Check localStorage first, then system preference
-    const saved = localStorage.getItem("theme");
-    if (saved === "dark") {
-      setIsDark(true);
-      document.documentElement.classList.add("dark");
-    } else if (saved === "light") {
-      setIsDark(false);
-      document.documentElement.classList.remove("dark");
-    } else {
-      // No saved preference — check system
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      setIsDark(prefersDark);
-      if (prefersDark) {
+    const timeout = window.setTimeout(() => {
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark") {
+        document.documentElement.classList.add("dark");
+      } else if (saved === "light") {
+        document.documentElement.classList.remove("dark");
+      } else if (
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      ) {
         document.documentElement.classList.add("dark");
       }
-    }
+
+      setMounted(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, []);
 
   const toggle = () => {
     const next = !isDark;
-    setIsDark(next);
+
     if (next) {
       document.documentElement.classList.add("dark");
       localStorage.setItem("theme", "dark");
@@ -40,7 +38,6 @@ export default function ThemeToggle() {
     }
   };
 
-  // Avoid hydration mismatch — render nothing until mounted
   if (!mounted) {
     return <div className="h-[46px] w-[46px]" />;
   }
