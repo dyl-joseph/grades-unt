@@ -34,11 +34,13 @@ export default function SearchBar({
     if (debouncedQuery.length < 2) return;
 
     const controller = new AbortController();
+    let active = true;
     fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`, {
       signal: controller.signal,
     })
       .then((res) => res.json())
       .then((data: SearchResult) => {
+        if (!active) return;
         setResults(data);
         setIsOpen(true);
         setHighlightIdx(-1);
@@ -46,10 +48,15 @@ export default function SearchBar({
       })
       .catch(() => {
         // Abort or network error — ignore
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       });
 
-    return () => controller.abort();
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [debouncedQuery]);
 
   // Close dropdown when clicking outside
