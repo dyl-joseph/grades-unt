@@ -1,19 +1,18 @@
 import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
-
-export const revalidate = 3600; // ISR: regenerate every hour
 import { aggregateGrades, calculateGPA, toChartData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
 import CourseSaveButton from "@/components/CourseSaveButton";
 import ShareButton from "@/components/ShareButton";
-import type { Section, Instructor } from "@prisma/client";
 
-const getCourse = unstable_cache(
+export const revalidate = 3600; // ISR: regenerate every hour
+
+const getCourseDetail = unstable_cache(
   async (prefix: string, number: string) => {
-    return prisma.course.findUnique({
+    const course = await prisma.course.findUnique({
       where: {
         prefix_number: { prefix, number },
       },
@@ -24,9 +23,22 @@ const getCourse = unstable_cache(
         },
       },
     });
+
+    if (!course) {
+      return null;
+    }
+
+    const aggregate = aggregateGrades(course.sections);
+
+    return {
+      course,
+      aggregate,
+      overallGPA: calculateGPA(aggregate),
+      aggregateChartData: toChartData(aggregate),
+    };
   },
   ["course-detail"],
-  { revalidate: 3600 } // 1 hour
+  { revalidate: 3600, tags: ["course-detail"] } // 1 hour
 );
 
 interface CoursePageProps {
@@ -36,15 +48,13 @@ interface CoursePageProps {
 export default async function CoursePage({ params }: CoursePageProps) {
   const { prefix, number } = await params;
 
-  const course = await getCourse(prefix.toUpperCase(), number);
+  const detail = await getCourseDetail(prefix.toUpperCase(), number);
 
-  if (!course) {
+  if (!detail) {
     notFound();
   }
 
-  const aggregate = aggregateGrades(course.sections);
-  const overallGPA = calculateGPA(aggregate);
-  const aggregateChartData = toChartData(aggregate);
+  const { course, aggregate, overallGPA, aggregateChartData } = detail;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -78,10 +88,9 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 sectionCount: course.sections.length,
               }}
             />
-            {/* Compare Button */}
             <a
               href={`/compare?type=course&a=${course.prefix}:${course.number}`}
-              className="inline-block px-3 py-1 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+              className="inline-block rounded bg-blue-600 px-3 py-1 font-semibold text-white transition hover:bg-blue-700"
               title="Compare with another course"
             >
               Compare
@@ -110,11 +119,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
         Sections
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {course.sections.map((section: Section & { instructor: Instructor }) => (
-          <SectionCard
-            key={section.id}
-            section={{ ...section, course }}
-          />
+        {course.sections.map((section) => (
+          <SectionCard key={section.id} section={{ ...section, course }} />
         ))}
       </div>
     </div>
