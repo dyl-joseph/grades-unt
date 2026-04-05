@@ -15,6 +15,7 @@ model Course {
 
   @@unique([prefix, number])
   @@index([prefix])
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
   @@map("courses")
 }
 
@@ -25,7 +26,8 @@ model Instructor {
   sections  Section[]
 
   @@unique([firstName, lastName])
-  @@index([lastName])
+  @@index([firstName(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([lastName(ops: raw("gin_trgm_ops"))], type: Gin)
   @@map("instructors")
 }
 
