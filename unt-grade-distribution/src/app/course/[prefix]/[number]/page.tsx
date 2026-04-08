@@ -9,6 +9,8 @@ import CourseSaveButton from "@/components/CourseSaveButton";
 import ShareButton from "@/components/ShareButton";
 
 export const dynamic = "force-static";
+export const fetchCache = "default-cache";
+export const dynamicParams = true;
 export const revalidate = 3600; // ISR: regenerate every hour
 
 const getCourseDetail = unstable_cache(
