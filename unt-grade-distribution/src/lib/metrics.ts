@@ -4,6 +4,7 @@ type SearchMetricEvent = {
   kind: "search";
   outcome: SearchMetricOutcome;
   query: string;
+  queryKind?: "course" | "name" | "skip";
   durationMs: number;
   courseCount?: number;
   instructorCount?: number;
@@ -89,7 +90,12 @@ export function initializeMetrics() {
   return getMetricsSnapshot();
 }
 
-export function recordSearchCacheHit(query: string, durationMs: number, counts: { courses: number; instructors: number }) {
+export function recordSearchCacheHit(
+  query: string,
+  durationMs: number,
+  counts: { courses: number; instructors: number },
+  queryKind?: "course" | "name"
+) {
   const snapshot = getMetricsSnapshot();
   snapshot.search.cacheHits += 1;
   snapshot.search.queries += 1;
@@ -98,6 +104,7 @@ export function recordSearchCacheHit(query: string, durationMs: number, counts: 
     kind: "search",
     outcome: "cache-hit",
     query,
+    queryKind,
     durationMs,
     courseCount: counts.courses,
     instructorCount: counts.instructors,
@@ -118,6 +125,7 @@ export function recordSearchSkip(query: string, durationMs: number) {
     kind: "search",
     outcome: "cache-skip",
     query,
+    queryKind: "skip",
     durationMs,
     timestamp: Date.now(),
   });
@@ -126,7 +134,8 @@ export function recordSearchSkip(query: string, durationMs: number) {
 export function recordSearchQuery(
   query: string,
   durationMs: number,
-  counts: { courses: number; instructors: number }
+  counts: { courses: number; instructors: number },
+  queryKind?: "course" | "name"
 ) {
   const snapshot = getMetricsSnapshot();
   snapshot.search.queries += 1;
@@ -135,6 +144,7 @@ export function recordSearchQuery(
     kind: "search",
     outcome: "cache-miss",
     query,
+    queryKind,
     durationMs,
     courseCount: counts.courses,
     instructorCount: counts.instructors,
@@ -142,7 +152,7 @@ export function recordSearchQuery(
   });
 }
 
-export function recordSearchError(query: string, durationMs: number, error: unknown) {
+export function recordSearchError(query: string, durationMs: number, error: unknown, queryKind?: "course" | "name") {
   const snapshot = getMetricsSnapshot();
   snapshot.search.errors += 1;
   updateDuration(durationMs);
@@ -150,6 +160,7 @@ export function recordSearchError(query: string, durationMs: number, error: unkn
     kind: "search",
     outcome: "error",
     query,
+    queryKind,
     durationMs,
     message: error instanceof Error ? error.message : String(error),
     timestamp: Date.now(),
