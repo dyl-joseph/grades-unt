@@ -365,9 +365,11 @@ The search system has three layers: the **SearchBar component** (UI), the **API 
 
 A client component with the following features:
 
-- **Debounced Input:** Uses `useDebounce(query, 300)` — only fires a network request 300ms after the user stops typing
+- **Debounced Input:** Uses `useDebounce(query, 250)` — only fires a network request after the user stops typing, which reduces request volume during rapid input
 - **Abort Control:** Creates an `AbortController` for each fetch. When a new query fires, the previous in-flight request is cancelled via `controller.abort()`
 - **Minimum Length:** Queries shorter than 2 characters return empty results immediately (both client and server)
+- **Client-side result reuse:** Keeps a small in-memory cache of recent normalized queries so repeated searches can reuse results without another network round-trip
+- **UX resilience:** Shows a non-blocking loading spinner while results are pending and a friendly error message when the search request fails
 - **Two Modes:**
   - **Default (home page):** Glass-styled with `glass-glossy` class, larger text, autofocused
   - **Compact (navbar):** Solid background (`bg-jungle-tan-light` / `bg-jungle-canopy`), smaller text
@@ -726,6 +728,16 @@ The project auto-deploys on every push to the `main` branch:
 - **Direct:** Port 5432 — used for migrations and seeding
 - **Schema management:** Tables are created via Prisma migrations or manual SQL execution via Supabase SQL Editor
 
+### Vercel + Supabase runtime settings
+
+Recommended production configuration:
+
+- `DATABASE_URL` should use the Supabase pooler hostname and port `6543` with `pgbouncer=true`
+- `DIRECT_URL` should continue pointing at the direct database host on port `5432`
+- Vercel should use the pooled `DATABASE_URL` for runtime traffic and keep `DIRECT_URL` available only for build-time Prisma work and local development
+
+This keeps serverless traffic behind PgBouncer while preserving a direct path for migrations, seeds, and local debugging.
+
 ---
 
 ## 14. Development Guide
@@ -778,6 +790,9 @@ npm run dev
 
 - **Port 3000 in use:** Kill existing processes with `lsof -ti:3000 | xargs kill -9`
 - **Dev server lock file:** Delete `.next/dev/lock` if the dev server won't start
+- **Search p95 validation:** Run a warm-cache and cold-cache probe against `/api/search`, then compare the p95 from the `Server-Timing` header or a load tool report before and after changes.
+  - Example: `npx autocannon -c 10 -d 30 "http://localhost:3000/api/search?q=accounting"`
+  - Example: use the browser network panel on the SearchBar, confirm repeated keystrokes no longer fire a request for every character, and verify cached repeats stay below the p95 target.
 - **Prisma Client outdated:** Run `npx prisma generate` after schema changes
 - **Connection pool exhaustion:** If queries hang, check that `DATABASE_URL` uses the pooler connection string (port 6543)
 

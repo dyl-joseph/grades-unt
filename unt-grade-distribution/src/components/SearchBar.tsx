@@ -12,6 +12,10 @@ interface SearchBarProps {
   onFocusChange?: (focused: boolean) => void;
 }
 
+const MIN_QUERY_LENGTH = 2;
+const DEBOUNCE_MS = 250;
+const MAX_CLIENT_CACHE_ENTRIES = 25;
+
 export default function SearchBar({
   placeholder = "Search course, professor, or class code...",
   autoFocus = false,
@@ -24,40 +28,80 @@ export default function SearchBar({
   const [isOpen, setIsOpen] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [navigatingId, setNavigatingId] = useState<string | null>(null);
-  const debouncedQuery = useDebounce(query, 150);
+  const debouncedQuery = useDebounce(query, DEBOUNCE_MS);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const clientCache = useRef(new Map<string, SearchResult>());
+
+  const normalizeQuery = useCallback((value: string) => value.trim().toLowerCase(), []);
+
+  const rememberResult = useCallback((key: string, value: SearchResult) => {
+    const cache = clientCache.current;
+    if (cache.has(key)) cache.delete(key);
+    cache.set(key, value);
+    if (cache.size > MAX_CLIENT_CACHE_ENTRIES) {
+      const oldest = cache.keys().next().value;
+      if (oldest !== undefined) cache.delete(oldest);
+    }
+  }, []);
+
+  const resetResults = useCallback(() => {
+    setResults(null);
+    setIsOpen(false);
+    setHighlightIdx(-1);
+    setLoading(false);
+    setError(null);
+  }, []);
 
   // Fetch results when debounced query changes
   useEffect(() => {
-    if (debouncedQuery.length < 2) return;
+    const normalized = normalizeQuery(debouncedQuery);
+    if (normalized.length < MIN_QUERY_LENGTH) return;
+
+    const cached = clientCache.current.get(normalized);
+    if (cached) {
+      setResults(cached);
+      setIsOpen(true);
+      setHighlightIdx(-1);
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
     const controller = new AbortController();
     let active = true;
-    fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`, {
+    setError(null);
+
+    fetch(`/api/search?q=${encodeURIComponent(normalized)}`, {
       signal: controller.signal,
     })
-      .then((res) => res.json())
-      .then((data: SearchResult) => {
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`Search request failed (${res.status})`);
+        }
+        return (await res.json()) as SearchResult;
+      })
+      .then((data) => {
         if (!active) return;
+        rememberResult(normalized, data);
         setResults(data);
         setIsOpen(true);
         setHighlightIdx(-1);
         setLoading(false);
       })
-      .catch(() => {
-        // Abort or network error — ignore
-        if (active) {
-          setLoading(false);
-        }
+      .catch((cause: unknown) => {
+        if (!active) return;
+        setLoading(false);
+        setError(cause instanceof Error ? cause.message : "Search request failed");
       });
 
     return () => {
       active = false;
       controller.abort();
     };
-  }, [debouncedQuery]);
+  }, [debouncedQuery, normalizeQuery, rememberResult]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -103,9 +147,7 @@ export default function SearchBar({
     setNavigatingId(navId);
     setIsOpen(false);
     setQuery("");
-    setResults(null);
-    setHighlightIdx(-1);
-    setLoading(false);
+    resetResults();
     if (type === "course") {
       router.push(`/course/${id}`);
     } else {
@@ -125,7 +167,6 @@ export default function SearchBar({
       setHighlightIdx((prev) => (prev - 1 + items.length) % items.length);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      // Navigate to highlighted item, or first item if none highlighted
       const targetIdx = highlightIdx >= 0 ? highlightIdx : 0;
       const item = items[targetIdx];
       if (item) navigate(item.type, item.id);
@@ -136,10 +177,10 @@ export default function SearchBar({
   };
 
   const items = allItems();
+  const hasQuery = debouncedQuery.length >= MIN_QUERY_LENGTH;
 
   return (
     <div ref={containerRef} className={`relative w-full ${compact ? "" : "max-w-3xl mx-auto"}`}>
-
       <div className="relative">
         <svg
           className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${compact ? "h-4 w-4" : "h-6 w-6 left-4"}`}
@@ -161,11 +202,9 @@ export default function SearchBar({
           onChange={(e) => {
             const value = e.target.value;
             setQuery(value);
-            if (value.length < 2) {
-              setResults(null);
-              setIsOpen(false);
-              setHighlightIdx(-1);
-              setLoading(false);
+            setError(null);
+            if (normalizeQuery(value).length < MIN_QUERY_LENGTH) {
+              resetResults();
             } else {
               setLoading(true);
             }
@@ -177,9 +216,11 @@ export default function SearchBar({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoFocus={autoFocus}
+          aria-busy={loading}
+          aria-invalid={error ? "true" : undefined}
           className={`w-full rounded-2xl border pl-9 pr-9 text-gray-900 placeholder:text-gray-500/70 focus:outline-none focus:ring-2 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light py-1.5 text-sm shadow-sm focus:border-primary/40 focus:ring-primary/20 dark:border-green-800/50 dark:bg-jungle-canopy dark:focus:border-green-600/50 dark:focus:ring-green-700/30" : "glass-glossy border-white/40 py-4 pl-12 text-lg shadow-lg focus:border-white/60 focus:ring-white/40 dark:border-white/15 dark:focus:border-white/25 dark:focus:ring-white/15"} dark:text-green-100 dark:placeholder:text-green-200/40`}
         />
-        {loading && query.length >= 2 && (
+        {loading && hasQuery && (
           <svg
             className={`absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400 dark:text-green-300/60 ${compact ? "h-4 w-4" : "h-5 w-5"}`}
             viewBox="0 0 24 24"
@@ -261,10 +302,15 @@ export default function SearchBar({
                 );
               })}
             </div>
-        )}
+          )}
         </div>
       )}
-      {isOpen && !loading && items.length === 0 && debouncedQuery.length >= 2 && (
+      {isOpen && !loading && error && hasQuery && (
+        <div className={`absolute z-50 mt-2 w-full rounded-2xl border p-4 text-center text-sm text-red-600 shadow-xl dark:text-red-300 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
+          Could not load search results. Please try again.
+        </div>
+      )}
+      {isOpen && !loading && !error && items.length === 0 && hasQuery && (
         <div className={`absolute z-50 mt-2 w-full rounded-2xl border p-4 text-center text-sm text-gray-500 shadow-xl dark:text-green-200/70 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
           No results found for &ldquo;{debouncedQuery}&rdquo;
         </div>
