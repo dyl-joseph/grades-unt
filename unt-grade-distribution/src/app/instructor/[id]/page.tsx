@@ -7,6 +7,7 @@ import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
 
+export const dynamic = "force-static";
 export const revalidate = 3600; // ISR: regenerate every hour
 
 const getInstructorDetail = unstable_cache(
