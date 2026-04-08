@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: NextRequest, context: { params: any }) {
-  const params = await Promise.resolve(context.params) as { id: string };
-  const instructorId = parseInt(params.id);
+type RouteParams = Record<string, string | string[] | undefined>;
+
+function coerceRouteParam(value: RouteParams[string]) {
+  if (Array.isArray(value)) return value[0];
+  return value;
+}
+
+export async function GET(
+  request: NextRequest,
+  ctx: { params: Promise<RouteParams> }
+) {
+  const params = (await ctx.params) ?? {};
+  const id = coerceRouteParam(params.id);
+  const instructorId = Number(id);
   if (isNaN(instructorId)) return NextResponse.json({ sections: [] }, { status: 400 });
   const instructor = await prisma.instructor.findUnique({
     where: { id: instructorId },
@@ -12,5 +23,12 @@ export async function GET(request: NextRequest, context: { params: any }) {
     },
   });
   if (!instructor) return NextResponse.json({ sections: [] }, { status: 404 });
-  return NextResponse.json({ sections: instructor.sections });
+  return NextResponse.json({
+    sections: instructor.sections,
+    instructor: {
+      id: instructor.id,
+      firstName: instructor.firstName,
+      lastName: instructor.lastName,
+    },
+  });
 }
