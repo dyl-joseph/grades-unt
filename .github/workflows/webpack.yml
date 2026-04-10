@@ -23,5 +23,8 @@ jobs:
       run: npm install
     - name: Build
       run: npm run build
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        DIRECT_URL: ${{ secrets.DIRECT_URL }}
     - name: Start
       run: npm run start
