@@ -27,4 +27,8 @@ jobs:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         DIRECT_URL: ${{ secrets.DIRECT_URL }}
     - name: Start
-      run: npm run start
+      run: |
+        npm run start &
+        sleep 10
+        curl --fail http://localhost:3000 || exit 1
+        kill $!
