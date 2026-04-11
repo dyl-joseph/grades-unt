@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build --webpack",
     "start": "next start",
+    "test": "node --import tsx --test 'src/**/*.test.ts'",
     "lint": "eslint",
     "postinstall": "prisma generate"
   },
