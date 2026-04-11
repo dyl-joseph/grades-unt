@@ -100,7 +100,7 @@ test("recordSearchSkip increments cacheSkips", () => {
   assert.equal(snap.search.cacheSkips, 1);
 });
 
-test("recordSearchQuery increments queries and cacheMisses event", () => {
+test("recordSearchQuery increments queries and records duration", () => {
   globalThis.__untGradeMetrics = undefined;
   initializeMetrics();
 

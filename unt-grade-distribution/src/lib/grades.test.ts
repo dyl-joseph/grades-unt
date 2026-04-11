@@ -87,7 +87,8 @@ test("toChartData uses 1 as denominator when totalEnroll is 0", () => {
   const chart = toChartData(zeroEnroll);
   const aEntry = chart.find((d) => d.grade === "A");
   assert.ok(aEntry);
-  assert.equal(aEntry.percentage, 10 * 1000 / 10); // gradeA/1 * 1000 / 10
+  // gradeA=10, denominator=1 → Math.round(10/1 * 1000) / 10 = 1000
+  assert.equal(aEntry.percentage, 1000);
 });
 
 // aggregateGrades
