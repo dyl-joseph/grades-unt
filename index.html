@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>UNT Schedule Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --green:#00853E;--green-d:#005f2c;--green-l:#e8f5ee;--gold:#FFB81C;
+  --bg:#f1f3f6;--surface:#fff;--border:#e2e5ea;--text:#1a1d23;--muted:#6b7280;
+  --danger:#e53e3e;--warn:#d97706;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{background:var(--green);color:#fff;padding:0 18px;height:50px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:200}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem}
+.logo-badge{background:var(--gold);color:#1a1d23;font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.6px;text-transform:uppercase}
+.app{display:flex;flex:1;overflow:hidden}
+.left{width:350px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.search-wrap{padding:12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.search-label{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.search-row{display:flex;gap:6px}
+.search-row input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none;background:var(--bg);transition:border-color .15s}
+.search-row input:focus{border-color:var(--green);background:#fff}
+.btn{border:none;border-radius:8px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:var(--green-d)}
+.btn-ghost{background:var(--bg);color:var(--text);border:1.5px solid var(--border)}.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+.results-scroll{flex:1;overflow-y:auto;padding:4px 0}
+.state-msg{padding:28px 18px;text-align:center;color:var(--muted);font-size:.84rem;line-height:1.7}
+.state-msg strong{display:block;font-size:1.05rem;margin-bottom:5px;color:var(--text)}
+.course-card{border-bottom:1px solid #f0f2f5}
+.cc-header{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;cursor:pointer;transition:background .1s;user-select:none}
+.cc-header:hover,.cc-header.open{background:var(--green-l)}
+.cc-left{display:flex;flex-direction:column;gap:2px}
+.cc-code{font-family:'DM Mono',monospace;font-weight:600;font-size:.84rem;color:var(--green)}
+.cc-name{font-size:.74rem;color:var(--muted)}
+.cc-right{display:flex;align-items:center;gap:7px}
+.cc-count{font-size:.69rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 7px}
+.cc-arrow{font-size:.72rem;color:var(--muted);transition:transform .2s;display:inline-block}
+.cc-header.open .cc-arrow{transform:rotate(180deg)}
+.sections-dd{display:none;background:#fafbfc;border-top:1px solid var(--border)}
+.sections-dd.open{display:block}
+.sec-row{display:flex;align-items:flex-start;padding:8px 12px 8px 18px;gap:9px;cursor:pointer;border-bottom:1px solid #f0f2f5;transition:background .1s;position:relative}
+.sec-row:last-child{border-bottom:none}
+.sec-row:hover{background:#f0faf4}
+.sec-row.previewing{background:#e6f4ec}
+.sec-row.selected{background:var(--green-l);border-left:3px solid var(--green);padding-left:15px}
+.sec-row.conflict{opacity:.45;cursor:not-allowed}
+.sec-row.conflict::after{content:'conflict';position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:.6rem;color:var(--danger);font-weight:700;text-transform:uppercase}
+.sec-dot{width:8px;height:8px;border-radius:2px;margin-top:5px;flex-shrink:0}
+.sec-info{flex:1;min-width:0}
+.sec-top{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.sec-id{font-family:'DM Mono',monospace;font-size:.75rem;font-weight:600}
+.sec-badge{font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:10px;flex-shrink:0}
+.b-open{background:#d1fae5;color:#065f46}.b-closed{background:#fee2e2;color:#991b1b}.b-wait{background:#fef3c7;color:#92400e}
+.sec-time{font-size:.78rem;font-weight:600;margin-top:3px}
+.sec-meta{font-size:.71rem;color:var(--muted);margin-top:2px;display:flex;flex-wrap:wrap;gap:3px 8px}
+.seats-row{display:flex;align-items:center;gap:5px;margin-top:4px}
+.seats-row span{font-size:.67rem;color:var(--muted);white-space:nowrap}
+.seats-bar{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.seats-fill{height:100%;border-radius:2px;background:var(--green)}
+.seats-fill.warn{background:var(--warn)}.seats-fill.full{background:var(--danger)}
+.tray{border-top:1px solid var(--border);flex-shrink:0;max-height:165px;overflow-y:auto;background:var(--surface)}
+.tray-hdr{padding:7px 13px 3px;font-size:.67rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;display:flex;justify-content:space-between;align-items:center}
+.tray-clear-btn{font-size:.67rem;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;padding:0}
+.tray-clear-btn:hover{color:var(--danger)}
+.tray-empty{padding:5px 13px 10px;font-size:.77rem;color:var(--muted)}
+.tray-item{display:flex;align-items:center;gap:8px;padding:5px 13px}
+.tray-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.tray-info{flex:1;min-width:0}
+.tray-code{font-size:.76rem;font-weight:700;font-family:'DM Mono',monospace}
+.tray-sub{font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tray-x{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;padding:2px 4px;border-radius:4px}
+.tray-x:hover{color:var(--danger)}
+.right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.cal-bar{padding:9px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;gap:12px}
+.cal-bar-title{font-size:.82rem;font-weight:700}
+.crn-box{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);flex:1;text-align:center}
+.crn-box strong{color:var(--text)}
+.cal-wrap{flex:1;overflow:auto;padding:12px 14px}
+.calendar{display:grid;grid-template-columns:46px repeat(5,1fr);min-width:500px;background:var(--surface);border-radius:10px;border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.cal-corner{background:var(--green)}
+.cal-day-hdr{background:var(--green);color:#fff;text-align:center;padding:8px 4px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-right:1px solid rgba(255,255,255,.12)}
+.cal-day-hdr:last-child{border-right:none}
+.time-lbl{text-align:right;padding:0 6px 0 0;font-size:.6rem;font-family:'DM Mono',monospace;color:#c0c4cc;height:48px;display:flex;align-items:flex-start;padding-top:3px;border-top:1px solid var(--border);border-right:1px solid var(--border)}
+.cal-cell{border-top:1px solid var(--border);border-right:1px solid var(--border);height:48px;position:relative}
+.cal-cell:last-child{border-right:none}
+.ev{position:absolute;left:2px;right:2px;border-radius:5px;padding:3px 5px;font-size:.65rem;font-weight:600;line-height:1.3;overflow:hidden;z-index:10;cursor:pointer;transition:filter .12s,box-shadow .12s,opacity .12s,transform .12s;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.ev:hover{filter:brightness(1.1);z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.ev-code{font-size:.67rem;font-weight:700}
+.ev-room{font-size:.59rem;opacity:.8}
+.ev-ghost{opacity:.28;border:2px dashed;background:transparent !important;box-shadow:none !important}
+.ev-ghost-hover{opacity:1;border:2px solid;box-shadow:0 2px 10px rgba(0,0,0,.18) !important;transform:scaleX(1.03);z-index:30 !important}
+.online-area{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+.online-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:.72rem;color:var(--muted)}
+.chip-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.toast{position:fixed;bottom:18px;right:18px;background:#1a1d23;color:#fff;padding:9px 15px;border-radius:8px;font-size:.8rem;font-weight:500;z-index:9999;opacity:0;transform:translateY(6px);transition:all .22s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,133,62,.2);border-top-color:var(--green);border-radius:50%;animation:sp .65s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:2px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🦅 UNT Schedule Builder <span class="logo-badge">Fall 2026</span></div>
+  <span style="font-size:.75rem;font-family:'DM Mono',monospace;opacity:.8">Term 1268</span>
+</header>
+<div class="app">
+  <div class="left">
+    <div class="search-wrap">
+      <div class="search-label">Search Courses</div>
+      <div class="search-row">
+        <input id="searchInput" type="text" placeholder="MATH 1650, Calculus, instructor…" autocomplete="off"/>
+        <button class="btn btn-green" onclick="doSearch()">Search</button>
+      </div>
+    </div>
+    <div id="resultsList" class="results-scroll">
+      <div class="state-msg"><strong>Build your schedule</strong>Search a course, expand it, hover sections to preview on the calendar, then click to lock in.</div>
+    </div>
+    <div class="tray">
+      <div class="tray-hdr">Added to Schedule <button class="tray-clear-btn" onclick="clearAll()">Clear all</button></div>
+      <div id="trayList"><div class="tray-empty">No courses added yet</div></div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="cal-bar">
+      <div class="cal-bar-title">Weekly Schedule</div>
+      <div class="crn-box" id="crnBox">Add courses to see your CRNs</div>
+      <button class="btn btn-ghost" onclick="clearAll()" style="font-size:.73rem;padding:5px 11px">Clear All</button>
+    </div>
+    <div class="cal-wrap">
+      <div id="calGrid" class="calendar"></div>
+      <div id="onlineArea" class="online-area"></div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL = "https://pezgajwesesihrdxvpdl.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlemdhandlc2VzaWhyZHh2cGRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NzMzMzEsImV4cCI6MjA5MjM0OTMzMX0.hkHO3D_5YSoG2IvLK2rsAf75xQaBATdF_0NicdeUJtA";
+const TERM = "1268";
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const selected      = new Map(); // courseKey -> sec
+const courseColors  = new Map();
+const sectionsCache = new Map();
+let previewSecs     = [];        // ghost blocks on calendar
+let colorIdx        = 0;
+
+const PALETTE   = ["#3b82f6","#8b5cf6","#10b981","#f59e0b","#ef4444","#ec4899","#06b6d4","#84cc16","#f97316","#6366f1","#14b8a6","#a855f7"];
+const DAYS      = ["M","T","W","R","F"];
+const DAY_LABELS= {M:"Mon",T:"Tue",W:"Wed",R:"Thu",F:"Fri"};
+const START_H   = 7, END_H = 22, SLOT = 48;
+
+document.getElementById("searchInput").addEventListener("keydown", e => { if(e.key==="Enter") doSearch(); });
+
+/* ── Search ── */
+async function doSearch() {
+  const raw = document.getElementById("searchInput").value.trim();
+  if (!raw) return;
+  const list = document.getElementById("resultsList");
+  list.innerHTML = `<div class="state-msg"><span class="spin"></span><br><br>Searching…</div>`;
+
+  const q = raw.toUpperCase();
+  let query = db.from("unt_schedule").select("subject,course_number").eq("term", TERM);
+
+  const exact = q.match(/^([A-Z]+)\s+(\d{4}[A-Z]?)$/);
+  if (exact) {
+    query = query.eq("subject", exact[1]).eq("course_number", exact[2]);
+  } else if (/^[A-Z]{2,6}$/.test(q)) {
+    query = query.eq("subject", q);
+  } else {
+    query = query.or(`instructor.ilike.%${raw}%,room.ilike.%${raw}%`);
+  }
+
+  const { data, error } = await query.limit(300);
+  if (error) { list.innerHTML = `<div class="state-msg">Error: ${error.message}</div>`; return; }
+
+  const seen = new Map();
+  (data||[]).forEach(r => { const k=`${r.subject} ${r.course_number}`; if(!seen.has(k)) seen.set(k,r); });
+
+  if (!seen.size) { list.innerHTML = `<div class="state-msg"><strong>No results</strong>Try MATH, CSCI, or a course title.</div>`; return; }
+
+  list.innerHTML = "";
+  for (const [key, row] of seen) list.appendChild(buildCard(key, row));
+}
+
+function safeId(k) { return k.replace(/[\s]+/g,"_"); }
+
+/* ── Course card ── */
+function buildCard(courseKey, row) {
+  const wrap = document.createElement("div");
+  wrap.className = "course-card";
+  const hdr = document.createElement("div");
+  hdr.className = "cc-header";
+  hdr.innerHTML = `
+    <div class="cc-left">
+      <div class="cc-code">${courseKey}</div>
+      <div class="cc-name">${row.subject} ${row.course_number}</div>
+    </div>
+    <div class="cc-right">
+      <div class="cc-count" id="cnt_${safeId(courseKey)}">…</div>
+      <span class="cc-arrow">▾</span>
+    </div>`;
+  const dd = document.createElement("div");
+  dd.className = "sections-dd";
+  dd.id = `dd_${safeId(courseKey)}`;
+  hdr.onclick = () => toggleCard(courseKey, row, hdr, dd);
+  wrap.appendChild(hdr);
+  wrap.appendChild(dd);
+
+  db.from("unt_schedule").select("id",{count:"exact",head:true})
+    .eq("term",TERM).eq("subject",row.subject).eq("course_number",row.course_number)
+    .then(({count}) => {
+      const el = document.getElementById(`cnt_${safeId(courseKey)}`);
+      if (el) el.textContent = `${count??0} sections`;
+    });
+  return wrap;
+}
+
+async function toggleCard(courseKey, row, hdr, dd) {
+  const wasOpen = hdr.classList.contains("open");
+  document.querySelectorAll(".cc-header.open").forEach(h => {
+    h.classList.remove("open"); h.nextElementSibling.classList.remove("open");
+  });
+  // clear previews when closing
+  previewSecs = []; renderCalendar();
+  if (wasOpen) return;
+
+  hdr.classList.add("open"); dd.classList.add("open");
+
+  // Fetch sections if not cached
+  if (!sectionsCache.has(courseKey)) {
+    dd.innerHTML = `<div style="padding:12px;text-align:center"><span class="spin"></span></div>`;
+    const { data } = await db.from("unt_schedule").select("*")
+      .eq("term",TERM).eq("subject",row.subject).eq("course_number",row.course_number).order("section");
+    sectionsCache.set(courseKey, (data||[]));
+  }
+
+  if (!courseColors.has(courseKey)) {
+    courseColors.set(courseKey, PALETTE[colorIdx % PALETTE.length]); colorIdx++;
+  }
+
+  // Show all sections as ghost previews on calendar
+  const color = courseColors.get(courseKey);
+  const secs  = sectionsCache.get(courseKey) || [];
+  const _sel = selected.get(courseKey);
+  previewSecs = secs.filter(s => !_sel || s.id !== _sel.id).map(s => ({...s, _color:color, _key:courseKey, _isHovered:false}));
+  renderCalendar();
+
+  // Render section list
+  dd.innerHTML = "";
+  if (!secs.length) {
+    dd.innerHTML = `<div style="padding:10px 14px;font-size:.78rem;color:var(--muted)">No sections found.</div>`;
+    return;
+  }
+  secs.forEach(sec => dd.appendChild(buildSecRow(courseKey, sec)));
+}
+
+/* ── Section row ── */
+function buildSecRow(courseKey, sec) {
+  const color    = courseColors.get(courseKey) || PALETTE[0];
+  const isOnline = !sec.days;
+  // Use sec.id as the unique key (class_nbr is null in the DB)
+  const selSec   = selected.get(courseKey);
+  const isSel    = !!selSec && selSec.id === sec.id;
+  const isConf   = !isOnline && !isSel && checkConflict(sec, courseKey);
+
+  const row = document.createElement("div");
+  row.className = "sec-row"+(isSel?" selected":"")+(isConf?" conflict":"");
+
+  const pct = sec.seats_total ? Math.round((1-sec.seats_open/sec.seats_total)*100) : 0;
+  const fillCls  = pct>=100?"full":pct>=75?"warn":"";
+  const badgeCls = (sec.status||"").toLowerCase().includes("open")?"b-open"
+                 : (sec.status||"").toLowerCase().includes("wait")?"b-wait":"b-closed";
+  const timeStr  = isOnline
+    ? "Online — No Set Time"
+    : `${sec.days}  ${formatTime(sec.start_time)} – ${formatTime(sec.end_time)}`;
+
+  row.innerHTML = `
+    <div class="sec-dot" style="background:${color}"></div>
+    <div class="sec-info">
+      <div class="sec-top">
+        <span class="sec-id">§${sec.section}${sec.class_nbr ? ` · CRN ${sec.class_nbr}` : ""}</span>
+        <span class="sec-badge ${badgeCls}">${sec.status||"—"}</span>
+      </div>
+      <div class="sec-time">${timeStr}</div>
+      <div class="sec-meta">
+        <span>📍 ${sec.room||"TBA"}</span>
+        <span>👤 ${sec.instructor||"TBA"}</span>
+      </div>
+      <div class="seats-row">
+        <span>${sec.seats_open??0}/${sec.seats_total??0} open</span>
+        <div class="seats-bar"><div class="seats-fill ${fillCls}" style="width:${Math.min(pct,100)}%"></div></div>
+      </div>
+    </div>`;
+
+  if (!isConf && !isSel) {
+    row.addEventListener("mouseenter", () => {
+      const allSecs = sectionsCache.get(courseKey) || [];
+      const curSel = selected.get(courseKey);
+      // Ghost all unselected sections; brighten the one being hovered
+      previewSecs = allSecs
+        .filter(s => !curSel || s.id !== curSel.id)
+        .map(s => ({...s, _color:color, _key:courseKey, _isHovered:s.id===sec.id}));
+      renderCalendar();
+      row.classList.add("previewing");
+    });
+    row.addEventListener("mouseleave", () => {
+      const allSecs = sectionsCache.get(courseKey) || [];
+      const curSel = selected.get(courseKey);
+      // Back to ghosting all unselected sections equally
+      previewSecs = allSecs
+        .filter(s => !curSel || s.id !== curSel.id)
+        .map(s => ({...s, _color:color, _key:courseKey, _isHovered:false}));
+      row.classList.remove("previewing");
+      renderCalendar();
+    });
+    row.addEventListener("click", () => {
+      previewSecs = [];
+      toggleSection(courseKey, sec, color);
+    });
+  }
+  // Selected row: hover shows other ghosts dimmed, click to deselect
+  if (isSel) {
+    row.addEventListener("mouseenter", () => {
+      const allSecs = sectionsCache.get(courseKey) || [];
+      // Show ghosts for unselected, nothing extra for selected (it's solid)
+      previewSecs = allSecs
+        .filter(s => s.id !== sec.id)
+        .map(s => ({...s, _color:color, _key:courseKey, _isHovered:false}));
+      renderCalendar();
+    });
+    row.addEventListener("mouseleave", () => {
+      const allSecs = sectionsCache.get(courseKey) || [];
+      previewSecs = allSecs
+        .filter(s => s.id !== sec.id)
+        .map(s => ({...s, _color:color, _key:courseKey, _isHovered:false}));
+      renderCalendar();
+    });
+    row.addEventListener("click", () => {
+      previewSecs = [];
+      toggleSection(courseKey, sec, color);
+    });
+  }
+  return row;
+}
+
+/* ── Toggle section selected ── */
+function toggleSection(courseKey, sec, color) {
+  const selSec = selected.get(courseKey);
+  if (selSec && selSec.id === sec.id) {
+    selected.delete(courseKey); toast(`Removed ${courseKey}`);
+  } else {
+    selected.set(courseKey, {...sec, _color:color, _key:courseKey}); toast(`Added ${courseKey} · §${sec.section}`);
+  }
+  renderCalendar(); renderTray(); refreshDd(courseKey);
+}
+
+function refreshDd(courseKey) {
+  const dd = document.getElementById(`dd_${safeId(courseKey)}`);
+  if (!dd || !dd.classList.contains("open")) return;
+  dd.innerHTML = "";
+  const secs = sectionsCache.get(courseKey) || [];
+  secs.forEach(sec => dd.appendChild(buildSecRow(courseKey, sec)));
+}
+
+/* ── Data helpers ── */
+function formatTime(t) {
+  if (!t) return null;
+  // Supabase TIME comes back as "HH:MM:SS"
+  const m = t.match(/^(\d+):(\d+)/);
+  if (!m) return t;
+  let h=+m[1], mi=+m[2];
+  const ampm = h>=12 ? 'PM' : 'AM';
+  if (h>12) h-=12; if (h===0) h=12;
+  return `${h}:${String(mi).padStart(2,'0')} ${ampm}`;
+}
+
+function toMin(t) {
+  // Supabase TIME columns come back as "HH:MM:SS" (24h) — just parse hours + minutes
+  if (!t) return null;
+  const m = t.match(/^(\d+):(\d+)/);
+  if (!m) return null;
+  return +m[1]*60 + +m[2];
+}
+
+function overlaps(a,b) {
+  if (!a.days||!b.days) return false;
+  if (!a.days.split("").some(d=>b.days.split("").includes(d))) return false;
+  const aS=toMin(a.start_time),aE=toMin(a.end_time),bS=toMin(b.start_time),bE=toMin(b.end_time);
+  if (!aS||!bS) return false;
+  return aS<bE && bS<aE;
+}
+
+function checkConflict(sec,skipKey) {
+  for (const [k,s] of selected) { if (k!==skipKey && overlaps(sec,s)) return true; }
+  return false;
+}
+
+/* ── Calendar render ── */
+function renderCalendar() {
+  const grid=document.getElementById("calGrid"), onlineArea=document.getElementById("onlineArea");
+  grid.innerHTML=""; onlineArea.innerHTML="";
+
+  const corner=document.createElement("div"); corner.className="cal-corner"; grid.appendChild(corner);
+  DAYS.forEach(d=>{
+    const el=document.createElement("div"); el.className="cal-day-hdr"; el.textContent=DAY_LABELS[d]; grid.appendChild(el);
+  });
+
+  for (let h=0; h<END_H-START_H; h++) {
+    const hr=START_H+h;
+    const lbl=document.createElement("div"); lbl.className="time-lbl";
+    lbl.textContent=hr<12?`${hr}a`:hr===12?"12p":`${hr-12}p`; grid.appendChild(lbl);
+    DAYS.forEach(d=>{
+      const cell=document.createElement("div"); cell.className="cal-cell"; cell.dataset.day=d; cell.dataset.hour=hr; grid.appendChild(cell);
+    });
+  }
+
+  function placeBlock(sec, color, ghost, hovered) {
+    if (!sec.days) return;
+    const sMin=toMin(sec.start_time), eMin=toMin(sec.end_time);
+    if (!sMin||!eMin) return;
+    sec.days.split("").filter(d=>DAYS.includes(d)).forEach(day=>{
+      const startHr=Math.floor(sMin/60);
+      if (startHr<START_H||startHr>=END_H) return;
+      const cells=grid.querySelectorAll(`.cal-cell[data-day="${day}"]`);
+      const cell=cells[startHr-START_H]; if (!cell) return;
+      const topPx=((sMin%60)/60)*SLOT;
+      const heightPx=Math.max(((eMin-sMin)/60)*SLOT,18);
+      const ev=document.createElement("div");
+      ev.className="ev"+(ghost?(hovered?" ev-ghost-hover":" ev-ghost"):"");
+      if (ghost) {
+        ev.style.cssText=`top:${topPx}px;height:${heightPx}px;border-color:${color};color:${color};`;
+      } else {
+        ev.style.cssText=`top:${topPx}px;height:${heightPx}px;background:${color}28;border-left:3px solid ${color};color:${color};`;
+      }
+      const label=sec._key||`${sec.subject} ${sec.course_number}`;
+      ev.innerHTML=`<div class="ev-code">${label}</div>${heightPx>28?`<div class="ev-room">${sec.room||""}</div>`:""}`;
+      ev.title=`${label} §${sec.section}\n${sec.start_time} – ${sec.end_time}\n${sec.room||""}\n${sec.instructor||""}`;
+      cell.appendChild(ev);
+    });
+  }
+
+  // Draw selected (solid) blocks first
+  for (const [key,sec] of selected) {
+    if (!sec.days) {
+      const chip=document.createElement("div"); chip.className="online-chip";
+      chip.innerHTML=`<div class="chip-dot" style="background:${sec._color}"></div>${key} · Online`;
+      onlineArea.appendChild(chip);
+    } else {
+      placeBlock(sec, sec._color, false, false);
+    }
+  }
+
+  // Draw ghost previews on top
+  previewSecs.forEach(sec => {
+    if (sec.days) placeBlock(sec, sec._color, true, sec._isHovered);
+  });
+
+  const crnBox=document.getElementById("crnBox");
+  if (!selected.size) { crnBox.textContent="Add courses to see your CRNs"; }
+  else {
+    const crns=[...selected.values()].map(s=>s.class_nbr).filter(Boolean);
+    crnBox.innerHTML=crns.length ? `CRNs: <strong>${crns.join("  ·  ")}</strong>` : `${selected.size} course${selected.size>1?"s":""} added`;
+  }
+}
+
+/* ── Tray ── */
+function renderTray() {
+  const tray=document.getElementById("trayList");
+  if (!selected.size) { tray.innerHTML=`<div class="tray-empty">No courses added yet</div>`; return; }
+  tray.innerHTML="";
+  for (const [key,sec] of selected) {
+    const timeStr=!sec.days?"Online":`${sec.days} ${formatTime(sec.start_time)}–${formatTime(sec.end_time)}`;
+    const item=document.createElement("div"); item.className="tray-item";
+    item.innerHTML=`
+      <div class="tray-dot" style="background:${sec._color}"></div>
+      <div class="tray-info">
+        <div class="tray-code">${key} · §${sec.section}</div>
+        <div class="tray-sub">${timeStr} · ${sec.instructor||"TBA"}</div>
+      </div>
+      <button class="tray-x" onclick="removeCourse('${key}')">✕</button>`;
+    tray.appendChild(item);
+  }
+}
+
+function removeCourse(key) {
+  selected.delete(key); renderCalendar(); renderTray(); refreshDd(key); toast(`Removed ${key}`);
+}
+
+function clearAll() {
+  selected.clear(); previewSecs=[]; renderCalendar(); renderTray();
+  document.querySelectorAll(".sections-dd.open").forEach(dd=>{
+    const key=dd.id.replace("dd_","").replace(/_/g," "); refreshDd(key);
+  });
+}
+
+let _tt;
+function toast(msg) {
+  const el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show");
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove("show"),2200);
+}
+
+renderCalendar();
+</script>
+</body>
+</html>
