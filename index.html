@@ -741,8 +741,10 @@
     /* ── Calendar grid ── */
     .cal-wrap {
       flex: 1;
-      overflow: auto;
-      padding: 12px 14px
+      overflow: hidden;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
     }
 
     .calendar {
@@ -752,12 +754,17 @@
       background: var(--bg);
       border-radius: var(--radius-lg);
       border: 1px solid var(--border);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm)
+      box-shadow: var(--shadow-sm);
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .cal-corner {
-      background: var(--bg-secondary)
+      background: var(--bg-secondary);
+      position: sticky;
+      top: 0;
+      z-index: 3;
     }
 
     .cal-day-hdr {
@@ -768,7 +775,10 @@
       font-size: .75rem;
       font-weight: 700;
       border-bottom: 1px solid var(--border);
-      border-right: 1px solid var(--border-subtle)
+      border-right: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 3;
     }
 
     .cal-day-hdr:last-child {
@@ -782,7 +792,7 @@
       font-family: 'Albert Sans', sans-serif;
       font-variant-numeric: tabular-nums;
       color: var(--muted);
-      height: 60px;
+      height: 48px;
       display: flex;
       align-items: flex-start;
       padding-top: 4px;
@@ -793,7 +803,7 @@
     .cal-cell {
       border-top: 1px solid var(--border-subtle);
       border-right: 1px solid var(--border-subtle);
-      height: 60px;
+      height: 48px;
       position: relative;
       background: var(--bg)
     }
@@ -806,7 +816,8 @@
       margin-top: 10px;
       display: flex;
       flex-wrap: wrap;
-      gap: 6px
+      gap: 6px;
+      flex-shrink: 0;
     }
 
     .online-chip {
@@ -2003,7 +2014,7 @@
     const PALETTE = ["#4F6AE8", "#E05280", "#2DA563", "#E8A84F", "#8B5CF6", "#06B6D4", "#F97316", "#EC4899", "#6366f1", "#14b8a6", "#a855f7", "#84cc16"];
     const DAYS = ["M", "T", "W", "R", "F"];
     const DAY_LABELS = { M: "Mon", T: "Tue", W: "Wed", R: "Thu", F: "Fri" };
-    const START_H = 7, END_H = 22, SLOT = 48;
+    const START_H = 0, END_H = 24, SLOT = 48;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // THEME TOGGLE
@@ -2767,7 +2778,7 @@
       for (let h = 0; h < END_H - START_H; h++) {
         const hr = START_H + h;
         const lbl = document.createElement('div'); lbl.className = 'time-lbl';
-        lbl.textContent = hr < 12 ? `${hr}a` : hr === 12 ? '12p' : `${hr - 12}p`; grid.appendChild(lbl);
+        lbl.textContent = hr === 0 ? '12a' : hr < 12 ? `${hr}a` : hr === 12 ? '12p' : `${hr - 12}p`; grid.appendChild(lbl);
         DAYS.forEach(d => { const cell = document.createElement('div'); cell.className = 'cal-cell'; cell.dataset.day = d; cell.dataset.hour = hr; grid.appendChild(cell); });
       }
 
@@ -2989,6 +3000,11 @@
     // INIT
     // ─────────────────────────────────────────────────────────────────────────────
     renderCalendar();
+    // Scroll calendar to 6am on load
+    requestAnimationFrame(() => {
+      const cal = document.getElementById('calGrid');
+      if (cal) cal.scrollTop = 6 * SLOT;
+    });
     document.getElementById('savedCount').textContent = savedSchedules.length;
     populateBusyTimeDropdowns();
     updateThemeIcon(document.documentElement.getAttribute('data-theme'));
