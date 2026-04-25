@@ -97,7 +97,7 @@
 
     /* ── Header ── */
     header {
-      background: var(--green);
+      background: rgba(27, 94, 32, 0.9);
       color: #fff;
       padding: 0 24px;
       height: 56px;
@@ -105,9 +105,11 @@
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
       z-index: 200;
-      border-bottom: 1px solid rgba(0, 0, 0, .1)
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px)
     }
 
     .logo {
@@ -1558,7 +1560,7 @@
 </head>
 
 <body>
-  <header class="glass-glossy">
+  <header>
     <div class="logo sparkle-text">UNT Schedule Builder</div>
     <div class="header-right">
       <button class="header-tab active" id="tabManual" onclick="switchView('manual')">My Schedule</button>
