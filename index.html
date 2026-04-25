@@ -8,7 +8,6 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
-
   <style>
     :root {
       --green: #1B5E20;
@@ -22,6 +21,7 @@
       --muted: #4E342E;
       --danger: #e53e3e;
       --warn: #d97706;
+      --info: #3b82f6;
     }
 
     *,
@@ -42,6 +42,7 @@
       overflow: hidden
     }
 
+    /* ── Header ── */
     header {
       background: var(--green);
       color: #fff;
@@ -64,6 +65,12 @@
       font-size: 1rem
     }
 
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
     .term-select {
       background: rgba(255, 255, 255, .15);
       color: #fff;
@@ -84,7 +91,7 @@
     }
 
     .term-select:hover {
-      background: rgba(255, 255, 255, .25)
+      background-color: rgba(255, 255, 255, .25)
     }
 
     .term-select option {
@@ -92,6 +99,25 @@
       color: #fff
     }
 
+    .header-tab {
+      background: rgba(255, 255, 255, .12);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .25);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .header-tab:hover,
+    .header-tab.active {
+      background: rgba(255, 255, 255, .28)
+    }
+
+    /* ── App layout ── */
     .app {
       display: flex;
       flex: 1;
@@ -108,6 +134,69 @@
       overflow: hidden
     }
 
+    .right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .btn-green {
+      background: var(--green);
+      color: #fff
+    }
+
+    .btn-green:hover {
+      background: var(--green-d)
+    }
+
+    .btn-ghost {
+      background: var(--bg);
+      color: var(--text);
+      border: 1.5px solid var(--border)
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--green);
+      color: var(--green)
+    }
+
+    .btn-warn {
+      background: var(--warn);
+      color: #fff
+    }
+
+    .btn-warn:hover {
+      background: #b45309
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: .76rem
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff
+    }
+
+    .btn-danger:hover {
+      background: #c53030
+    }
+
+    /* ── Search panel ── */
     .search-wrap {
       padding: 12px;
       border-bottom: 1px solid var(--border);
@@ -145,37 +234,6 @@
       background: #fff
     }
 
-    .btn {
-      border: none;
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .84rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .15s
-    }
-
-    .btn-green {
-      background: var(--green);
-      color: #fff
-    }
-
-    .btn-green:hover {
-      background: var(--green-d)
-    }
-
-    .btn-ghost {
-      background: var(--bg);
-      color: var(--text);
-      border: 1.5px solid var(--border)
-    }
-
-    .btn-ghost:hover {
-      border-color: var(--green);
-      color: var(--green)
-    }
-
     .results-scroll {
       flex: 1;
       overflow-y: auto;
@@ -197,6 +255,7 @@
       color: var(--text)
     }
 
+    /* ── Course cards ── */
     .course-card {
       border-bottom: 1px solid #f0f2f5
     }
@@ -270,6 +329,7 @@
       display: block
     }
 
+    /* ── Section rows ── */
     .sec-row {
       display: flex;
       align-items: flex-start;
@@ -312,6 +372,23 @@
       transform: translateY(-50%);
       font-size: .6rem;
       color: var(--danger);
+      font-weight: 700;
+      text-transform: uppercase
+    }
+
+    .sec-row.busy-conflict {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .sec-row.busy-conflict::after {
+      content: 'busy';
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: .6rem;
+      color: var(--warn);
       font-weight: 700;
       text-transform: uppercase
     }
@@ -425,6 +502,30 @@
       background: var(--danger)
     }
 
+    .lock-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: .6rem;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all .15s;
+      flex-shrink: 0
+    }
+
+    .lock-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold)
+    }
+
+    .lock-btn.locked {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #fff
+    }
+
+    /* ── Tray ── */
     .tray {
       border-top: 1px solid var(--border);
       flex-shrink: 0;
@@ -512,13 +613,7 @@
       color: var(--danger)
     }
 
-    .right {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden
-    }
-
+    /* ── Calendar bar ── */
     .cal-bar {
       padding: 9px 16px;
       display: flex;
@@ -547,6 +642,13 @@
       color: var(--text)
     }
 
+    .cal-bar-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center
+    }
+
+    /* ── Calendar grid ── */
     .cal-wrap {
       flex: 1;
       overflow: auto;
@@ -609,6 +711,33 @@
       border-right: none
     }
 
+    .online-area {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px
+    }
+
+    .online-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: .72rem;
+      color: var(--muted)
+    }
+
+    .chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0
+    }
+
+    /* ── Calendar events ── */
     .ev {
       position: absolute;
       border-radius: 5px;
@@ -631,10 +760,6 @@
 
     .ev-selected {
       z-index: 15
-    }
-
-    .ev-selected:hover {
-      z-index: 20
     }
 
     .ev-code {
@@ -670,30 +795,457 @@
       z-index: 6 !important
     }
 
-    .online-area {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px
+    .ev-busy {
+      background: repeating-linear-gradient(45deg, #fee2e2, #fee2e2 4px, #fecaca 4px, #fecaca 8px) !important;
+      border-left: 3px solid var(--danger) !important;
+      color: var(--danger) !important;
+      cursor: default;
+      opacity: .7
     }
 
-    .online-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+    /* ── Saved schedules panel ── */
+    .schedules-panel {
+      display: none;
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px
+    }
+
+    .schedules-panel.active {
+      display: block
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px
+    }
+
+    .schedule-card {
       background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all .15s;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .06)
+    }
+
+    .schedule-card:hover {
+      border-color: var(--green);
+      box-shadow: 0 3px 12px rgba(27, 94, 32, .15)
+    }
+
+    .schedule-card.primary {
+      border-color: var(--green);
+      border-width: 2px
+    }
+
+    .sc-header {
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .sc-name {
+      font-weight: 700;
+      font-size: .88rem
+    }
+
+    .sc-hours {
+      font-size: .73rem;
+      color: var(--muted)
+    }
+
+    .sc-mini-cal {
+      padding: 8px 12px
+    }
+
+    .sc-mini-grid {
+      display: grid;
+      grid-template-columns: 28px repeat(5, 1fr);
+      gap: 1px;
+      font-size: .52rem;
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 4px 10px;
+      border-radius: 4px;
+      overflow: hidden
+    }
+
+    .sc-mini-hdr {
+      background: var(--green);
+      color: #fff;
+      text-align: center;
+      padding: 2px 1px;
+      font-weight: 700
+    }
+
+    .sc-mini-corner {
+      background: var(--green-d)
+    }
+
+    .sc-mini-lbl {
+      background: #f5f5f5;
+      text-align: right;
+      padding: 1px 3px 1px 0;
+      color: #aaa;
+      border-top: 1px solid #eee;
+      font-family: 'DM Mono', monospace
+    }
+
+    .sc-mini-cell {
+      background: #fff;
+      border-top: 1px solid #eee;
+      border-left: 1px solid #eee;
+      height: 8px;
+      position: relative
+    }
+
+    .sc-mini-ev {
+      position: absolute;
+      left: 1px;
+      right: 1px;
+      border-radius: 1px
+    }
+
+    .sc-actions {
+      padding: 8px 12px;
+      display: flex;
+      gap: 6px;
+      border-top: 1px solid var(--border)
+    }
+
+    .primary-badge {
+      font-size: .6rem;
+      background: var(--green);
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 700
+    }
+
+    /* ── Modal overlay ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .45);
+      z-index: 500;
+      align-items: center;
+      justify-content: center
+    }
+
+    .modal-overlay.open {
+      display: flex
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 14px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .2);
+      width: 520px;
+      max-width: calc(100vw - 32px);
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .modal-hdr {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 700
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: var(--muted);
+      line-height: 1
+    }
+
+    .modal-close:hover {
+      color: var(--danger)
+    }
+
+    .modal-body {
+      padding: 18px 20px;
+      overflow-y: auto;
+      flex: 1
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end
+    }
+
+    /* ── Busy times ── */
+    .busy-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border)
+    }
+
+    .busy-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: var(--danger);
+      flex-shrink: 0
+    }
+
+    .busy-info {
+      flex: 1;
+      font-size: .8rem
+    }
+
+    .busy-name {
+      font-weight: 700
+    }
+
+    .busy-time {
       font-size: .72rem;
       color: var(--muted)
     }
 
-    .chip-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
-      flex-shrink: 0
+    .busy-x {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: .85rem;
+      padding: 2px 4px;
+      border-radius: 4px
+    }
+
+    .busy-x:hover {
+      color: var(--danger)
+    }
+
+    .form-group {
+      margin-bottom: 14px
+    }
+
+    .form-label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 5px
+    }
+
+    .form-input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 11px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .86rem;
+      outline: none;
+      background: var(--bg);
+      transition: border-color .15s
+    }
+
+    .form-input:focus {
+      border-color: var(--green);
+      background: #fff
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px
+    }
+
+    .days-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .day-cb {
+      display: none
+    }
+
+    .day-lbl {
+      padding: 5px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: .76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none
+    }
+
+    .day-cb:checked+.day-lbl {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green)
+    }
+
+    /* ── Preferences tabs ── */
+    .pref-tabs {
+      display: flex;
+      gap: 2px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px
+    }
+
+    .pref-tab {
+      padding: 8px 14px;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      transition: all .15s
+    }
+
+    .pref-tab.active {
+      color: var(--green);
+      border-bottom-color: var(--green)
+    }
+
+    .pref-tab-panel {
+      display: none
+    }
+
+    .pref-tab-panel.active {
+      display: block
+    }
+
+    /* ── Professor prefs ── */
+    .prof-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .prof-row:last-child {
+      border-bottom: none
+    }
+
+    .prof-name {
+      flex: 1;
+      font-size: .82rem;
+      font-weight: 600
+    }
+
+    .prof-course {
+      font-size: .69rem;
+      color: var(--muted);
+      margin-top: 1px
+    }
+
+    .pref-btns {
+      display: flex;
+      gap: 4px
+    }
+
+    .pref-btn {
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      font-size: .68rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: none;
+      transition: all .15s;
+      color: var(--muted)
+    }
+
+    .pref-btn.active-dontw {
+      background: #fee2e2;
+      border-color: var(--danger);
+      color: var(--danger)
+    }
+
+    .pref-btn.active-dontp {
+      background: #fef3c7;
+      border-color: var(--warn);
+      color: var(--warn)
+    }
+
+    .pref-btn.active-neutral {
+      background: #374151;
+      border-color: #374151;
+      color: #fff
+    }
+
+    .pref-btn.active-prefer {
+      background: #d1fae5;
+      border-color: #059669;
+      color: #065f46
+    }
+
+    .pref-btn.active-want {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff
+    }
+
+    /* ── Number of classes ── */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px
+    }
+
+    .radio-opt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: .84rem
+    }
+
+    .range-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px
+    }
+
+    /* ── Spin / toast ── */
+    .spin {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0, 133, 62, .2);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: sp .65s linear infinite;
+      vertical-align: middle
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg)
+      }
     }
 
     .toast {
@@ -718,23 +1270,72 @@
       transform: translateY(0)
     }
 
-    .spin {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(0, 133, 62, .2);
-      border-top-color: var(--green);
-      border-radius: 50%;
-      animation: sp .65s linear infinite;
-      vertical-align: middle
+    /* ── Auto-generate results ── */
+    .autogen-wrap {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column
     }
 
-    @keyframes sp {
-      to {
-        transform: rotate(360deg)
-      }
+    .autogen-grid {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px
     }
 
+    .autogen-bar {
+      padding: 9px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0
+    }
+
+    .generated-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .06)
+    }
+
+    .generated-card:hover {
+      border-color: var(--green)
+    }
+
+    .gc-header {
+      padding: 9px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: #f9fafb
+    }
+
+    .gc-title {
+      font-weight: 700;
+      font-size: .86rem
+    }
+
+    .gc-hours {
+      font-size: .72rem;
+      color: var(--muted)
+    }
+
+    .gc-actions {
+      padding: 8px 12px;
+      display: flex;
+      gap: 6px;
+      border-top: 1px solid var(--border)
+    }
+
+    /* ── Scrollbars ── */
     ::-webkit-scrollbar {
       width: 4px
     }
@@ -743,68 +1344,420 @@
       background: #d1d5db;
       border-radius: 2px
     }
+
+    /* ── View toggle ── */
+    .main-view {
+      display: flex;
+      flex: 1;
+      overflow: hidden
+    }
+
+    .view-panel {
+      display: none;
+      flex: 1;
+      overflow: hidden;
+      flex-direction: column
+    }
+
+    .view-panel.active {
+      display: flex
+    }
+
+    /* ── Section notes tag ── */
+    .sec-note {
+      font-size: .63rem;
+      color: var(--info);
+      margin-top: 2px
+    }
+
+    /* ── Campus badge ── */
+    .campus-badge {
+      font-size: .6rem;
+      padding: 1px 5px;
+      background: #e0f2fe;
+      color: #075985;
+      border-radius: 4px;
+      font-weight: 700
+    }
+
+    /* save modal */
+    .save-name-input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 13px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      outline: none;
+      margin-bottom: 10px
+    }
+
+    .save-name-input:focus {
+      border-color: var(--green)
+    }
+
+    .primary-check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .84rem;
+      cursor: pointer
+    }
   </style>
 </head>
 
 <body>
+
   <header>
     <div class="logo">UNT Schedule Builder</div>
-    <select class="term-select" id="termSelect">
-      <option value="1268" selected>Fall 2026</option>
-    </select>
+    <div class="header-right">
+      <button class="header-tab active" id="tabManual" onclick="switchView('manual')">✏️ My Schedule</button>
+      <button class="header-tab" id="tabSaved" onclick="switchView('saved')">📅 Saved (<span
+          id="savedCount">0</span>)</button>
+      <select class="term-select" id="termSelect">
+        <option value="1268" selected>Fall 2026</option>
+      </select>
+    </div>
   </header>
-  <div class="app">
-    <div class="left">
-      <div class="search-wrap">
-        <div class="search-label">Search Courses</div>
-        <div class="search-row">
-          <input id="searchInput" type="text" placeholder="MATH 1650, Calculus, instructor…" autocomplete="off" />
-          <button class="btn btn-green" onclick="doSearch()">Search</button>
-        </div>
-      </div>
-      <div id="resultsList" class="results-scroll">
-        <div class="state-msg">
-          <div id="dataBanner"
-            style="font-size:.75rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;margin-bottom:12px;display:flex;align-items:center;gap:6px">
-            <span class="spin"></span> Loading course data…
+
+  <div class="main-view">
+
+    <!-- ── MANUAL BUILD VIEW ── -->
+    <div class="view-panel active" id="viewManual">
+      <div class="app">
+        <!-- Left panel -->
+        <div class="left">
+          <div class="search-wrap">
+            <div class="search-label">Search Courses</div>
+            <div class="search-row">
+              <input id="searchInput" type="text" placeholder="MATH 1650, Calculus, instructor…" autocomplete="off" />
+              <button class="btn btn-green" onclick="doSearch()">Search</button>
+            </div>
           </div>
-          <strong>Build your schedule</strong>Search a course, expand it, hover sections to preview on the calendar,
-          then click to lock in.
+          <div id="resultsList" class="results-scroll">
+            <div class="state-msg">
+              <div id="dataBanner"
+                style="font-size:.75rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+                <span class="spin"></span> Loading course data…
+              </div>
+              <strong>Build your schedule</strong>Search a course, expand it, hover sections to preview on the calendar,
+              then click to lock in.
+            </div>
+          </div>
+          <div class="tray">
+            <div class="tray-hdr">
+              Added to Schedule
+              <div style="display:flex;gap:8px;align-items:center">
+                <button class="header-tab btn-sm"
+                  style="background:rgba(27,94,32,.1);color:var(--green);border:1px solid var(--green-l);border-radius:6px;padding:3px 9px;font-size:.67rem;font-weight:700;cursor:pointer"
+                  onclick="openBusyModal()">⏰ Busy Times</button>
+                <button class="tray-clear-btn" onclick="clearAll()">Clear all</button>
+              </div>
+            </div>
+            <div id="trayList">
+              <div class="tray-empty">No courses added yet</div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="tray">
-        <div class="tray-hdr">Added to Schedule <button class="tray-clear-btn" onclick="clearAll()">Clear all</button>
-        </div>
-        <div id="trayList">
-          <div class="tray-empty">No courses added yet</div>
+
+        <!-- Right panel: calendar -->
+        <div class="right">
+          <div class="cal-bar">
+            <div class="cal-bar-title">Weekly Schedule</div>
+            <div class="crn-box" id="crnBox">Add courses to see your CRNs</div>
+            <div class="cal-bar-actions">
+              <button class="btn btn-warn btn-sm" onclick="openAutoGenModal()">⚡ Auto-Generate</button>
+              <button class="btn btn-ghost btn-sm" onclick="openSaveModal()">💾 Save</button>
+              <button class="btn btn-ghost btn-sm" onclick="clearAll()">Clear</button>
+            </div>
+          </div>
+          <div class="cal-wrap">
+            <div id="calGrid" class="calendar"></div>
+            <div id="onlineArea" class="online-area"></div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="right">
+
+    <!-- ── SAVED SCHEDULES VIEW ── -->
+    <div class="view-panel" id="viewSaved">
       <div class="cal-bar">
-        <div class="cal-bar-title">Weekly Schedule</div>
-        <div class="crn-box" id="crnBox">Add courses to see your CRNs</div>
-        <button class="btn btn-ghost" onclick="clearAll()" style="font-size:.73rem;padding:5px 11px">Clear All</button>
+        <div class="cal-bar-title">My Saved Schedules</div>
+        <div class="crn-box" id="savedSubtitle">Your saved schedule options</div>
+        <button class="btn btn-ghost btn-sm" onclick="switchView('manual')">← Back to Builder</button>
       </div>
-      <div class="cal-wrap">
-        <div id="calGrid" class="calendar"></div>
-        <div id="onlineArea" class="online-area"></div>
+      <div class="schedules-panel active" id="savedPanel">
+        <div id="savedGrid" class="schedule-grid"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── BUSY TIMES MODAL ── -->
+  <div class="modal-overlay" id="busyModal">
+    <div class="modal">
+      <div class="modal-hdr">
+        <div class="modal-title">⏰ Add Busy Times</div>
+        <button class="modal-close" onclick="closeBusyModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">Block out times when you're not available to
+          take classes (e.g., work, gym). Sections that conflict will be flagged.</p>
+        <div id="busyList"></div>
+        <div
+          style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:10px">
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input class="form-input" id="busyName" placeholder="e.g., Work, Gym, Commute" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Start Time</label>
+              <select class="form-input" id="busyStart"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Time</label>
+              <select class="form-input" id="busyEnd"></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Days of the Week</label>
+            <div class="days-row">
+              <input class="day-cb" type="checkbox" id="bM" value="M"><label class="day-lbl" for="bM">Mon</label>
+              <input class="day-cb" type="checkbox" id="bT" value="T"><label class="day-lbl" for="bT">Tue</label>
+              <input class="day-cb" type="checkbox" id="bW" value="W"><label class="day-lbl" for="bW">Wed</label>
+              <input class="day-cb" type="checkbox" id="bR" value="R"><label class="day-lbl" for="bR">Thu</label>
+              <input class="day-cb" type="checkbox" id="bF" value="F"><label class="day-lbl" for="bF">Fri</label>
+            </div>
+          </div>
+          <button class="btn btn-green" onclick="addBusyTime()">Save Busy Time</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeBusyModal()">Done</button>
       </div>
     </div>
   </div>
+
+  <!-- ── AUTO-GENERATE MODAL ── -->
+  <div class="modal-overlay" id="autoGenModal">
+    <div class="modal" style="width:600px">
+      <div class="modal-hdr">
+        <div class="modal-title">⚡ Configure Auto-Generate</div>
+        <button class="modal-close" onclick="closeAutoGenModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="pref-tabs">
+          <div class="pref-tab active" onclick="switchPrefTab('time')">Time</div>
+          <div class="pref-tab" onclick="switchPrefTab('classes')">Classes</div>
+          <div class="pref-tab" onclick="switchPrefTab('profs')">Professors</div>
+          <div class="pref-tab" onclick="switchPrefTab('additional')">Additional</div>
+          <div class="pref-tab" onclick="switchPrefTab('generate')">Generate</div>
+        </div>
+
+        <!-- Time-Based Preferences -->
+        <div class="pref-tab-panel active" id="ptTime">
+          <div class="form-group">
+            <label class="form-label">Number of Days</label>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" id="daysFewer" onclick="setDayPref('fewer')">Fewer Days, More
+                Classes/Day</button>
+              <button class="btn btn-ghost btn-sm active" id="daysBalanced" onclick="setDayPref('balanced')"
+                style="border-color:var(--green);color:var(--green)">Balanced</button>
+              <button class="btn btn-ghost btn-sm" id="daysMore" onclick="setDayPref('more')">More Days, Fewer
+                Classes/Day</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Min Minutes Between Classes</label>
+              <input class="form-input" type="number" id="minGap" value="15" min="0" max="120" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Max Minutes Between Classes</label>
+              <input class="form-input" type="number" id="maxGap" value="480" min="0" max="480" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time Block (preferred hours)</label>
+            <div class="form-row">
+              <select class="form-input" id="blockStart">
+                <option value="">No preference</option>
+              </select>
+              <select class="form-input" id="blockEnd">
+                <option value="">No preference</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Number of Classes -->
+        <div class="pref-tab-panel" id="ptClasses">
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="classCount" id="rcAll" checked
+                onchange="toggleClassRange()"> Take all my selected courses</label>
+            <label class="radio-opt"><input type="radio" name="classCount" id="rcExtra" onchange="toggleClassRange()"> I
+              planned extra — use a range</label>
+          </div>
+          <div id="classRangeFields" style="display:none">
+            <div class="range-row">
+              <div class="form-group"><label class="form-label">Min Courses</label><input class="form-input"
+                  type="number" id="minCourses" value="3" min="1" /></div>
+              <div class="form-group"><label class="form-label">Max Courses</label><input class="form-input"
+                  type="number" id="maxCourses" value="5" min="1" /></div>
+            </div>
+            <div class="range-row">
+              <div class="form-group"><label class="form-label">Min Credit Hours</label><input class="form-input"
+                  type="number" id="minHours" value="9" min="1" /></div>
+              <div class="form-group"><label class="form-label">Max Credit Hours</label><input class="form-input"
+                  type="number" id="maxHours" value="18" min="1" /></div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:8px">
+            <label class="form-label">Number of schedules to generate</label>
+            <select class="form-input" id="numSchedules">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Professor Preferences -->
+        <div class="pref-tab-panel" id="ptProfs">
+          <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px">Set your preferences for instructors in your
+            selected courses. Defaults to Neutral.</p>
+          <div id="profPrefList"></div>
+        </div>
+
+        <!-- Additional Preferences -->
+        <div class="pref-tab-panel" id="ptAdditional">
+          <div class="form-group">
+            <label class="form-label">Campus</label>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:.84rem">INET — Online</span>
+                <div class="pref-btns" id="campusINET" data-pref="neutral"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:.84rem">MAIN — Denton Main Campus</span>
+                <div class="pref-btns" id="campusMAIN" data-pref="neutral"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:.84rem">FRSC — Frisco Location</span>
+                <div class="pref-btns" id="campusFRSC" data-pref="dontw"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Delivery Method</label>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:.84rem">Face to Face</span>
+                <div class="pref-btns" id="delivF2F" data-pref="neutral"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:.84rem">Hybrid</span>
+                <div class="pref-btns" id="delivHybrid" data-pref="neutral"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:.84rem">100% Online</span>
+                <div class="pref-btns" id="delivOnline" data-pref="neutral"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate -->
+        <div class="pref-tab-panel" id="ptGenerate">
+          <div style="text-align:center;padding:20px 0">
+            <div style="font-size:2rem;margin-bottom:10px">⚡</div>
+            <div style="font-size:1rem;font-weight:700;margin-bottom:6px">Ready to Generate</div>
+            <div style="font-size:.82rem;color:var(--muted);margin-bottom:20px">
+              The system will create schedule options based on your preferences and available courses.
+              <br>Note: Preferences are not guaranteed.
+            </div>
+            <div id="generateSummary"
+              style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:left;font-size:.8rem;margin-bottom:16px">
+            </div>
+            <button class="btn btn-warn" style="font-size:.9rem;padding:10px 24px" onclick="runAutoGenerate()">⚡
+              Generate Schedules</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeAutoGenModal()">Cancel</button>
+        <button class="btn btn-green" onclick="advancePrefTab()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GENERATED RESULTS MODAL ── -->
+  <div class="modal-overlay" id="genResultsModal">
+    <div class="modal" style="width:700px;max-height:90vh">
+      <div class="modal-hdr">
+        <div class="modal-title">⚡ Generated Schedules</div>
+        <button class="modal-close"
+          onclick="document.getElementById('genResultsModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" style="padding:12px">
+        <div id="genResultsGrid"
+          style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SAVE SCHEDULE MODAL ── -->
+  <div class="modal-overlay" id="saveModal">
+    <div class="modal" style="width:380px">
+      <div class="modal-hdr">
+        <div class="modal-title">💾 Save Schedule</div>
+        <button class="modal-close" onclick="document.getElementById('saveModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Schedule Name</label>
+          <input class="save-name-input" id="saveNameInput" placeholder="e.g., First Choice, Backup Plan…" />
+        </div>
+        <label class="primary-check-row">
+          <input type="checkbox" id="makePrimaryCheck" />
+          <span>Make Primary Schedule</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost"
+          onclick="document.getElementById('saveModal').classList.remove('open')">Cancel</button>
+        <button class="btn btn-green" onclick="doSaveSchedule()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION DETAIL MODAL ── -->
+  <div class="modal-overlay" id="secDetailModal">
+    <div class="modal" style="width:420px">
+      <div class="modal-hdr">
+        <div class="modal-title" id="secDetailTitle">Section Details</div>
+        <button class="modal-close"
+          onclick="document.getElementById('secDetailModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" id="secDetailBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost"
+          onclick="document.getElementById('secDetailModal').classList.remove('open')">Close</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
   <script>
-    // ── Data layer: local JSON instead of Supabase ──────────────────────────
-    // allCourses is populated on page load; search/filter runs entirely in memory.
-    let allCourses = [];      // flat array of normalized section objects
-    let dataReady = false;   // true once JSON has loaded
-    let dataError = false;
-
-    // fix_json.js already outputs snake_case with parsed days/times — no translation needed.
+    // ─────────────────────────────────────────────────────────────────────────────
+    // DATA LAYER
+    // ─────────────────────────────────────────────────────────────────────────────
+    let allCourses = [], dataReady = false, dataError = false;
     function normalize(c) { return c; }
 
-    // Kick off JSON load immediately — page is usable before it finishes
     (async function loadData() {
       try {
         const res = await fetch('./unt_sections.json');
@@ -812,28 +1765,20 @@
         const json = await res.json();
         allCourses = (json.courses || []).map(normalize);
         dataReady = true;
-        // Update the loading banner if it's still showing
-        const banner = document.getElementById('dataBanner');
-        if (banner) banner.remove();
+        document.getElementById('dataBanner')?.remove();
         toast(`Loaded ${allCourses.length} sections ✓`);
       } catch (err) {
         dataError = true;
-        const banner = document.getElementById('dataBanner');
-        if (banner) banner.textContent = `⚠️ Could not load unt_sections.json — ${err.message}`;
+        const b = document.getElementById('dataBanner');
+        if (b) b.textContent = `⚠️ Could not load unt_sections.json — ${err.message}`;
       }
     })();
 
-    // ── Query helpers that replace Supabase calls ──────────────────────────
     function queryCourses(raw) {
       const q = raw.trim().toUpperCase();
       const exact = q.match(/^([A-Z]+)\s+(\d{3,4}[A-Z]?)$/);
-      if (exact) {
-        return allCourses.filter(c => c.subject === exact[1] && c.course_number === exact[2]);
-      }
-      if (/^[A-Z]{2,6}$/.test(q)) {
-        return allCourses.filter(c => c.subject === q);
-      }
-      // Free-text: search instructor, room, course_title
+      if (exact) return allCourses.filter(c => c.subject === exact[1] && c.course_number === exact[2]);
+      if (/^[A-Z]{2,6}$/.test(q)) return allCourses.filter(c => c.subject === q);
       const ql = raw.toLowerCase();
       return allCourses.filter(c =>
         (c.instructor || '').toLowerCase().includes(ql) ||
@@ -841,163 +1786,167 @@
         (c.course_title || '').toLowerCase().includes(ql)
       );
     }
-
     function getSections(subject, course_number) {
-      return allCourses
-        .filter(c => c.subject === subject && c.course_number === course_number)
+      return allCourses.filter(c => c.subject === subject && c.course_number === course_number)
         .sort((a, b) => (a.section || '').localeCompare(b.section || ''));
     }
 
-    // ── App state ──────────────────────────────────────────────────────────
-    const selected = new Map(); // courseKey -> sec
-    const selectedRecitations = new Map(); // courseKey -> recitation sec (or null)
+    // ─────────────────────────────────────────────────────────────────────────────
+    // APP STATE
+    // ─────────────────────────────────────────────────────────────────────────────
+    const selected = new Map();
+    const selectedRecitations = new Map();
     const courseColors = new Map();
     const sectionsCache = new Map();
+    const lockedSections = new Set(); // courseKeys with locked section
     let previewSecs = [];
     let openCourseKey = null;
     let colorIdx = 0;
+
+    // Busy times: [{id, name, days, startMin, endMin}]
+    let busyTimes = [];
+    let busyIdCtr = 0;
+
+    // Preferences
+    let prefs = {
+      dayPref: 'balanced',
+      minGap: 15, maxGap: 480,
+      blockStart: '', blockEnd: '',
+      classCount: 'all',
+      minCourses: 3, maxCourses: 5,
+      minHours: 9, maxHours: 18,
+      numSchedules: 10,
+      profPrefs: {}, // instructorName -> 'dontw'|'dontp'|'neutral'|'prefer'|'want'
+      campusPrefs: { INET: 'neutral', MAIN: 'neutral', FRSC: 'dontw' },
+      delivPrefs: { F2F: 'neutral', Hybrid: 'neutral', Online: 'neutral' }
+    };
+
+    // Saved schedules: [{id, name, primary, selections, recitations, colors, createdAt}]
+    let savedSchedules = JSON.parse(localStorage.getItem('unt_vsb_saved') || '[]');
 
     const PALETTE = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1", "#14b8a6", "#a855f7"];
     const DAYS = ["M", "T", "W", "R", "F"];
     const DAY_LABELS = { M: "Mon", T: "Tue", W: "Wed", R: "Thu", F: "Fri" };
     const START_H = 7, END_H = 22, SLOT = 48;
 
-    document.getElementById("searchInput").addEventListener("keydown", e => { if (e.key === "Enter") doSearch(); });
+    // ─────────────────────────────────────────────────────────────────────────────
+    // VIEW SWITCHING
+    // ─────────────────────────────────────────────────────────────────────────────
+    function switchView(v) {
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.header-tab').forEach(t => t.classList.remove('active'));
+      if (v === 'manual') {
+        document.getElementById('viewManual').classList.add('active');
+        document.getElementById('tabManual').classList.add('active');
+      } else {
+        document.getElementById('viewSaved').classList.add('active');
+        document.getElementById('tabSaved').classList.add('active');
+        renderSavedSchedules();
+      }
+    }
 
-    /* ── Search ── */
+    // ─────────────────────────────────────────────────────────────────────────────
+    // SEARCH
+    // ─────────────────────────────────────────────────────────────────────────────
+    document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
     function doSearch() {
-      const raw = document.getElementById("searchInput").value.trim();
+      const raw = document.getElementById('searchInput').value.trim();
       if (!raw) return;
-      const list = document.getElementById("resultsList");
-
-      if (!dataReady) {
-        list.innerHTML = `<div class="state-msg"><span class="spin"></span><br><br>Data still loading, hang on…</div>`;
-        return;
-      }
-
+      const list = document.getElementById('resultsList');
+      if (!dataReady) { list.innerHTML = `<div class="state-msg"><span class="spin"></span><br><br>Data still loading…</div>`; return; }
       const matches = queryCourses(raw);
-
-      // Deduplicate to unique course keys
       const seen = new Map();
-      matches.forEach(c => {
-        const k = `${c.subject} ${c.course_number}`;
-        if (!seen.has(k)) seen.set(k, c);
-      });
-
-      if (!seen.size) {
-        list.innerHTML = `<div class="state-msg"><strong>No results</strong>Try MATH, CSCI 1100, or an instructor name.</div>`;
-        return;
-      }
-
-      list.innerHTML = "";
+      matches.forEach(c => { const k = `${c.subject} ${c.course_number}`; if (!seen.has(k)) seen.set(k, c); });
+      if (!seen.size) { list.innerHTML = `<div class="state-msg"><strong>No results</strong>Try MATH, CSCI 1100, or an instructor name.</div>`; return; }
+      list.innerHTML = '';
       for (const [key, row] of seen) list.appendChild(buildCard(key, row));
     }
 
-    function safeId(k) { return k.replace(/[\s]+/g, "_"); }
+    function safeId(k) { return k.replace(/[\s]+/g, '_'); }
 
-    /* ── Course card ── */
+    // ─────────────────────────────────────────────────────────────────────────────
+    // COURSE CARD
+    // ─────────────────────────────────────────────────────────────────────────────
     function buildCard(courseKey, row) {
-      const sectionCount = getSections(row.subject, row.course_number).length;
-      const wrap = document.createElement("div");
-      wrap.className = "course-card";
-      const hdr = document.createElement("div");
-      hdr.className = "cc-header";
+      const count = getSections(row.subject, row.course_number).length;
+      const wrap = document.createElement('div'); wrap.className = 'course-card';
+      const hdr = document.createElement('div'); hdr.className = 'cc-header';
+      const isLocked = lockedSections.has(courseKey);
       hdr.innerHTML = `
-        <div class="cc-left">
-          <div class="cc-code">${courseKey}</div>
-          <div class="cc-name">${row.course_title || courseKey}</div>
-        </div>
-        <div class="cc-right">
-          <div class="cc-count">${sectionCount} section${sectionCount !== 1 ? 's' : ''}</div>
-          <span class="cc-arrow">▾</span>
-        </div>`;
-      const dd = document.createElement("div");
-      dd.className = "sections-dd";
-      dd.id = `dd_${safeId(courseKey)}`;
+    <div class="cc-left">
+      <div class="cc-code">${courseKey}${isLocked ? ' 🔒' : ''}</div>
+      <div class="cc-name">${row.course_title || courseKey}</div>
+    </div>
+    <div class="cc-right">
+      <div class="cc-count">${count} section${count !== 1 ? 's' : ''}</div>
+      <span class="cc-arrow">▾</span>
+    </div>`;
+      const dd = document.createElement('div'); dd.className = 'sections-dd'; dd.id = `dd_${safeId(courseKey)}`;
       hdr.onclick = () => toggleCard(courseKey, row, hdr, dd);
-      wrap.appendChild(hdr);
-      wrap.appendChild(dd);
+      wrap.appendChild(hdr); wrap.appendChild(dd);
       return wrap;
     }
 
     function toggleCard(courseKey, row, hdr, dd) {
-      const wasOpen = hdr.classList.contains("open");
-      document.querySelectorAll(".cc-header.open").forEach(h => {
-        h.classList.remove("open"); h.nextElementSibling.classList.remove("open");
-      });
-      if (wasOpen) {
-        openCourseKey = null;
-        previewSecs = []; renderCalendar();
-        return;
-      }
-
-      hdr.classList.add("open"); dd.classList.add("open");
+      const wasOpen = hdr.classList.contains('open');
+      document.querySelectorAll('.cc-header.open').forEach(h => { h.classList.remove('open'); h.nextElementSibling.classList.remove('open'); });
+      if (wasOpen) { openCourseKey = null; previewSecs = []; renderCalendar(); return; }
+      hdr.classList.add('open'); dd.classList.add('open');
       openCourseKey = courseKey;
-
-      // Sections come from memory — instant, no await needed
-      if (!sectionsCache.has(courseKey)) {
-        const secs = getSections(row.subject, row.course_number);
-        sectionsCache.set(courseKey, secs);
-      }
-
-      if (!courseColors.has(courseKey)) {
-        courseColors.set(courseKey, PALETTE[colorIdx % PALETTE.length]); colorIdx++;
-      }
-
+      if (!sectionsCache.has(courseKey)) sectionsCache.set(courseKey, getSections(row.subject, row.course_number));
+      if (!courseColors.has(courseKey)) { courseColors.set(courseKey, PALETTE[colorIdx % PALETTE.length]); colorIdx++; }
       rebuildGhosts(courseKey);
-
-      dd.innerHTML = "";
+      dd.innerHTML = '';
       const secs = sectionsCache.get(courseKey) || [];
-      if (!secs.length) {
-        dd.innerHTML = `<div style="padding:10px 14px;font-size:.78rem;color:var(--muted)">No sections found.</div>`;
-        return;
-      }
+      if (!secs.length) { dd.innerHTML = `<div style="padding:10px 14px;font-size:.78rem;color:var(--muted)">No sections found.</div>`; return; }
       secs.forEach(sec => dd.appendChild(buildSecRow(courseKey, sec)));
     }
 
-    /* ── Rebuild ghost blocks for the open course ── */
     function rebuildGhosts(courseKey) {
       if (!courseKey) { previewSecs = []; renderCalendar(); return; }
       const color = courseColors.get(courseKey);
       const secs = sectionsCache.get(courseKey) || [];
       const _sel = selected.get(courseKey);
-      previewSecs = secs
-        .filter(s => !_sel || s.id !== _sel.id)
-        .map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
+      previewSecs = secs.filter(s => !_sel || s.id !== _sel.id).map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
       renderCalendar();
     }
 
-    /* ── Section row ── */
+    // ─────────────────────────────────────────────────────────────────────────────
+    // SECTION ROW
+    // ─────────────────────────────────────────────────────────────────────────────
     function buildSecRow(courseKey, sec) {
       const color = courseColors.get(courseKey) || PALETTE[0];
       const isOnline = !sec.days;
-      // Use sec.id as the unique key (class_nbr is null in the DB)
       const selSec = selected.get(courseKey);
       const isSel = !!selSec && selSec.id === sec.id;
       const isConf = !isOnline && !isSel && checkConflict(sec, courseKey);
+      const isBusy = !isOnline && !isSel && checkBusyConflict(sec);
+      const isLocked = lockedSections.has(courseKey) && isSel;
 
-      const row = document.createElement("div");
-      row.className = "sec-row" + (isSel ? " selected" : "") + (isConf ? " conflict" : "");
+      const row = document.createElement('div');
+      row.className = 'sec-row' + (isSel ? ' selected' : '') + (isConf ? ' conflict' : isBusy ? ' busy-conflict' : '');
 
       const pct = sec.seats_total ? Math.round((1 - sec.seats_open / sec.seats_total) * 100) : 0;
-      const fillCls = pct >= 100 ? "full" : pct >= 75 ? "warn" : "";
-      const badgeCls = (sec.status || "").toLowerCase().includes("open") ? "b-open"
-        : (sec.status || "").toLowerCase().includes("wait") ? "b-wait" : "b-closed";
-      const timeStr = isOnline
-        ? "Online — No Set Time"
-        : `${sec.days}  ${formatTime(sec.start_time)} – ${formatTime(sec.end_time)}`;
+      const fillCls = pct >= 100 ? 'full' : pct >= 75 ? 'warn' : '';
+      const badgeCls = (sec.status || '').toLowerCase().includes('open') ? 'b-open' : (sec.status || '').toLowerCase().includes('wait') ? 'b-wait' : 'b-closed';
+      const timeStr = isOnline ? 'Online — No Set Time' : `${sec.days}  ${formatTime(sec.start_time)} – ${formatTime(sec.end_time)}`;
 
       row.innerHTML = `
     <div class="sec-dot" style="background:${color}"></div>
     <div class="sec-info">
       <div class="sec-top">
-        <span class="sec-id">Section ${sec.section}${sec.class_nbr ? ` — CRN ${sec.class_nbr}` : ""}</span>
-        <span class="sec-badge ${badgeCls}">${sec.status || "—"}</span>
+        <span class="sec-id">Section ${sec.section}${sec.class_nbr ? ` — CRN ${sec.class_nbr}` : ''}</span>
+        <div style="display:flex;gap:4px;align-items:center">
+          ${isSel ? `<button class="lock-btn${isLocked ? ' locked' : ''}" title="${isLocked ? 'Unlock' : 'Lock'} this section" onclick="toggleLock(event,'${courseKey}')">${isLocked ? '🔒' : '🔓'}</button>` : ''}
+          <span class="sec-badge ${badgeCls}">${sec.status || '—'}</span>
+          <button class="sec-badge" style="background:#e0f2fe;color:#075985;cursor:pointer;border:none;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:10px" onclick="showSecDetail(event,'${courseKey}',${JSON.stringify(sec).replace(/'/g, "&#39;")})">ℹ</button>
+        </div>
       </div>
       <div class="sec-time">${timeStr}</div>
       <div class="sec-meta">
-        <span><span class="sec-meta-label">Room</span> ${sec.room || "TBA"}</span>
-        <span><span class="sec-meta-label">Instructor</span> ${sec.instructor || "TBA"}</span>
+        <span><span class="sec-meta-label">Room</span> ${sec.room || 'TBA'}</span>
+        <span><span class="sec-meta-label">Instructor</span> ${sec.instructor || 'TBA'}</span>
       </div>
       <div class="seats-row">
         <span>${sec.seats_open ?? 0}/${sec.seats_total ?? 0} open</span>
@@ -1005,399 +1954,744 @@
       </div>
     </div>`;
 
-      if (!isConf && !isSel) {
-        row.addEventListener("mouseenter", () => {
+      if (!isConf && !isBusy && !isSel) {
+        row.addEventListener('mouseenter', () => {
           const allSecs = sectionsCache.get(courseKey) || [];
           const curSel = selected.get(courseKey);
-          // Ghost all unselected sections; brighten the one being hovered
-          previewSecs = allSecs
-            .filter(s => !curSel || s.id !== curSel.id)
-            .map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: s.id === sec.id }));
-          renderCalendar();
-          row.classList.add("previewing");
+          previewSecs = allSecs.filter(s => !curSel || s.id !== curSel.id).map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: s.id === sec.id }));
+          renderCalendar(); row.classList.add('previewing');
         });
-        row.addEventListener("mouseleave", () => {
+        row.addEventListener('mouseleave', () => {
           const allSecs = sectionsCache.get(courseKey) || [];
           const curSel = selected.get(courseKey);
-          // Back to ghosting all unselected sections equally
-          previewSecs = allSecs
-            .filter(s => !curSel || s.id !== curSel.id)
-            .map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
-          row.classList.remove("previewing");
-          renderCalendar();
+          previewSecs = allSecs.filter(s => !curSel || s.id !== curSel.id).map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
+          row.classList.remove('previewing'); renderCalendar();
         });
-        row.addEventListener("click", () => {
-          toggleSection(courseKey, sec, color);
-        });
+        row.addEventListener('click', () => toggleSection(courseKey, sec, color));
       }
-      // Selected row: hover shows other ghosts dimmed, click to deselect
       if (isSel) {
-        row.addEventListener("mouseenter", () => {
+        row.addEventListener('mouseenter', () => {
           const allSecs = sectionsCache.get(courseKey) || [];
-          // Show ghosts for unselected, nothing extra for selected (it's solid)
-          previewSecs = allSecs
-            .filter(s => s.id !== sec.id)
-            .map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
+          previewSecs = allSecs.filter(s => s.id !== sec.id).map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
           renderCalendar();
         });
-        row.addEventListener("mouseleave", () => {
+        row.addEventListener('mouseleave', () => {
           const allSecs = sectionsCache.get(courseKey) || [];
-          previewSecs = allSecs
-            .filter(s => s.id !== sec.id)
-            .map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
+          previewSecs = allSecs.filter(s => s.id !== sec.id).map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
           renderCalendar();
         });
-        row.addEventListener("click", () => {
-          toggleSection(courseKey, sec, color);
+        row.addEventListener('click', () => {
+          if (!lockedSections.has(courseKey)) toggleSection(courseKey, sec, color);
+          else toast('🔒 Unlock this section first to change it');
         });
 
-        // If this section has recitations, append a sub-picker right after this row
         if (sec.recitations && sec.recitations.length > 0) {
-          const recWrap = document.createElement("div");
+          const recWrap = document.createElement('div');
           recWrap.style.cssText = `background:#f7fdf9;border-bottom:1px solid #e0f2e9;`;
-
-          const recHdr = document.createElement("div");
+          const recHdr = document.createElement('div');
           recHdr.style.cssText = `padding:4px 18px 3px;font-size:.62rem;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:.5px;`;
-          recHdr.textContent = "▸ Pick a Recitation";
+          recHdr.textContent = '▸ Pick a Recitation';
           recWrap.appendChild(recHdr);
-
           const curRec = selectedRecitations.get(courseKey);
-
           sec.recitations.forEach(rec => {
             const isOnlineRec = !rec.days;
             const isSelRec = curRec && curRec.id === rec.id;
-            const recTimeStr = isOnlineRec ? "Online — No Set Time" : `${rec.days}  ${formatTime(rec.start_time)} – ${formatTime(rec.end_time)}`;
-            const recBadgeCls = (rec.status || "").toLowerCase().includes("open") ? "b-open"
-              : (rec.status || "").toLowerCase().includes("wait") ? "b-wait" : "b-closed";
-
-            const recRow = document.createElement("div");
-            recRow.style.cssText = `display:flex;align-items:flex-start;padding:6px 12px 6px 28px;gap:9px;cursor:pointer;border-top:1px solid #e9f5ec;transition:background .1s;position:relative;` +
-              (isSelRec ? `background:#c8e6c9;border-left:3px solid var(--green);padding-left:25px;` : ``);
-
+            const recTimeStr = isOnlineRec ? 'Online — No Set Time' : `${rec.days}  ${formatTime(rec.start_time)} – ${formatTime(rec.end_time)}`;
+            const recBadgeCls = (rec.status || '').toLowerCase().includes('open') ? 'b-open' : (rec.status || '').toLowerCase().includes('wait') ? 'b-wait' : 'b-closed';
+            const recRow = document.createElement('div');
+            recRow.style.cssText = `display:flex;align-items:flex-start;padding:6px 12px 6px 28px;gap:9px;cursor:pointer;border-top:1px solid #e9f5ec;transition:background .1s;position:relative;` + (isSelRec ? `background:#c8e6c9;border-left:3px solid var(--green);padding-left:25px;` : '');
             recRow.innerHTML = `
-              <div style="width:6px;height:6px;border-radius:1px;margin-top:5px;flex-shrink:0;background:${color};opacity:.7;"></div>
-              <div style="flex:1;min-width:0;">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:5px;">
-                  <span style="font-family:'DM Mono',monospace;font-size:.73rem;font-weight:700;color:var(--text);">Rec ${rec.section}${rec.class_nbr ? ` — CRN ${rec.class_nbr}` : ""}</span>
-                  <span class="sec-badge ${recBadgeCls}" style="font-size:.58rem;">${rec.status || "—"}</span>
-                </div>
-                <div style="font-size:.75rem;font-weight:600;margin-top:3px;">${recTimeStr}</div>
-                <div style="font-size:.68rem;color:var(--muted);margin-top:2px;">${rec.room || "TBA"} · ${rec.instructor || "TBA"}</div>
-              </div>
-              ${isSelRec ? `<span style="font-size:.7rem;color:var(--green);font-weight:700;">✓</span>` : ""}
-            `;
-
-            if (!isOnlineRec || true) { // always clickable
-              recRow.addEventListener("mouseenter", () => { if (!isSelRec) recRow.style.background = "#e6f4ec"; });
-              recRow.addEventListener("mouseleave", () => { if (!isSelRec) recRow.style.background = ""; });
-              recRow.addEventListener("click", (e) => {
-                e.stopPropagation();
-                toggleRecitation(courseKey, rec, color);
-              });
-            }
+          <div style="width:6px;height:6px;border-radius:1px;margin-top:5px;flex-shrink:0;background:${color};opacity:.7;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:5px;">
+              <span style="font-family:'DM Mono',monospace;font-size:.73rem;font-weight:700;">Rec ${rec.section}${rec.class_nbr ? ` — CRN ${rec.class_nbr}` : ''}</span>
+              <span class="sec-badge ${recBadgeCls}" style="font-size:.58rem;">${rec.status || '—'}</span>
+            </div>
+            <div style="font-size:.75rem;font-weight:600;margin-top:3px;">${recTimeStr}</div>
+            <div style="font-size:.68rem;color:var(--muted);margin-top:2px;">${rec.room || 'TBA'} · ${rec.instructor || 'TBA'}</div>
+          </div>
+          ${isSelRec ? `<span style="font-size:.7rem;color:var(--green);font-weight:700;">✓</span>` : ''}`;
+            recRow.addEventListener('mouseenter', () => { if (!isSelRec) recRow.style.background = '#e6f4ec'; });
+            recRow.addEventListener('mouseleave', () => { if (!isSelRec) recRow.style.background = ''; });
+            recRow.addEventListener('click', e => { e.stopPropagation(); toggleRecitation(courseKey, rec, color); });
             recWrap.appendChild(recRow);
           });
-
-          // Return a fragment containing both the row and recitation picker
           const frag = document.createDocumentFragment();
-          frag.appendChild(row);
-          frag.appendChild(recWrap);
+          frag.appendChild(row); frag.appendChild(recWrap);
           return frag;
         }
       }
       return row;
     }
 
-    /* ── Toggle section selected ── */
+    // ─────────────────────────────────────────────────────────────────────────────
+    // TOGGLE / LOCK
+    // ─────────────────────────────────────────────────────────────────────────────
     function toggleSection(courseKey, sec, color) {
       const selSec = selected.get(courseKey);
       if (selSec && selSec.id === sec.id) {
-        selected.delete(courseKey);
-        selectedRecitations.delete(courseKey);
+        selected.delete(courseKey); selectedRecitations.delete(courseKey); lockedSections.delete(courseKey);
         toast(`Removed ${courseKey}`);
       } else {
         selected.set(courseKey, { ...sec, _color: color, _key: courseKey });
-        selectedRecitations.delete(courseKey); // clear old recitation pick when switching sections
+        selectedRecitations.delete(courseKey);
         toast(`Added ${courseKey} Section ${sec.section}`);
       }
-      // Rebuild ghosts so the newly-selected section disappears and others stay
-      rebuildGhosts(openCourseKey);
-      renderTray(); refreshDd(courseKey);
+      rebuildGhosts(openCourseKey); renderTray(); refreshDd(courseKey); autoSave();
     }
 
-    /* ── Toggle recitation selected ── */
     function toggleRecitation(courseKey, rec, color) {
       const curRec = selectedRecitations.get(courseKey);
-      if (curRec && curRec.id === rec.id) {
-        selectedRecitations.delete(courseKey);
-        toast(`Removed recitation for ${courseKey}`);
-      } else {
-        selectedRecitations.set(courseKey, { ...rec, _color: color, _key: courseKey, _isRec: true });
-        toast(`Added recitation ${rec.section} for ${courseKey}`);
-      }
-      renderCalendar(); renderTray(); refreshDd(courseKey);
+      if (curRec && curRec.id === rec.id) { selectedRecitations.delete(courseKey); toast(`Removed recitation for ${courseKey}`); }
+      else { selectedRecitations.set(courseKey, { ...rec, _color: color, _key: courseKey, _isRec: true }); toast(`Added recitation ${rec.section} for ${courseKey}`); }
+      renderCalendar(); renderTray(); refreshDd(courseKey); autoSave();
+    }
+
+    function toggleLock(e, courseKey) {
+      e.stopPropagation();
+      if (lockedSections.has(courseKey)) { lockedSections.delete(courseKey); toast(`🔓 Unlocked ${courseKey}`); }
+      else { lockedSections.add(courseKey); toast(`🔒 Locked ${courseKey}`); }
+      refreshDd(courseKey);
     }
 
     function refreshDd(courseKey) {
       const dd = document.getElementById(`dd_${safeId(courseKey)}`);
-      if (!dd || !dd.classList.contains("open")) return;
-      dd.innerHTML = "";
+      if (!dd || !dd.classList.contains('open')) return;
+      dd.innerHTML = '';
       const secs = sectionsCache.get(courseKey) || [];
       secs.forEach(sec => dd.appendChild(buildSecRow(courseKey, sec)));
     }
 
-    /* ── Data helpers ── */
-    function formatTime(t) {
-      // JSON times are already "9:05AM" / "10:55AM" — just return as-is
-      if (!t || t === 'TBA') return t;
-      // Also handle legacy HH:MM:SS from any old data
-      const hms = t.match(/^(\d+):(\d+):\d+$/);
-      if (hms) {
-        let h = +hms[1], mi = +hms[2];
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        if (h > 12) h -= 12; if (h === 0) h = 12;
-        return `${h}:${String(mi).padStart(2, '0')} ${ampm}`;
-      }
-      return t;
+    // ─────────────────────────────────────────────────────────────────────────────
+    // SECTION DETAIL MODAL
+    // ─────────────────────────────────────────────────────────────────────────────
+    function showSecDetail(e, courseKey, sec) {
+      e.stopPropagation();
+      document.getElementById('secDetailTitle').textContent = `${courseKey} — Section ${sec.section}`;
+      const pct = sec.seats_total ? Math.round((1 - sec.seats_open / sec.seats_total) * 100) : 0;
+      document.getElementById('secDetailBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.82rem">
+      <div><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px">CRN</div>${sec.class_nbr || 'N/A'}</div>
+      <div><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Status</div>${sec.status || '—'}</div>
+      <div><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Meeting Days</div>${sec.days || 'Online'}</div>
+      <div><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Time</div>${sec.days ? `${formatTime(sec.start_time)} – ${formatTime(sec.end_time)}` : 'N/A'}</div>
+      <div><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Room</div>${sec.room || 'TBA'}</div>
+      <div><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Instructor</div>${sec.instructor || 'TBA'}</div>
+      <div><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Enrollment</div>${sec.seats_open ?? 0} / ${sec.seats_total ?? 0} open (${pct}% full)</div>
+      <div><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Credits</div>${sec.credit_hours || '—'}</div>
+    </div>
+    ${sec.course_title ? `<div style="margin-top:12px;font-size:.82rem"><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Course Title</div>${sec.course_title}</div>` : ''}
+    ${sec.description ? `<div style="margin-top:12px;font-size:.82rem"><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Description</div>${sec.description}</div>` : ''}
+    ${sec.prerequisites ? `<div style="margin-top:12px;font-size:.82rem"><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Prerequisites</div>${sec.prerequisites}</div>` : ''}
+    <div style="margin-top:12px;font-size:.75rem;color:var(--muted);background:var(--bg);padding:8px 10px;border-radius:6px">⚠️ Section Notes are not currently displaying in Schedule Builder. View in the Public Class Search for full notes.</div>`;
+      document.getElementById('secDetailModal').classList.add('open');
     }
 
+    // ─────────────────────────────────────────────────────────────────────────────
+    // TIME HELPERS
+    // ─────────────────────────────────────────────────────────────────────────────
+    function formatTime(t) {
+      if (!t || t === 'TBA') return t;
+      const hms = t.match(/^(\d+):(\d+):\d+$/);
+      if (hms) { let h = +hms[1], mi = +hms[2], ap = h >= 12 ? 'PM' : 'AM'; if (h > 12) h -= 12; if (h === 0) h = 12; return `${h}:${String(mi).padStart(2, '0')} ${ap}`; }
+      return t;
+    }
     function toMin(t) {
       if (!t || t === 'TBA') return null;
-      // "9:05AM" / "10:55PM"
       const ampm = t.match(/^(\d{1,2}):(\d{2})(AM|PM)$/i);
-      if (ampm) {
-        let h = +ampm[1], m = +ampm[2], ap = ampm[3].toUpperCase();
-        if (ap === 'PM' && h !== 12) h += 12;
-        if (ap === 'AM' && h === 12) h = 0;
-        return h * 60 + m;
-      }
-      // Legacy HH:MM or HH:MM:SS
+      if (ampm) { let h = +ampm[1], m = +ampm[2], ap = ampm[3].toUpperCase(); if (ap === 'PM' && h !== 12) h += 12; if (ap === 'AM' && h === 12) h = 0; return h * 60 + m; }
       const plain = t.match(/^(\d+):(\d+)/);
       if (plain) return +plain[1] * 60 + +plain[2];
       return null;
     }
-
     function overlaps(a, b) {
       if (!a.days || !b.days) return false;
-      if (!a.days.split("").some(d => b.days.split("").includes(d))) return false;
+      if (!a.days.split('').some(d => b.days.split('').includes(d))) return false;
       const aS = toMin(a.start_time), aE = toMin(a.end_time), bS = toMin(b.start_time), bE = toMin(b.end_time);
       if (!aS || !bS) return false;
       return aS < bE && bS < aE;
     }
-
     function checkConflict(sec, skipKey) {
       for (const [k, s] of selected) { if (k !== skipKey && overlaps(sec, s)) return true; }
+      const selRec = selectedRecitations.get(skipKey);
+      for (const [k, r] of selectedRecitations) { if (k !== skipKey && overlaps(sec, r)) return true; }
+      return false;
+    }
+    function checkBusyConflict(sec) {
+      if (!sec.days) return false;
+      for (const bt of busyTimes) {
+        const sharedDay = sec.days.split('').some(d => bt.days.includes(d));
+        if (!sharedDay) continue;
+        const sS = toMin(sec.start_time), sE = toMin(sec.end_time);
+        if (sS && sE && sS < bt.endMin && bt.startMin < sE) return true;
+      }
       return false;
     }
 
-    /* ── Calendar render ── */
-    function renderCalendar() {
-      const grid = document.getElementById("calGrid"), onlineArea = document.getElementById("onlineArea");
-      grid.innerHTML = ""; onlineArea.innerHTML = "";
+    // ─────────────────────────────────────────────────────────────────────────────
+    // BUSY TIMES
+    // ─────────────────────────────────────────────────────────────────────────────
+    function openBusyModal() {
+      populateBusyTimeDropdowns();
+      renderBusyList();
+      document.getElementById('busyModal').classList.add('open');
+    }
+    function closeBusyModal() {
+      document.getElementById('busyModal').classList.remove('open');
+      renderCalendar();
+    }
+    function populateBusyTimeDropdowns() {
+      const opts = [];
+      for (let h = 6; h <= 22; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          const ampm = h >= 12 ? 'PM' : 'AM', hh = h > 12 ? h - 12 : h === 0 ? 12 : h;
+          const lbl = `${hh}:${String(m).padStart(2, '0')} ${ampm}`;
+          opts.push(`<option value="${h * 60 + m}">${lbl}</option>`);
+        }
+      }
+      const blockOpts = ['<option value="">No preference</option>'].concat(opts);
+      ['busyStart', 'busyEnd'].forEach(id => document.getElementById(id).innerHTML = opts.join(''));
+      ['blockStart', 'blockEnd'].forEach(id => document.getElementById(id).innerHTML = blockOpts.join(''));
+    }
+    function addBusyTime() {
+      const name = document.getElementById('busyName').value.trim();
+      const startMin = +document.getElementById('busyStart').value;
+      const endMin = +document.getElementById('busyEnd').value;
+      const days = ['bM', 'bT', 'bW', 'bR', 'bF'].filter(id => document.getElementById(id).checked).map(id => document.getElementById(id).value);
+      if (!name) { toast('⚠️ Enter a name'); return; }
+      if (endMin <= startMin) { toast('⚠️ End time must be after start time'); return; }
+      if (!days.length) { toast('⚠️ Select at least one day'); return; }
+      busyTimes.push({ id: ++busyIdCtr, name, days, startMin, endMin });
+      document.getElementById('busyName').value = '';
+      ['bM', 'bT', 'bW', 'bR', 'bF'].forEach(id => document.getElementById(id).checked = false);
+      renderBusyList();
+      toast(`Added busy time: ${name}`);
+    }
+    function removeBusyTime(id) {
+      busyTimes = busyTimes.filter(b => b.id !== id);
+      renderBusyList(); renderCalendar();
+    }
+    function renderBusyList() {
+      const el = document.getElementById('busyList');
+      if (!busyTimes.length) { el.innerHTML = `<div style="font-size:.8rem;color:var(--muted);margin-bottom:10px">No busy times added yet.</div>`; return; }
+      el.innerHTML = busyTimes.map(bt => {
+        const fmt = min => { const h = Math.floor(min / 60), m = min % 60, ap = h >= 12 ? 'PM' : 'AM', hh = h > 12 ? h - 12 : h === 0 ? 12 : h; return `${hh}:${String(m).padStart(2, '0')} ${ap}`; };
+        return `<div class="busy-item">
+      <div class="busy-dot"></div>
+      <div class="busy-info">
+        <div class="busy-name">${bt.name}</div>
+        <div class="busy-time">${bt.days.join('')} · ${fmt(bt.startMin)} – ${fmt(bt.endMin)}</div>
+      </div>
+      <button class="busy-x" onclick="removeBusyTime(${bt.id})">✕</button>
+    </div>`;
+      }).join('');
+    }
 
-      const corner = document.createElement("div"); corner.className = "cal-corner"; grid.appendChild(corner);
-      DAYS.forEach(d => {
-        const el = document.createElement("div"); el.className = "cal-day-hdr"; el.textContent = DAY_LABELS[d]; grid.appendChild(el);
+    // ─────────────────────────────────────────────────────────────────────────────
+    // AUTO-GENERATE MODAL
+    // ─────────────────────────────────────────────────────────────────────────────
+    const PREF_TAB_ORDER = ['time', 'classes', 'profs', 'additional', 'generate'];
+    let currentPrefTab = 'time';
+
+    function openAutoGenModal() {
+      if (!selected.size) { toast('⚠️ Add at least one course first'); return; }
+      populateBusyTimeDropdowns();
+      populateProfPrefs();
+      renderCampusDelivPrefs();
+      switchPrefTab('time');
+      document.getElementById('autoGenModal').classList.add('open');
+    }
+    function closeAutoGenModal() { document.getElementById('autoGenModal').classList.remove('open'); }
+
+    function switchPrefTab(tab) {
+      currentPrefTab = tab;
+      document.querySelectorAll('.pref-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.pref-tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelector(`.pref-tab[onclick="switchPrefTab('${tab}')"]`).classList.add('active');
+      document.getElementById(`pt${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
+      if (tab === 'generate') updateGenerateSummary();
+    }
+    function advancePrefTab() {
+      const idx = PREF_TAB_ORDER.indexOf(currentPrefTab);
+      if (idx < PREF_TAB_ORDER.length - 1) switchPrefTab(PREF_TAB_ORDER[idx + 1]);
+      else runAutoGenerate();
+    }
+
+    function setDayPref(v) {
+      prefs.dayPref = v;
+      ['fewer', 'balanced', 'more'].forEach(n => {
+        const b = document.getElementById(`days${n.charAt(0).toUpperCase() + n.slice(1)}`);
+        if (n === v) { b.style.borderColor = 'var(--green)'; b.style.color = 'var(--green)'; }
+        else { b.style.borderColor = ''; b.style.color = ''; }
       });
+    }
+    function toggleClassRange() {
+      const extra = document.getElementById('rcExtra').checked;
+      document.getElementById('classRangeFields').style.display = extra ? 'block' : 'none';
+    }
+
+    function populateProfPrefs() {
+      const profMap = new Map(); // instructor -> [courseKey]
+      for (const [key, sec] of selected) {
+        if (sec.instructor) {
+          if (!profMap.has(sec.instructor)) profMap.set(sec.instructor, []);
+          profMap.get(sec.instructor).push(key);
+        }
+      }
+      const el = document.getElementById('profPrefList');
+      if (!profMap.size) { el.innerHTML = `<div style="font-size:.8rem;color:var(--muted)">No instructors found in selected sections.</div>`; return; }
+      el.innerHTML = '';
+      for (const [prof, keys] of profMap) {
+        const cur = prefs.profPrefs[prof] || 'neutral';
+        const row = document.createElement('div'); row.className = 'prof-row';
+        row.innerHTML = `
+      <div>
+        <div class="prof-name">${prof}</div>
+        <div class="prof-course">${keys.join(', ')}</div>
+      </div>
+      <div class="pref-btns" id="pp_${btoa(prof).replace(/=/g, '')}"></div>`;
+        el.appendChild(row);
+        const btns = row.querySelector('.pref-btns');
+        renderPrefBtns(btns, cur, v => { prefs.profPrefs[prof] = v; renderPrefBtns(btns, v, null); });
+      }
+    }
+
+    function renderPrefBtns(container, active, onChange) {
+      const opts = [{ v: 'dontw', l: "Don't Want" }, { v: 'dontp', l: "Don't Prefer" }, { v: 'neutral', l: 'Neutral' }, { v: 'prefer', l: 'Prefer' }, { v: 'want', l: 'Want' }];
+      container.innerHTML = '';
+      opts.forEach(({ v, l }) => {
+        const b = document.createElement('button');
+        b.className = `pref-btn${active === v ? ` active-${v}` : ''}`;
+        b.textContent = l;
+        b.onclick = () => { if (onChange) onChange(v); };
+        container.appendChild(b);
+      });
+    }
+
+    function renderCampusDelivPrefs() {
+      const campuses = [{ id: 'campusINET', key: 'INET' }, { id: 'campusMAIN', key: 'MAIN' }, { id: 'campusFRSC', key: 'FRSC' }];
+      campuses.forEach(({ id, key }) => {
+        const el = document.getElementById(id);
+        renderPrefBtns(el, prefs.campusPrefs[key], v => { prefs.campusPrefs[key] = v; renderPrefBtns(el, v, null); });
+      });
+      const delivs = [{ id: 'delivF2F', key: 'F2F' }, { id: 'delivHybrid', key: 'Hybrid' }, { id: 'delivOnline', key: 'Online' }];
+      delivs.forEach(({ id, key }) => {
+        const el = document.getElementById(id);
+        renderPrefBtns(el, prefs.delivPrefs[key], v => { prefs.delivPrefs[key] = v; renderPrefBtns(el, v, null); });
+      });
+    }
+
+    function updateGenerateSummary() {
+      const count = +document.getElementById('numSchedules').value || 10;
+      const extra = document.getElementById('rcExtra').checked;
+      document.getElementById('generateSummary').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div>📚 <strong>${selected.size}</strong> course${selected.size !== 1 ? 's' : ''} selected</div>
+      <div>📅 Day preference: <strong>${prefs.dayPref}</strong></div>
+      <div>⏱ Gap between classes: <strong>${document.getElementById('minGap').value} – ${document.getElementById('maxGap').value} min</strong></div>
+      ${extra ? `<div>🔢 Course range: <strong>${document.getElementById('minCourses').value} – ${document.getElementById('maxCourses').value}</strong></div>` : ''}
+      ${busyTimes.length ? `<div>⛔ <strong>${busyTimes.length}</strong> busy time${busyTimes.length !== 1 ? 's' : ''} active</div>` : ''}
+      <div>🔒 <strong>${lockedSections.size}</strong> locked section${lockedSections.size !== 1 ? 's' : ''}</div>
+      <div>⚡ Generating up to <strong>${count}</strong> schedule options</div>
+    </div>`;
+    }
+
+    function runAutoGenerate() {
+      closeAutoGenModal();
+      const numSched = +document.getElementById('numSchedules').value || 10;
+      const minGap = +document.getElementById('minGap').value || 0;
+      const extra = document.getElementById('rcExtra').checked;
+      const minC = extra ? +document.getElementById('minCourses').value : selected.size;
+      const maxC = extra ? +document.getElementById('maxCourses').value : selected.size;
+
+      // Collect course candidates
+      const courseKeys = [...selected.keys()];
+      const courseSections = {};
+      courseKeys.forEach(key => {
+        const sec = selected.get(key);
+        if (lockedSections.has(key)) {
+          courseSections[key] = [sec]; // locked: only this section
+        } else {
+          const allSecs = sectionsCache.get(key) || [sec];
+          // Filter out busy conflicts
+          courseSections[key] = allSecs.filter(s => !checkBusyConflict(s));
+          if (!courseSections[key].length) courseSections[key] = [sec];
+        }
+      });
+
+      const generated = [];
+      const attempts = numSched * 40;
+
+      for (let attempt = 0; attempt < attempts && generated.length < numSched; attempt++) {
+        // Pick courses (respect min/max count)
+        let pool = [...courseKeys];
+        if (!extra) pool = courseKeys;
+        else {
+          pool = courseKeys.slice().sort(() => Math.random() - .5).slice(0, Math.min(maxC, courseKeys.length));
+          if (pool.length < minC) continue;
+        }
+
+        // Pick one random section per course
+        const schedule = {};
+        let valid = true;
+        for (const key of pool) {
+          const options = courseSections[key] || [];
+          if (!options.length) { valid = false; break; }
+          const candidates = options.filter(s => s.days); // prefer in-person if possible
+          const pick = (candidates.length ? candidates : options)[Math.floor(Math.random() * (candidates.length || options.length))];
+          // Check conflicts with already-picked sections
+          for (const [k2, s2] of Object.entries(schedule)) {
+            if (overlaps(pick, s2)) { valid = false; break; }
+            // Check gap
+            if (pick.days && s2.days && pick.days.split('').some(d => s2.days.includes(d))) {
+              const s1 = toMin(pick.start_time), e1 = toMin(pick.end_time), s2m = toMin(s2.start_time), e2m = toMin(s2.end_time);
+              if (s1 && e1 && s2m && e2m) {
+                const gap = Math.max(s1 - e2m, s2m - e1);
+                if (gap >= 0 && gap < minGap) { valid = false; break; }
+              }
+            }
+          }
+          if (!valid) break;
+          schedule[key] = pick;
+        }
+        if (!valid || Object.keys(schedule).length < minC) continue;
+        // Deduplicate
+        const sig = Object.entries(schedule).map(([k, s]) => `${k}:${s.id}`).sort().join('|');
+        if (generated.some(g => g.sig === sig)) continue;
+        generated.push({ sig, schedule, courses: Object.keys(schedule).length });
+      }
+
+      if (!generated.length) { toast('⚠️ Could not generate any conflict-free schedules. Try relaxing preferences.'); return; }
+      toast(`Generated ${generated.length} schedule${generated.length !== 1 ? 's' : ''}!`);
+      renderGeneratedResults(generated);
+    }
+
+    function renderGeneratedResults(generated) {
+      const grid = document.getElementById('genResultsGrid');
+      grid.innerHTML = '';
+      generated.forEach((g, i) => {
+        const schedSecs = Object.values(g.schedule);
+        const totalHrs = schedSecs.reduce((sum, s) => sum + (+s.credit_hours || 3), 0);
+        const card = document.createElement('div'); card.className = 'generated-card';
+        const mini = buildMiniCalHtml(g.schedule);
+        card.innerHTML = `
+      <div class="gc-header">
+        <div class="gc-title">Schedule ${i + 1}</div>
+        <div class="gc-hours">${totalHrs} hrs · ${g.courses} courses</div>
+      </div>
+      ${mini}
+      <div style="padding:8px 12px;font-size:.73rem;color:var(--muted)">${Object.entries(g.schedule).map(([k, s]) => `<span style="font-family:'DM Mono',monospace;font-weight:700">${k}</span> §${s.section}`).join(' · ')}</div>
+      <div class="gc-actions">
+        <button class="btn btn-green btn-sm" onclick="applyGenerated(${i},generatedResults)">Apply</button>
+        <button class="btn btn-ghost btn-sm" onclick="saveGenerated(${i},generatedResults)">💾 Save</button>
+      </div>`;
+        grid.appendChild(card);
+      });
+      window.generatedResults = generated;
+      document.getElementById('genResultsModal').classList.add('open');
+    }
+
+    function buildMiniCalHtml(schedule) {
+      // Build a simple mini-grid preview
+      const MINI_START = 8, MINI_END = 20, MINI_SLOT = 8;
+      const rows = MINI_END - MINI_START;
+      let cells = { M: [], T: [], W: [], R: [], F: [] };
+      const usedColors = {};
+      let ci = 0;
+      for (const [key, sec] of Object.entries(schedule)) {
+        if (!sec.days) continue;
+        const color = PALETTE[ci++ % PALETTE.length];
+        usedColors[key] = color;
+        const sMin = toMin(sec.start_time), eMin = toMin(sec.end_time);
+        if (!sMin || !eMin) continue;
+        sec.days.split('').filter(d => DAYS.includes(d)).forEach(day => {
+          cells[day].push({ key, sMin, eMin, color });
+        });
+      }
+      let html = `<div style="padding:6px 12px"><div style="display:grid;grid-template-columns:20px repeat(5,1fr);gap:1px;font-size:.48rem;border:1px solid var(--border);border-radius:4px;overflow:hidden">`;
+      html += `<div style="background:var(--green-d)"></div>`;
+      DAYS.forEach(d => { html += `<div style="background:var(--green);color:#fff;text-align:center;padding:2px;font-weight:700">${DAY_LABELS[d].slice(0, 2)}</div>`; });
+      for (let r = 0; r < rows; r++) {
+        const hr = MINI_START + r;
+        html += `<div style="background:#f5f5f5;text-align:right;padding:1px 2px 1px 0;color:#aaa;border-top:1px solid #eee;font-family:'DM Mono',monospace">${hr < 12 ? hr + 'a' : hr === 12 ? '12p' : (hr - 12) + 'p'}</div>`;
+        DAYS.forEach(d => {
+          const ev = cells[d].find(e => {
+            const sSl = Math.floor((e.sMin - MINI_START * 60) / 60), eSl = Math.floor((e.eMin - MINI_START * 60) / 60);
+            return r >= sSl && r < eSl;
+          });
+          html += `<div style="background:${ev ? ev.color + '33' : '#fff'};border-top:1px solid #eee;border-left:1px solid #eee;height:8px;${ev ? `border-left:2px solid ${ev.color}` : ''}">${ev && r === Math.floor((ev.sMin - MINI_START * 60) / 60) ? `<span style="font-size:.45rem;font-weight:700;color:${ev.color};overflow:hidden;white-space:nowrap;display:block;padding:0 1px">${ev.key.split(' ')[0]}</span>` : ''}</div>`;
+        });
+      }
+      html += `</div></div>`;
+      return html;
+    }
+
+    function applyGenerated(idx, results) {
+      const g = results[idx];
+      selected.clear(); selectedRecitations.clear(); lockedSections.clear();
+      for (const [key, sec] of Object.entries(g.schedule)) {
+        if (!courseColors.has(key)) { courseColors.set(key, PALETTE[colorIdx % PALETTE.length]); colorIdx++; }
+        selected.set(key, { ...sec, _color: courseColors.get(key), _key: key });
+      }
+      document.getElementById('genResultsModal').classList.remove('open');
+      renderCalendar(); renderTray(); autoSave();
+      toast('✅ Schedule applied!');
+      switchView('manual');
+    }
+
+    function saveGenerated(idx, results) {
+      const g = results[idx];
+      const name = `Schedule ${idx + 1}`;
+      const sched = {
+        id: Date.now() + '_' + idx,
+        name,
+        primary: false,
+        selections: {},
+        colors: {},
+        createdAt: new Date().toISOString()
+      };
+      for (const [key, sec] of Object.entries(g.schedule)) {
+        const color = PALETTE[Object.keys(sched.selections).length % PALETTE.length];
+        sched.selections[key] = { ...sec, _color: color, _key: key };
+        sched.colors[key] = color;
+      }
+      savedSchedules.push(sched);
+      persistSaved();
+      toast(`💾 Saved "${name}"`);
+      document.getElementById('savedCount').textContent = savedSchedules.length;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // SAVE / LOAD SCHEDULES
+    // ─────────────────────────────────────────────────────────────────────────────
+    function openSaveModal() {
+      if (!selected.size) { toast('⚠️ Add courses before saving'); return; }
+      document.getElementById('saveNameInput').value = '';
+      document.getElementById('makePrimaryCheck').checked = false;
+      document.getElementById('saveModal').classList.add('open');
+    }
+    function doSaveSchedule() {
+      const name = document.getElementById('saveNameInput').value.trim() || `Schedule ${savedSchedules.length + 1}`;
+      const primary = document.getElementById('makePrimaryCheck').checked;
+      if (primary) savedSchedules.forEach(s => s.primary = false);
+      const sched = {
+        id: Date.now() + '',
+        name,
+        primary,
+        selections: Object.fromEntries([...selected.entries()]),
+        recitations: Object.fromEntries([...selectedRecitations.entries()]),
+        colors: Object.fromEntries([...courseColors.entries()]),
+        createdAt: new Date().toISOString()
+      };
+      savedSchedules.push(sched);
+      persistSaved();
+      document.getElementById('saveModal').classList.remove('open');
+      document.getElementById('savedCount').textContent = savedSchedules.length;
+      toast(`💾 Saved "${name}"`);
+    }
+    function persistSaved() { localStorage.setItem('unt_vsb_saved', JSON.stringify(savedSchedules)); }
+    function deleteSavedSchedule(id) {
+      savedSchedules = savedSchedules.filter(s => s.id !== id);
+      persistSaved();
+      document.getElementById('savedCount').textContent = savedSchedules.length;
+      renderSavedSchedules();
+      toast('Deleted schedule');
+    }
+    function makePrimary(id) {
+      savedSchedules.forEach(s => s.primary = s.id === id);
+      persistSaved(); renderSavedSchedules(); toast('✅ Primary schedule set');
+    }
+    function loadSavedSchedule(id) {
+      const sched = savedSchedules.find(s => s.id === id);
+      if (!sched) return;
+      selected.clear(); selectedRecitations.clear();
+      Object.entries(sched.selections || {}).forEach(([k, v]) => selected.set(k, v));
+      Object.entries(sched.recitations || {}).forEach(([k, v]) => selectedRecitations.set(k, v));
+      Object.entries(sched.colors || {}).forEach(([k, v]) => courseColors.set(k, v));
+      renderCalendar(); renderTray();
+      switchView('manual');
+      toast(`Loaded "${sched.name}"`);
+    }
+    function pushToCart(id) {
+      const sched = savedSchedules.find(s => s.id === id);
+      if (!sched) return;
+      const crns = Object.values(sched.selections || {}).filter(s => s.class_nbr).map(s => s.class_nbr);
+      Object.values(sched.recitations || {}).filter(r => r.class_nbr).forEach(r => crns.push(r.class_nbr));
+      if (!crns.length) { toast('⚠️ No CRNs found — add courses first'); return; }
+      toast(`🛒 CRNs to add to myUNT cart: ${crns.join(', ')}`);
+    }
+
+    function renderSavedSchedules() {
+      const grid = document.getElementById('savedGrid');
+      if (!savedSchedules.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:10px">📅</div><strong>No saved schedules yet</strong><br><span style="font-size:.82rem">Build a schedule and click 💾 Save, or use Auto-Generate.</span></div>`;
+        return;
+      }
+      grid.innerHTML = '';
+      savedSchedules.forEach(sched => {
+        const totalHrs = Object.values(sched.selections || {}).reduce((sum, s) => sum + (+s.credit_hours || 3), 0);
+        const crns = Object.values(sched.selections || {}).filter(s => s.class_nbr).map(s => s.class_nbr);
+        Object.values(sched.recitations || {}).filter(r => r.class_nbr).forEach(r => crns.push(r.class_nbr));
+        const date = new Date(sched.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        const card = document.createElement('div');
+        card.className = `schedule-card${sched.primary ? ' primary' : ''}`;
+        card.innerHTML = `
+      <div class="sc-header">
+        <div>
+          <div class="sc-name">${sched.name} ${sched.primary ? '<span class="primary-badge">PRIMARY</span>' : ''}</div>
+          <div class="sc-hours">${totalHrs} hrs · ${Object.keys(sched.selections || {}).length} courses · ${date}</div>
+        </div>
+      </div>
+      <div style="padding:8px 12px 4px">
+        ${Object.entries(sched.selections || {}).map(([k, s]) => {
+          const c = (sched.colors || {})[k] || '#888';
+          return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <div style="width:8px;height:8px;border-radius:2px;background:${c};flex-shrink:0"></div>
+            <span style="font-size:.75rem;font-family:'DM Mono',monospace;font-weight:700">${k}</span>
+            <span style="font-size:.72rem;color:var(--muted)">§${s.section}${s.class_nbr ? ` CRN ${s.class_nbr}` : ''}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      ${crns.length ? `<div style="padding:4px 12px 8px;font-size:.72rem;color:var(--muted)">CRNs: <strong style="font-family:'DM Mono',monospace">${crns.join(' · ')}</strong></div>` : ''}
+      <div class="sc-actions">
+        <button class="btn btn-green btn-sm" onclick="loadSavedSchedule('${sched.id}')">Load</button>
+        <button class="btn btn-ghost btn-sm" onclick="pushToCart('${sched.id}')">🛒 Push to Cart</button>
+        ${!sched.primary ? `<button class="btn btn-ghost btn-sm" onclick="makePrimary('${sched.id}')">★ Primary</button>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="deleteSavedSchedule('${sched.id}')">🗑</button>
+      </div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // CALENDAR RENDER
+    // ─────────────────────────────────────────────────────────────────────────────
+    function renderCalendar() {
+      const grid = document.getElementById('calGrid'), onlineArea = document.getElementById('onlineArea');
+      grid.innerHTML = ''; onlineArea.innerHTML = '';
+
+      const corner = document.createElement('div'); corner.className = 'cal-corner'; grid.appendChild(corner);
+      DAYS.forEach(d => { const el = document.createElement('div'); el.className = 'cal-day-hdr'; el.textContent = DAY_LABELS[d]; grid.appendChild(el); });
 
       for (let h = 0; h < END_H - START_H; h++) {
         const hr = START_H + h;
-        const lbl = document.createElement("div"); lbl.className = "time-lbl";
-        lbl.textContent = hr < 12 ? `${hr}a` : hr === 12 ? "12p" : `${hr - 12}p`; grid.appendChild(lbl);
-        DAYS.forEach(d => {
-          const cell = document.createElement("div"); cell.className = "cal-cell"; cell.dataset.day = d; cell.dataset.hour = hr; grid.appendChild(cell);
-        });
+        const lbl = document.createElement('div'); lbl.className = 'time-lbl';
+        lbl.textContent = hr < 12 ? `${hr}a` : hr === 12 ? '12p' : `${hr - 12}p`; grid.appendChild(lbl);
+        DAYS.forEach(d => { const cell = document.createElement('div'); cell.className = 'cal-cell'; cell.dataset.day = d; cell.dataset.hour = hr; grid.appendChild(cell); });
       }
 
-      // Convert hex color to a solid opaque tint (mixed with white)
       function tintColor(hex, amount) {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        const tr = Math.round(r + (255 - r) * amount);
-        const tg = Math.round(g + (255 - g) * amount);
-        const tb = Math.round(b + (255 - b) * amount);
-        return `rgb(${tr},${tg},${tb})`;
+        const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+        return `rgb(${Math.round(r + (255 - r) * amount)},${Math.round(g + (255 - g) * amount)},${Math.round(b + (255 - b) * amount)})`;
       }
 
-      // ── Collect ALL events per day for overlap computation ──
-      // Each event: { sec, color, ghost, hovered, sMin, eMin, day }
-      const dayEvents = {}; // day -> [event objects]
-      DAYS.forEach(d => dayEvents[d] = []);
+      // Render busy times as red blocks
+      busyTimes.forEach(bt => {
+        bt.days.forEach(day => {
+          if (!DAYS.includes(day)) return;
+          const startHr = Math.floor(bt.startMin / 60);
+          if (startHr < START_H || startHr >= END_H) return;
+          const cells = grid.querySelectorAll(`.cal-cell[data-day="${day}"]`);
+          const cell = cells[startHr - START_H];
+          if (!cell) return;
+          const topPx = ((bt.startMin % 60) / 60) * SLOT;
+          const heightPx = Math.max(((bt.endMin - bt.startMin) / 60) * SLOT, 16);
+          const ev = document.createElement('div');
+          ev.className = 'ev ev-busy';
+          ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:0;right:0;`;
+          ev.innerHTML = `<div class="ev-code" style="color:var(--danger)">⛔ ${bt.name}</div>`;
+          ev.title = `Busy: ${bt.name}`;
+          cell.appendChild(ev);
+        });
+      });
+
+      const dayEvents = {}; DAYS.forEach(d => dayEvents[d] = []);
 
       function collectEvents(sec, color, ghost, hovered) {
         if (!sec.days) return;
         const sMin = toMin(sec.start_time), eMin = toMin(sec.end_time);
         if (!sMin || !eMin) return;
-        sec.days.split("").filter(d => DAYS.includes(d)).forEach(day => {
+        sec.days.split('').filter(d => DAYS.includes(d)).forEach(day => {
           const startHr = Math.floor(sMin / 60);
           if (startHr < START_H || startHr >= END_H) return;
           dayEvents[day].push({ sec, color, ghost, hovered, sMin, eMin, id: sec.id + (ghost ? '_ghost' : '_sel') });
         });
       }
 
-      // Collect selected (solid) events
       for (const [key, sec] of selected) {
         if (!sec.days) {
-          const chip = document.createElement("div"); chip.className = "online-chip";
+          const chip = document.createElement('div'); chip.className = 'online-chip';
           chip.innerHTML = `<div class="chip-dot" style="background:${sec._color}"></div>${key} — Online`;
           onlineArea.appendChild(chip);
-        } else {
-          collectEvents(sec, sec._color, false, false);
-        }
-
-        // If a recitation is selected for this course, render it solid
+        } else collectEvents(sec, sec._color, false, false);
         const selRec = selectedRecitations.get(key);
         if (selRec) {
           if (!selRec.days) {
-            const chip = document.createElement("div"); chip.className = "online-chip";
+            const chip = document.createElement('div'); chip.className = 'online-chip';
             chip.innerHTML = `<div class="chip-dot" style="background:${sec._color}"></div>${key} — Rec Online`;
             onlineArea.appendChild(chip);
-          } else {
-            collectEvents({ ...selRec, _isRec: true }, sec._color, false, false);
-          }
+          } else collectEvents({ ...selRec, _isRec: true }, sec._color, false, false);
         } else if (sec.recitations && sec.recitations.length > 0) {
-          // Show recitation options as ghosts so student can pick one
-          const isOpenCourse = (openCourseKey === key);
           sec.recitations.forEach(rec => {
-            if (rec.days) {
-              collectEvents({ ...rec, _color: sec._color, _key: key, _isRec: true, _isRecGhost: true },
-                sec._color, true, isOpenCourse && false);
-            }
+            if (rec.days) collectEvents({ ...rec, _color: sec._color, _key: key, _isRec: true, _isRecGhost: true }, sec._color, true, false);
           });
         }
       }
+      previewSecs.forEach(sec => { if (sec.days) collectEvents(sec, sec._color, true, sec._isHovered); });
 
-      // Collect ghost preview events
-      previewSecs.forEach(sec => {
-        if (sec.days) collectEvents(sec, sec._color, true, sec._isHovered);
-      });
-
-      // ── Compute overlap groups per day and place blocks ──
       function computeColumns(events) {
-        // Sort by start time, then by end time descending (longer events first)
         events.sort((a, b) => a.sMin - b.sMin || b.eMin - a.eMin);
-        const columns = []; // each column is an array of events; tracks end time of last event
-        const evColMap = new Map(); // event -> { col, totalCols }
-
-        // Assign columns greedily
+        const columns = []; const evColMap = new Map();
         events.forEach(ev => {
           let placed = false;
-          for (let c = 0; c < columns.length; c++) {
-            if (columns[c].endTime <= ev.sMin) {
-              columns[c].endTime = ev.eMin;
-              columns[c].events.push(ev);
-              evColMap.set(ev, { col: c });
-              placed = true;
-              break;
-            }
-          }
-          if (!placed) {
-            columns.push({ endTime: ev.eMin, events: [ev] });
-            evColMap.set(ev, { col: columns.length - 1 });
-          }
+          for (let c = 0; c < columns.length; c++) { if (columns[c].endTime <= ev.sMin) { columns[c].endTime = ev.eMin; columns[c].events.push(ev); evColMap.set(ev, { col: c }); placed = true; break; } }
+          if (!placed) { columns.push({ endTime: ev.eMin, events: [ev] }); evColMap.set(ev, { col: columns.length - 1 }); }
         });
-
-        // Now compute how many columns each event's overlap group spans
-        // For simplicity, find connected components of overlapping events
-        events.forEach(ev => {
-          const info = evColMap.get(ev);
-          // Find max columns among all events overlapping with this one
-          let maxCol = info.col;
-          events.forEach(other => {
-            if (ev.sMin < other.eMin && other.sMin < ev.eMin) {
-              const otherCol = evColMap.get(other).col;
-              if (otherCol > maxCol) maxCol = otherCol;
-            }
-          });
-          info.totalCols = maxCol + 1;
-        });
-
+        events.forEach(ev => { const info = evColMap.get(ev); let maxCol = info.col; events.forEach(other => { if (ev.sMin < other.eMin && other.sMin < ev.eMin) { const oc = evColMap.get(other).col; if (oc > maxCol) maxCol = oc; } }); info.totalCols = maxCol + 1; });
         return evColMap;
       }
 
       DAYS.forEach(day => {
-        const events = dayEvents[day];
-        if (!events.length) return;
+        const events = dayEvents[day]; if (!events.length) return;
         const colMap = computeColumns(events);
         const cells = grid.querySelectorAll(`.cal-cell[data-day="${day}"]`);
-
         events.forEach(({ sec, color, ghost, hovered, sMin, eMin }) => {
           const ev_entry = events.find(e => e.sec === sec && e.ghost === ghost);
           const { col, totalCols } = colMap.get(ev_entry);
           const startHr = Math.floor(sMin / 60);
-          const cell = cells[startHr - START_H];
-          if (!cell) return;
-
-          const topPx = ((sMin % 60) / 60) * SLOT;
-          const heightPx = Math.max(((eMin - sMin) / 60) * SLOT, 18);
-          const widthPct = 100 / totalCols;
-          const leftPct = col * widthPct;
-
-          const ev = document.createElement("div");
-          ev.className = "ev" + (ghost ? (hovered ? " ev-ghost-hover" : " ev-ghost") : " ev-selected");
-
-          if (ghost) {
-            ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;border-color:${color};color:${color};`;
-          } else if (sec._isRec) {
-            // Recitation: use a striped pattern to visually distinguish from lecture
-            const bg = tintColor(color, 0.84);
-            ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;background:repeating-linear-gradient(45deg,${bg},${bg} 4px,${tintColor(color, 0.92)} 4px,${tintColor(color, 0.92)} 8px);border-left:3px solid ${color};color:${color};`;
-          } else {
-            const bg = tintColor(color, 0.84);
-            ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;background:${bg};border-left:3px solid ${color};color:${color};`;
-          }
-
+          const cell = cells[startHr - START_H]; if (!cell) return;
+          const topPx = ((sMin % 60) / 60) * SLOT, heightPx = Math.max(((eMin - sMin) / 60) * SLOT, 18);
+          const widthPct = 100 / totalCols, leftPct = col * widthPct;
+          const ev = document.createElement('div');
+          ev.className = 'ev' + (ghost ? (hovered ? ' ev-ghost-hover' : ' ev-ghost') : ' ev-selected');
+          if (ghost) ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;border-color:${color};color:${color};`;
+          else if (sec._isRec) { const bg = tintColor(color, .84); ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;background:repeating-linear-gradient(45deg,${bg},${bg} 4px,${tintColor(color, .92)} 4px,${tintColor(color, .92)} 8px);border-left:3px solid ${color};color:${color};`; }
+          else { const bg = tintColor(color, .84); ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;background:${bg};border-left:3px solid ${color};color:${color};`; }
           const label = sec._key || `${sec.subject} ${sec.course_number}`;
-          const recLabel = sec._isRec ? " REC" : "";
-          ev.innerHTML = `<div class="ev-code">${label}${recLabel}</div>${heightPx > 28 ? `<div class="ev-room">${sec.room || ""}</div>` : ""}`;
-          ev.title = `${label}${recLabel} Sec ${sec.section}\n${formatTime(sec.start_time)} – ${formatTime(sec.end_time)}\n${sec.room || ""}\n${sec.instructor || ""}`;
-
-          // Ghost blocks: recitation ghosts open the dropdown; section ghosts select
+          const recLabel = sec._isRec ? ' REC' : '';
+          ev.innerHTML = `<div class="ev-code">${label}${recLabel}</div>${heightPx > 28 ? `<div class="ev-room">${sec.room || ''}</div>` : ''}`;
+          ev.title = `${label}${recLabel} Sec ${sec.section}\n${formatTime(sec.start_time)} – ${formatTime(sec.end_time)}\n${sec.room || ''}\n${sec.instructor || ''}`;
           if (ghost && sec._key) {
             const courseKey = sec._key;
             if (sec._isRecGhost) {
-              // Recitation ghost → click to select this recitation
-              const recColor = color;
-              ev.addEventListener("click", (e) => {
-                e.stopPropagation();
-                toggleRecitation(courseKey, sec, recColor);
-              });
-              ev.addEventListener("mouseenter", () => {
-                ev.classList.remove("ev-ghost"); ev.classList.add("ev-ghost-hover");
-              });
-              ev.addEventListener("mouseleave", () => {
-                ev.classList.remove("ev-ghost-hover"); ev.classList.add("ev-ghost");
-              });
+              ev.addEventListener('click', e => { e.stopPropagation(); toggleRecitation(courseKey, sec, color); });
+              ev.addEventListener('mouseenter', () => { ev.classList.remove('ev-ghost'); ev.classList.add('ev-ghost-hover'); });
+              ev.addEventListener('mouseleave', () => { ev.classList.remove('ev-ghost-hover'); ev.classList.add('ev-ghost'); });
             } else {
               const isConf = checkConflict(sec, courseKey);
               if (!isConf) {
-                ev.addEventListener("click", (e) => {
-                  e.stopPropagation();
-                  toggleSection(courseKey, sec, color);
-                });
-                ev.addEventListener("mouseenter", () => {
-                  ev.classList.remove("ev-ghost");
-                  ev.classList.add("ev-ghost-hover");
-                  highlightSidebarRow(courseKey, sec.id, true);
-                });
-                ev.addEventListener("mouseleave", () => {
-                  ev.classList.remove("ev-ghost-hover");
-                  ev.classList.add("ev-ghost");
-                  highlightSidebarRow(courseKey, sec.id, false);
-                });
-              } else {
-                ev.style.cursor = "not-allowed";
-              }
+                ev.addEventListener('click', e => { e.stopPropagation(); toggleSection(courseKey, sec, color); });
+                ev.addEventListener('mouseenter', () => { ev.classList.remove('ev-ghost'); ev.classList.add('ev-ghost-hover'); highlightSidebarRow(courseKey, sec.id, true); });
+                ev.addEventListener('mouseleave', () => { ev.classList.remove('ev-ghost-hover'); ev.classList.add('ev-ghost'); highlightSidebarRow(courseKey, sec.id, false); });
+              } else ev.style.cursor = 'not-allowed';
             }
           }
-
           cell.appendChild(ev);
         });
       });
 
-      const crnBox = document.getElementById("crnBox");
-      if (!selected.size) { crnBox.textContent = "Add courses to see your CRNs"; }
+      const crnBox = document.getElementById('crnBox');
+      if (!selected.size) crnBox.textContent = 'Add courses to see your CRNs';
       else {
         const crns = [];
         for (const [key, s] of selected) {
@@ -1405,280 +2699,108 @@
           const rec = selectedRecitations.get(key);
           if (rec && rec.class_nbr) crns.push(rec.class_nbr);
         }
-        crnBox.innerHTML = crns.length ? `CRNs: <strong>${crns.join("  ·  ")}</strong>` : `${selected.size} course${selected.size > 1 ? "s" : ""} added`;
+        crnBox.innerHTML = crns.length ? `CRNs: <strong>${crns.join('  ·  ')}</strong>` : `${selected.size} course${selected.size > 1 ? 's' : ''} added`;
       }
     }
 
-    /* ── Tray ── */
+    // ─────────────────────────────────────────────────────────────────────────────
+    // TRAY
+    // ─────────────────────────────────────────────────────────────────────────────
     function renderTray() {
-      const tray = document.getElementById("trayList");
+      const tray = document.getElementById('trayList');
       if (!selected.size) { tray.innerHTML = `<div class="tray-empty">No courses added yet</div>`; return; }
-      tray.innerHTML = "";
+      tray.innerHTML = '';
       for (const [key, sec] of selected) {
-        const timeStr = !sec.days ? "Online" : `${sec.days} ${formatTime(sec.start_time)}–${formatTime(sec.end_time)}`;
-        const item = document.createElement("div"); item.className = "tray-item";
+        const timeStr = !sec.days ? 'Online' : `${sec.days} ${formatTime(sec.start_time)}–${formatTime(sec.end_time)}`;
+        const isLocked = lockedSections.has(key);
+        const item = document.createElement('div'); item.className = 'tray-item';
         item.innerHTML = `
       <div class="tray-dot" style="background:${sec._color}"></div>
       <div class="tray-info">
-        <div class="tray-code">${key} — Sec ${sec.section}</div>
-        <div class="tray-sub">${timeStr} · ${sec.instructor || "TBA"}</div>
+        <div class="tray-code">${key} — Sec ${sec.section}${isLocked ? ' 🔒' : ''}</div>
+        <div class="tray-sub">${timeStr} · ${sec.instructor || 'TBA'}</div>
       </div>
       <button class="tray-x" onclick="removeCourse('${key}')">✕</button>`;
         tray.appendChild(item);
-
-        // Show recitation row in tray if one is selected
         const selRec = selectedRecitations.get(key);
         if (selRec) {
-          const recTimeStr = !selRec.days ? "Online" : `${selRec.days} ${formatTime(selRec.start_time)}–${formatTime(selRec.end_time)}`;
-          const recItem = document.createElement("div");
-          recItem.className = "tray-item";
-          recItem.style.cssText = "padding-left:26px;background:#f7fdf9;";
-          recItem.innerHTML = `
-        <div class="tray-dot" style="background:${sec._color};opacity:.6;"></div>
-        <div class="tray-info">
-          <div class="tray-code" style="font-size:.7rem;">↳ Rec ${selRec.section}${selRec.class_nbr ? ` (CRN ${selRec.class_nbr})` : ""}</div>
-          <div class="tray-sub">${recTimeStr} · ${selRec.instructor || "TBA"}</div>
-        </div>
-        <button class="tray-x" onclick="toggleRecitation('${key}', selectedRecitations.get('${key}'), '${sec._color}')">✕</button>`;
+          const recTimeStr = !selRec.days ? 'Online' : `${selRec.days} ${formatTime(selRec.start_time)}–${formatTime(selRec.end_time)}`;
+          const recItem = document.createElement('div'); recItem.className = 'tray-item'; recItem.style.cssText = 'padding-left:26px;background:#f7fdf9;';
+          recItem.innerHTML = `<div class="tray-dot" style="background:${sec._color};opacity:.6;"></div><div class="tray-info"><div class="tray-code" style="font-size:.7rem;">↳ Rec ${selRec.section}${selRec.class_nbr ? ` (CRN ${selRec.class_nbr})` : ''}</div><div class="tray-sub">${recTimeStr} · ${selRec.instructor || 'TBA'}</div></div><button class="tray-x" onclick="removeRec('${key}')">✕</button>`;
           tray.appendChild(recItem);
         } else if (sec.recitations && sec.recitations.length > 0) {
-          // Nudge to pick a recitation
-          const nudge = document.createElement("div");
-          nudge.className = "tray-item";
-          nudge.style.cssText = "padding-left:26px;background:#fffbeb;";
-          nudge.innerHTML = `
-        <div class="tray-dot" style="background:var(--warn);"></div>
-        <div class="tray-info">
-          <div class="tray-code" style="font-size:.7rem;color:var(--warn);">↳ Pick a recitation</div>
-          <div class="tray-sub">Expand the section above to choose</div>
-        </div>`;
+          const nudge = document.createElement('div'); nudge.className = 'tray-item'; nudge.style.cssText = 'padding-left:26px;background:#fffbeb;';
+          nudge.innerHTML = `<div class="tray-dot" style="background:var(--warn);"></div><div class="tray-info"><div class="tray-code" style="font-size:.7rem;color:var(--warn);">↳ Pick a recitation</div><div class="tray-sub">Expand the section above to choose</div></div>`;
           tray.appendChild(nudge);
         }
       }
     }
 
-    function removeCourse(key) {
-      selected.delete(key); selectedRecitations.delete(key); renderCalendar(); renderTray(); refreshDd(key); toast(`Removed ${key}`);
-    }
-
-    function clearAll() {
-      selected.clear(); selectedRecitations.clear(); previewSecs = []; openCourseKey = null; renderCalendar(); renderTray();
-      document.querySelectorAll(".sections-dd.open").forEach(dd => {
-        const key = dd.id.replace("dd_", "").replace(/_/g, " "); refreshDd(key);
-      });
-    }
-
-    /* ── Highlight sidebar section row when hovering a ghost on the calendar ── */
+    function removeRec(key) { selectedRecitations.delete(key); renderCalendar(); renderTray(); refreshDd(key); autoSave(); }
+    function removeCourse(key) { selected.delete(key); selectedRecitations.delete(key); lockedSections.delete(key); renderCalendar(); renderTray(); refreshDd(key); toast(`Removed ${key}`); autoSave(); }
+    function clearAll() { selected.clear(); selectedRecitations.clear(); lockedSections.clear(); previewSecs = []; openCourseKey = null; renderCalendar(); renderTray(); localStorage.removeItem('unt_vsb_current'); }
     function highlightSidebarRow(courseKey, secId, on) {
-      const dd = document.getElementById(`dd_${safeId(courseKey)}`);
-      if (!dd) return;
-      const rows = dd.querySelectorAll(".sec-row");
-      const secs = sectionsCache.get(courseKey) || [];
-      rows.forEach((row, i) => {
-        if (secs[i] && secs[i].id === secId) {
-          if (on) row.classList.add("previewing");
-          else row.classList.remove("previewing");
-        }
-      });
+      const dd = document.getElementById(`dd_${safeId(courseKey)}`); if (!dd) return;
+      const rows = dd.querySelectorAll('.sec-row'); const secs = sectionsCache.get(courseKey) || [];
+      rows.forEach((row, i) => { if (secs[i] && secs[i].id === secId) { if (on) row.classList.add('previewing'); else row.classList.remove('previewing'); } });
     }
 
-    let _tt;
-    function toast(msg) {
-      const el = document.getElementById("toast"); el.textContent = msg; el.classList.add("show");
-      clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove("show"), 2200);
-    }
-
-    /* ── localStorage: auto-save & resume ────────────────────────────────── */
-    const STORAGE_KEY = "unt_vsb_schedule";
-
-    function saveSchedule() {
-      if (!selected.size) {
-        localStorage.removeItem(STORAGE_KEY);
-        return;
-      }
-      const selections = [...selected.entries()].map(([courseKey, sec]) => {
-        const rec = selectedRecitations.get(courseKey);
-        return {
-          courseKey,
-          classNbr: sec.class_nbr,
-          section: sec.section,
-          subject: sec.subject,
-          courseNumber: sec.course_number,
-          recitationId: rec ? rec.id : null,
-          recitationClassNbr: rec ? rec.class_nbr : null,
-        };
-      });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    // ─────────────────────────────────────────────────────────────────────────────
+    // AUTO-SAVE CURRENT STATE
+    // ─────────────────────────────────────────────────────────────────────────────
+    function autoSave() {
+      if (!selected.size) { localStorage.removeItem('unt_vsb_current'); return; }
+      const data = {
         saved_at: new Date().toISOString(),
-        term: "1268",
-        selections,
-      }));
+        selections: [...selected.entries()].map(([k, s]) => ({ courseKey: k, classNbr: s.class_nbr, section: s.section, subject: s.subject, courseNumber: s.course_number, recitationId: selectedRecitations.get(k)?.id || null }))
+      };
+      localStorage.setItem('unt_vsb_current', JSON.stringify(data));
     }
-
-    function loadSavedSchedule() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      let saved;
-      try { saved = JSON.parse(raw); } catch { return; }
+    function loadAutoSaved() {
+      const raw = localStorage.getItem('unt_vsb_current'); if (!raw) return;
+      let saved; try { saved = JSON.parse(raw); } catch { return; }
       if (!saved.selections?.length) return;
-
-      // Show resume banner
-      const date = new Date(saved.saved_at).toLocaleDateString("en-US", {
-        month: "short", day: "numeric", hour: "numeric", minute: "2-digit"
-      });
+      const date = new Date(saved.saved_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
       showResumeBanner(saved, date);
     }
-
     function showResumeBanner(saved, date) {
-      // Remove any existing banner
-      document.getElementById("resumeBanner")?.remove();
-
-      const banner = document.createElement("div");
-      banner.id = "resumeBanner";
-      banner.style.cssText = `
-        position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
-        background:#1a1d23; color:#fff; border-radius:12px;
-        padding:14px 18px; z-index:9999; box-shadow:0 4px 20px rgba(0,0,0,.3);
-        display:flex; align-items:center; gap:14px; font-size:.82rem;
-        animation: slideUp .25s ease; max-width:420px; width:calc(100vw - 40px);
-      `;
-      banner.innerHTML = `
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:700;margin-bottom:2px">📅 Saved schedule found</div>
-          <div style="color:#9ca3af;font-size:.75rem">${saved.selections.length} course${saved.selections.length !== 1 ? 's' : ''} · saved ${date}</div>
-        </div>
-        <button id="resumeBtn" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Resume</button>
-        <button id="freshBtn" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Start Fresh</button>
-      `;
-
-      // Add slide-up keyframe once
-      if (!document.getElementById("resumeStyle")) {
-        const s = document.createElement("style");
-        s.id = "resumeStyle";
-        s.textContent = `@keyframes slideUp { from { opacity:0; transform:translateX(-50%) translateY(12px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }`;
-        document.head.appendChild(s);
-      }
-
+      const banner = document.createElement('div'); banner.id = 'resumeBanner';
+      banner.style.cssText = `position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1a1d23;color:#fff;border-radius:12px;padding:14px 18px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);display:flex;align-items:center;gap:14px;font-size:.82rem;max-width:420px;width:calc(100vw - 40px);`;
+      banner.innerHTML = `<div style="flex:1;min-width:0"><div style="font-weight:700;margin-bottom:2px">📅 Saved schedule found</div><div style="color:#9ca3af;font-size:.75rem">${saved.selections.length} course${saved.selections.length !== 1 ? 's' : ''} · ${date}</div></div><button id="resumeBtn" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Resume</button><button id="freshBtn" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Start Fresh</button>`;
       document.body.appendChild(banner);
-
-      document.getElementById("resumeBtn").onclick = () => {
-        banner.remove();
-        applyResume(saved);
-      };
-      document.getElementById("freshBtn").onclick = () => {
-        localStorage.removeItem(STORAGE_KEY);
-        banner.remove();
-        toast("Starting fresh 🌱");
-      };
+      document.getElementById('resumeBtn').onclick = () => { banner.remove(); applyResume(saved); };
+      document.getElementById('freshBtn').onclick = () => { localStorage.removeItem('unt_vsb_current'); banner.remove(); toast('Starting fresh 🌱'); };
     }
-
     async function applyResume(saved) {
-      // Wait for data to be ready if it isn't yet
       if (!dataReady) {
-        toast("Loading data, resuming in a moment…");
-        await new Promise(resolve => {
-          const check = setInterval(() => {
-            if (dataReady || dataError) { clearInterval(check); resolve(); }
-          }, 100);
-        });
+        toast('Loading data…');
+        await new Promise(res => { const c = setInterval(() => { if (dataReady || dataError) { clearInterval(c); res(); } }, 100); });
       }
-      if (dataError) { toast("⚠️ Couldn't load data to resume schedule"); return; }
-
-      const missing = [];
-      const changed = [];
-
+      if (dataError) { toast('⚠️ Couldn\'t load data'); return; }
       for (const s of saved.selections) {
-        // Find matching section in fresh JSON by classNbr
-        let sec = allCourses.find(c => c.class_nbr === s.classNbr);
-
-        // Fallback: match by subject + courseNumber + section if classNbr changed
-        if (!sec) {
-          sec = allCourses.find(c =>
-            c.subject === s.subject &&
-            c.course_number === s.courseNumber &&
-            c.section === s.section
-          );
-          if (sec) changed.push(s.courseKey); // found but CRN changed
-        }
-
-        if (!sec) {
-          missing.push(s.courseKey);
-          continue;
-        }
-
-        // Add color + restore
-        if (!courseColors.has(s.courseKey)) {
-          courseColors.set(s.courseKey, PALETTE[colorIdx % PALETTE.length]);
-          colorIdx++;
-        }
+        let sec = allCourses.find(c => c.class_nbr === s.classNbr) || allCourses.find(c => c.subject === s.subject && c.course_number === s.courseNumber && c.section === s.section);
+        if (!sec) continue;
+        if (!courseColors.has(s.courseKey)) { courseColors.set(s.courseKey, PALETTE[colorIdx % PALETTE.length]); colorIdx++; }
         const color = courseColors.get(s.courseKey);
         selected.set(s.courseKey, { ...sec, _color: color, _key: s.courseKey });
-
-        // Restore recitation if saved
-        if (s.recitationId && sec.recitations) {
-          const rec = sec.recitations.find(r => r.id === s.recitationId) ||
-            sec.recitations.find(r => r.class_nbr === s.recitationClassNbr);
-          if (rec) selectedRecitations.set(s.courseKey, { ...rec, _color: color, _key: s.courseKey, _isRec: true });
-        }
-
-        // Pre-populate sectionsCache so expanding works instantly
-        if (!sectionsCache.has(s.courseKey)) {
-          sectionsCache.set(s.courseKey, allCourses.filter(c =>
-            c.subject === sec.subject && c.course_number === sec.course_number
-          ));
-        }
+        if (!sectionsCache.has(s.courseKey)) sectionsCache.set(s.courseKey, allCourses.filter(c => c.subject === sec.subject && c.course_number === sec.course_number));
       }
-
-      renderCalendar();
-      renderTray();
-
-      // Report what happened
-      const restored = saved.selections.length - missing.length;
-      let msg = `✅ Restored ${restored} course${restored !== 1 ? 's' : ''}`;
-      if (changed.length) msg += ` · ${changed.length} CRN updated`;
-      toast(msg);
-
-      if (missing.length) {
-        setTimeout(() => {
-          toast(`⚠️ ${missing.join(", ")} no longer available`);
-        }, 2500);
-      }
+      renderCalendar(); renderTray(); toast(`✅ Restored ${selected.size} course${selected.size !== 1 ? 's' : ''}`);
     }
 
-    /* ── Hook saveSchedule into every action that changes the schedule ─────── */
-    // Wrap toggleSection to auto-save after every add/remove
-    const _origToggle = toggleSection;
-    toggleSection = function (courseKey, sec, color) {
-      _origToggle(courseKey, sec, color);
-      saveSchedule();
-    };
+    // ─────────────────────────────────────────────────────────────────────────────
+    // TOAST
+    // ─────────────────────────────────────────────────────────────────────────────
+    let _tt;
+    function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2400); }
 
-    // Wrap toggleRecitation to auto-save
-    const _origToggleRec = toggleRecitation;
-    toggleRecitation = function (courseKey, rec, color) {
-      _origToggleRec(courseKey, rec, color);
-      saveSchedule();
-    };
-
-    // Wrap clearAll to clear storage too
-    const _origClearAll = clearAll;
-    clearAll = function () {
-      _origClearAll();
-      localStorage.removeItem(STORAGE_KEY);
-    };
-
-    // Wrap removeCourse to auto-save
-    const _origRemove = removeCourse;
-    removeCourse = function (key) {
-      _origRemove(key);
-      saveSchedule();
-    };
-
-    /* ── Init ────────────────────────────────────────────────────────────────*/
+    // ─────────────────────────────────────────────────────────────────────────────
+    // INIT
+    // ─────────────────────────────────────────────────────────────────────────────
     renderCalendar();
-
-    // Check for saved schedule after a tiny delay so the page renders first
-    setTimeout(loadSavedSchedule, 400);
+    document.getElementById('savedCount').textContent = savedSchedules.length;
+    populateBusyTimeDropdowns();
+    setTimeout(loadAutoSaved, 500);
   </script>
 </body>
 
