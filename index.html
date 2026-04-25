@@ -10,18 +10,63 @@
     rel="stylesheet" />
   <style>
     :root {
+      /* Jungle Theme Palette */
       --green: #1B5E20;
-      --green-d: #0d3b13;
-      --green-l: #c8e6c9;
+      --green-d: #0D3B13;
+      --green-l: #C8E6C9;
       --gold: #F9A825;
-      --bg: #F4F1EA;
-      --surface: #fff;
-      --border: #DCD0B9;
-      --text: #0A2F11;
-      --muted: #4E342E;
+      --bg: #E8DCCA; /* Jungle Tan */
+      --surface: rgba(255, 255, 255, 0.8);
+      --border: #BBA882; /* Jungle Tan Dark */
+      --text: #0A2F11; /* Jungle Canopy */
+      --muted: #4E342E; /* Jungle Bark */
       --danger: #e53e3e;
       --warn: #d97706;
       --info: #3b82f6;
+
+      /* Animation Timings */
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Glassmorphism Utility */
+    .glass-glossy {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.5) 0%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.4) 100%
+      );
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 1px 1px rgba(255, 255, 255, 0.6),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(24px) saturate(1.8);
+      backdrop-filter: blur(24px) saturate(1.8);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Sparkle text animation */
+    @keyframes sparkle-shift {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .sparkle-text {
+      background-image: linear-gradient(
+        105deg,
+        currentColor 0%,
+        currentColor 44%,
+        rgba(134, 239, 172, 0.9) 47%,
+        rgba(134, 239, 172, 1) 49%,
+        rgba(134, 239, 172, 0.9) 51%,
+        currentColor 54%,
+        currentColor 100%
+      );
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: sparkle-shift 3s ease-in-out infinite;
     }
 
     *,
@@ -32,9 +77,17 @@
       padding: 0
     }
 
+    @keyframes jungle-gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     body {
       font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
+      background: linear-gradient(-45deg, #E8DCCA, #F4F1EA, #E8DCCA, #DCD0B9);
+      background-size: 400% 400%;
+      animation: jungle-gradient 20s ease infinite;
       color: var(--text);
       height: 100vh;
       display: flex;
@@ -131,7 +184,8 @@
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      overflow: hidden
+      overflow: hidden;
+      backdrop-filter: blur(8px);
     }
 
     .right {
@@ -150,7 +204,13 @@
       font-size: .84rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all .15s
+      transition: var(--transition);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
 
     .btn-green {
@@ -225,13 +285,15 @@
       font-family: 'DM Sans', sans-serif;
       font-size: .86rem;
       outline: none;
-      background: var(--bg);
-      transition: border-color .15s
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(4px);
+      transition: var(--transition);
     }
 
     .search-row input:focus {
       border-color: var(--green);
-      background: #fff
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
     }
 
     .results-scroll {
@@ -257,22 +319,27 @@
 
     /* ── Course cards ── */
     .course-card {
-      border-bottom: 1px solid #f0f2f5
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      transition: var(--transition);
     }
 
     .cc-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 13px;
+      padding: 12px 16px;
       cursor: pointer;
-      transition: background .1s;
-      user-select: none
+      transition: var(--transition);
+      user-select: none;
     }
 
-    .cc-header:hover,
+    .cc-header:hover {
+      background: rgba(27, 94, 32, 0.05);
+    }
+
     .cc-header.open {
-      background: var(--green-l)
+      background: var(--green-l);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
     }
 
     .cc-left {
@@ -283,9 +350,10 @@
 
     .cc-code {
       font-family: 'DM Mono', monospace;
-      font-weight: 600;
+      font-weight: 700;
       font-size: .84rem;
-      color: var(--green)
+      color: var(--green);
+      letter-spacing: -0.2px;
     }
 
     .cc-name {
@@ -321,7 +389,7 @@
 
     .sections-dd {
       display: none;
-      background: #fafbfc;
+      background: rgba(255, 255, 255, 0.4);
       border-top: 1px solid var(--border)
     }
 
@@ -333,11 +401,11 @@
     .sec-row {
       display: flex;
       align-items: flex-start;
-      padding: 8px 12px 8px 18px;
-      gap: 9px;
+      padding: 10px 16px 10px 24px;
+      gap: 12px;
       cursor: pointer;
-      border-bottom: 1px solid #f0f2f5;
-      transition: background .1s;
+      border-bottom: 1px solid rgba(0,0,0,0.03);
+      transition: var(--transition);
       position: relative
     }
 
@@ -346,17 +414,17 @@
     }
 
     .sec-row:hover {
-      background: #f0faf4
+      background: rgba(27, 94, 32, 0.08)
     }
 
     .sec-row.previewing {
-      background: #e6f4ec
+      background: rgba(27, 94, 32, 0.12)
     }
 
     .sec-row.selected {
       background: var(--green-l);
-      border-left: 3px solid var(--green);
-      padding-left: 15px
+      border-left: 4px solid var(--green);
+      padding-left: 20px
     }
 
     .sec-row.conflict {
@@ -659,11 +727,12 @@
       display: grid;
       grid-template-columns: 46px repeat(5, 1fr);
       min-width: 500px;
-      background: var(--surface);
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
       border: 1px solid var(--border);
       overflow: hidden;
-      box-shadow: 0 1px 6px rgba(0, 0, 0, .06)
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08)
     }
 
     .cal-corner {
@@ -674,12 +743,12 @@
       background: var(--green);
       color: #fff;
       text-align: center;
-      padding: 10px 4px;
+      padding: 12px 4px;
       font-size: .74rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .6px;
-      border-right: 1px solid rgba(255, 255, 255, .1)
+      letter-spacing: .8px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1)
     }
 
     .cal-day-hdr:last-child {
@@ -740,22 +809,24 @@
     /* ── Calendar events ── */
     .ev {
       position: absolute;
-      border-radius: 5px;
-      padding: 3px 5px;
+      border-radius: 6px;
+      padding: 4px 6px;
       font-size: .65rem;
-      font-weight: 600;
-      line-height: 1.3;
+      font-weight: 700;
+      line-height: 1.2;
       overflow: hidden;
       z-index: 10;
       cursor: pointer;
-      transition: filter .12s, box-shadow .12s, opacity .12s;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, .1)
+      transition: var(--transition);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .ev:hover {
-      filter: brightness(1.1);
-      z-index: 20;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .18)
+      filter: saturate(1.2) brightness(1.05);
+      z-index: 25;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: scale(1.02);
     }
 
     .ev-selected {
@@ -941,20 +1012,22 @@
     }
 
     .modal {
-      background: var(--surface);
-      border-radius: 14px;
-      box-shadow: 0 8px 40px rgba(0, 0, 0, .2);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
       width: 520px;
       max-width: calc(100vw - 32px);
       max-height: 85vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .modal-hdr {
-      padding: 18px 20px 14px;
-      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
       display: flex;
       align-items: center;
       justify-content: space-between
@@ -985,11 +1058,12 @@
     }
 
     .modal-footer {
-      padding: 14px 20px;
-      border-top: 1px solid var(--border);
+      padding: 16px 24px;
+      border-top: 1px solid rgba(0,0,0,0.05);
       display: flex;
-      gap: 8px;
-      justify-content: flex-end
+      gap: 10px;
+      justify-content: flex-end;
+      background: rgba(255, 255, 255, 0.3);
     }
 
     /* ── Busy times ── */
@@ -1058,17 +1132,18 @@
       width: 100%;
       border: 1.5px solid var(--border);
       border-radius: 8px;
-      padding: 8px 11px;
+      padding: 9px 12px;
       font-family: 'DM Sans', sans-serif;
       font-size: .86rem;
       outline: none;
-      background: var(--bg);
-      transition: border-color .15s
+      background: rgba(255, 255, 255, 0.5);
+      transition: var(--transition);
     }
 
     .form-input:focus {
       border-color: var(--green);
-      background: #fff
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
     }
 
     .form-row {
@@ -1300,13 +1375,17 @@
     .generated-card {
       background: var(--surface);
       border: 1.5px solid var(--border);
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, .06)
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      backdrop-filter: blur(8px)
     }
 
     .generated-card:hover {
-      border-color: var(--green)
+      border-color: var(--green);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12)
     }
 
     .gc-header {
@@ -1332,7 +1411,79 @@
       padding: 8px 12px;
       display: flex;
       gap: 6px;
-      border-top: 1px solid var(--border)
+      border-top: 1px solid rgba(0,0,0,0.05)
+    }
+
+    /* ── Saved schedules ── */
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1
+    }
+
+    .schedule-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(8px)
+    }
+
+    .schedule-card:hover {
+      border-color: var(--green);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12)
+    }
+
+    .schedule-card.primary {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px var(--gold), 0 8px 24px rgba(0,0,0,0.12)
+    }
+
+    .sc-header {
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.4);
+      border-bottom: 1px solid rgba(0,0,0,0.05)
+    }
+
+    .sc-name {
+      font-weight: 700;
+      font-size: .95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .primary-badge {
+      background: var(--gold);
+      color: #fff;
+      font-size: .6rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 800;
+      letter-spacing: .5px
+    }
+
+    .sc-hours {
+      font-size: .74rem;
+      color: var(--muted);
+      margin-top: 2px
+    }
+
+    .sc-actions {
+      padding: 12px 16px;
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      background: rgba(255,255,255,0.2)
     }
 
     /* ── Scrollbars ── */
@@ -1407,13 +1558,11 @@
 </head>
 
 <body>
-
-  <header>
-    <div class="logo">UNT Schedule Builder</div>
+  <header class="glass-glossy">
+    <div class="logo sparkle-text">UNT Schedule Builder</div>
     <div class="header-right">
-      <button class="header-tab active" id="tabManual" onclick="switchView('manual')">✏️ My Schedule</button>
-      <button class="header-tab" id="tabSaved" onclick="switchView('saved')">📅 Saved (<span
-          id="savedCount">0</span>)</button>
+      <button class="header-tab active" id="tabManual" onclick="switchView('manual')">My Schedule</button>
+      <button class="header-tab" id="tabSaved" onclick="switchView('saved')">Saved (<span id="savedCount">0</span>)</button>
       <select class="term-select" id="termSelect">
         <option value="1268" selected>Fall 2026</option>
       </select>
@@ -1421,8 +1570,6 @@
   </header>
 
   <div class="main-view">
-
-    <!-- ── MANUAL BUILD VIEW ── -->
     <div class="view-panel active" id="viewManual">
       <div class="app">
         <!-- Left panel -->
