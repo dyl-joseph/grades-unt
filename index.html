@@ -1654,8 +1654,8 @@
             <div class="cal-bar-title">Weekly Schedule</div>
             <div class="crn-box" id="crnBox">Add courses to see your CRNs</div>
             <div class="cal-bar-actions">
-              <button class="btn btn-warn btn-sm" onclick="openAutoGenModal()">⚡ Auto-Generate</button>
-              <button class="btn btn-ghost btn-sm" onclick="openSaveModal()">💾 Save</button>
+              <button class="btn btn-warn btn-sm" onclick="openAutoGenModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Auto-Generate</button>
+              <button class="btn btn-ghost btn-sm" onclick="openSaveModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save</button>
               <button class="btn btn-ghost btn-sm" onclick="clearAll()">Clear</button>
             </div>
           </div>
@@ -1686,7 +1686,7 @@
     <div class="modal">
       <div class="modal-hdr">
         <div class="modal-title">⏰ Add Busy Times</div>
-        <button class="modal-close" onclick="closeBusyModal()">✕</button>
+        <button class="modal-close" onclick="closeBusyModal()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body">
         <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">Block out times when you're not available to
@@ -1731,8 +1731,8 @@
   <div class="modal-overlay" id="autoGenModal">
     <div class="modal" style="width:600px">
       <div class="modal-hdr">
-        <div class="modal-title">⚡ Configure Auto-Generate</div>
-        <button class="modal-close" onclick="closeAutoGenModal()">✕</button>
+        <div class="modal-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Configure Auto-Generate</div>
+        <button class="modal-close" onclick="closeAutoGenModal()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body">
         <div class="pref-tabs">
@@ -1860,7 +1860,7 @@
         <!-- Generate -->
         <div class="pref-tab-panel" id="ptGenerate">
           <div style="text-align:center;padding:20px 0">
-            <div style="font-size:2rem;margin-bottom:10px">⚡</div>
+            <div style="font-size:2rem;margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
             <div style="font-size:1rem;font-weight:700;margin-bottom:6px">Ready to Generate</div>
             <div style="font-size:.82rem;color:var(--muted);margin-bottom:20px">
               The system will create schedule options based on your preferences and available courses.
@@ -1869,7 +1869,7 @@
             <div id="generateSummary"
               style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:left;font-size:.8rem;margin-bottom:16px">
             </div>
-            <button class="btn btn-warn" style="font-size:.9rem;padding:10px 24px" onclick="runAutoGenerate()">⚡
+            <button class="btn btn-warn" style="font-size:.9rem;padding:10px 24px" onclick="runAutoGenerate()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
               Generate Schedules</button>
           </div>
         </div>
@@ -1885,9 +1885,9 @@
   <div class="modal-overlay" id="genResultsModal">
     <div class="modal" style="width:700px;max-height:90vh">
       <div class="modal-hdr">
-        <div class="modal-title">⚡ Generated Schedules</div>
+        <div class="modal-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Generated Schedules</div>
         <button class="modal-close"
-          onclick="document.getElementById('genResultsModal').classList.remove('open')">✕</button>
+          onclick="document.getElementById('genResultsModal').classList.remove('open')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body" style="padding:12px">
         <div id="genResultsGrid"
@@ -1900,8 +1900,8 @@
   <div class="modal-overlay" id="saveModal">
     <div class="modal" style="width:380px">
       <div class="modal-hdr">
-        <div class="modal-title">💾 Save Schedule</div>
-        <button class="modal-close" onclick="document.getElementById('saveModal').classList.remove('open')">✕</button>
+        <div class="modal-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save Schedule</div>
+        <button class="modal-close" onclick="document.getElementById('saveModal').classList.remove('open')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -1927,7 +1927,7 @@
       <div class="modal-hdr">
         <div class="modal-title" id="secDetailTitle">Section Details</div>
         <button class="modal-close"
-          onclick="document.getElementById('secDetailModal').classList.remove('open')">✕</button>
+          onclick="document.getElementById('secDetailModal').classList.remove('open')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body" id="secDetailBody"></div>
       <div class="modal-footer">
@@ -1954,11 +1954,11 @@
         allCourses = (json.courses || []).map(normalize);
         dataReady = true;
         document.getElementById('dataBanner')?.remove();
-        toast(`Loaded ${allCourses.length} sections ✓`);
+        toast(`Loaded ${allCourses.length} sections <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>`);
       } catch (err) {
         dataError = true;
         const b = document.getElementById('dataBanner');
-        if (b) b.textContent = `⚠️ Could not load unt_sections.json — ${err.message}`;
+        if (b) b.textContent = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Could not load unt_sections.json — ${err.message}`;
       }
     })();
 
@@ -2078,12 +2078,12 @@
       const isLocked = lockedSections.has(courseKey);
       hdr.innerHTML = `
     <div class="cc-left">
-      <div class="cc-code">${courseKey}${isLocked ? ' 🔒' : ''}</div>
+      <div class="cc-code">${courseKey}${isLocked ? ' <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-left: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' : ''}</div>
       <div class="cc-name">${row.course_title || courseKey}</div>
     </div>
     <div class="cc-right">
       <div class="cc-count">${count} section${count !== 1 ? 's' : ''}</div>
-      <span class="cc-arrow">▾</span>
+      <span class="cc-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
     </div>`;
       const dd = document.createElement('div'); dd.className = 'sections-dd'; dd.id = `dd_${safeId(courseKey)}`;
       hdr.onclick = () => toggleCard(courseKey, row, hdr, dd);
@@ -2141,7 +2141,7 @@
       <div class="sec-top">
         <span class="sec-id">Section ${sec.section}${sec.class_nbr ? ` — CRN ${sec.class_nbr}` : ''}</span>
         <div style="display:flex;gap:4px;align-items:center">
-          ${isSel ? `<button class="lock-btn${isLocked ? ' locked' : ''}" title="${isLocked ? 'Unlock' : 'Lock'} this section" onclick="toggleLock(event,'${courseKey}')">${isLocked ? '🔒' : '🔓'}</button>` : ''}
+          ${isSel ? `<button class="lock-btn${isLocked ? ' locked' : ''}" title="${isLocked ? 'Unlock' : 'Lock'} this section" onclick="toggleLock(event,'${courseKey}')">${isLocked ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-left: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' : '🔓'}</button>` : ''}
           <span class="sec-badge ${badgeCls}">${sec.status || '—'}</span>
           <button class="sec-badge" style="background:#e0f2fe;color:#075985;cursor:pointer;border:none;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:10px" onclick="showSecDetail(event,'${courseKey}',${JSON.stringify(sec).replace(/'/g, "&#39;")})">ℹ</button>
         </div>
@@ -2185,7 +2185,7 @@
         });
         row.addEventListener('click', () => {
           if (!lockedSections.has(courseKey)) toggleSection(courseKey, sec, color);
-          else toast('🔒 Unlock this section first to change it');
+          else toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-left: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Unlock this section first to change it');
         });
 
         if (sec.recitations && sec.recitations.length > 0) {
@@ -2213,7 +2213,7 @@
             <div style="font-size:.75rem;font-weight:600;margin-top:3px;">${recTimeStr}</div>
             <div style="font-size:.68rem;color:var(--muted);margin-top:2px;">${rec.room || 'TBA'} · ${rec.instructor || 'TBA'}</div>
           </div>
-          ${isSelRec ? `<span style="font-size:.7rem;color:var(--green);font-weight:700;">✓</span>` : ''}`;
+          ${isSelRec ? `<span style="font-size:.7rem;color:var(--green);font-weight:700;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg></span>` : ''}`;
             recRow.addEventListener('mouseenter', () => { if (!isSelRec) recRow.style.background = '#e6f4ec'; });
             recRow.addEventListener('mouseleave', () => { if (!isSelRec) recRow.style.background = ''; });
             recRow.addEventListener('click', e => { e.stopPropagation(); toggleRecitation(courseKey, rec, color); });
@@ -2253,7 +2253,7 @@
     function toggleLock(e, courseKey) {
       e.stopPropagation();
       if (lockedSections.has(courseKey)) { lockedSections.delete(courseKey); toast(`🔓 Unlocked ${courseKey}`); }
-      else { lockedSections.add(courseKey); toast(`🔒 Locked ${courseKey}`); }
+      else { lockedSections.add(courseKey); toast(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-left: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Locked ${courseKey}`); }
       refreshDd(courseKey);
     }
 
@@ -2286,7 +2286,7 @@
     ${sec.course_title ? `<div style="margin-top:12px;font-size:.82rem"><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Course Title</div>${sec.course_title}</div>` : ''}
     ${sec.description ? `<div style="margin-top:12px;font-size:.82rem"><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Description</div>${sec.description}</div>` : ''}
     ${sec.prerequisites ? `<div style="margin-top:12px;font-size:.82rem"><div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Prerequisites</div>${sec.prerequisites}</div>` : ''}
-    <div style="margin-top:12px;font-size:.75rem;color:var(--muted);background:var(--bg);padding:8px 10px;border-radius:6px">⚠️ Section Notes are not currently displaying in Schedule Builder. View in the Public Class Search for full notes.</div>`;
+    <div style="margin-top:12px;font-size:.75rem;color:var(--muted);background:var(--bg);padding:8px 10px;border-radius:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Section Notes are not currently displaying in Schedule Builder. View in the Public Class Search for full notes.</div>`;
       document.getElementById('secDetailModal').classList.add('open');
     }
 
@@ -2361,9 +2361,9 @@
       const startMin = +document.getElementById('busyStart').value;
       const endMin = +document.getElementById('busyEnd').value;
       const days = ['bM', 'bT', 'bW', 'bR', 'bF'].filter(id => document.getElementById(id).checked).map(id => document.getElementById(id).value);
-      if (!name) { toast('⚠️ Enter a name'); return; }
-      if (endMin <= startMin) { toast('⚠️ End time must be after start time'); return; }
-      if (!days.length) { toast('⚠️ Select at least one day'); return; }
+      if (!name) { toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Enter a name'); return; }
+      if (endMin <= startMin) { toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> End time must be after start time'); return; }
+      if (!days.length) { toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Select at least one day'); return; }
       busyTimes.push({ id: ++busyIdCtr, name, days, startMin, endMin });
       document.getElementById('busyName').value = '';
       ['bM', 'bT', 'bW', 'bR', 'bF'].forEach(id => document.getElementById(id).checked = false);
@@ -2385,7 +2385,7 @@
         <div class="busy-name">${bt.name}</div>
         <div class="busy-time">${bt.days.join('')} · ${fmt(bt.startMin)} – ${fmt(bt.endMin)}</div>
       </div>
-      <button class="busy-x" onclick="removeBusyTime(${bt.id})">✕</button>
+      <button class="busy-x" onclick="removeBusyTime(${bt.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>`;
       }).join('');
     }
@@ -2397,7 +2397,7 @@
     let currentPrefTab = 'time';
 
     function openAutoGenModal() {
-      if (!selected.size) { toast('⚠️ Add at least one course first'); return; }
+      if (!selected.size) { toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Add at least one course first'); return; }
       populateBusyTimeDropdowns();
       populateProfPrefs();
       renderCampusDelivPrefs();
@@ -2489,13 +2489,13 @@
       const extra = document.getElementById('rcExtra').checked;
       document.getElementById('generateSummary').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:6px">
-      <div>📚 <strong>${selected.size}</strong> course${selected.size !== 1 ? 's' : ''} selected</div>
-      <div>📅 Day preference: <strong>${prefs.dayPref}</strong></div>
-      <div>⏱ Gap between classes: <strong>${document.getElementById('minGap').value} – ${document.getElementById('maxGap').value} min</strong></div>
-      ${extra ? `<div>🔢 Course range: <strong>${document.getElementById('minCourses').value} – ${document.getElementById('maxCourses').value}</strong></div>` : ''}
-      ${busyTimes.length ? `<div>⛔ <strong>${busyTimes.length}</strong> busy time${busyTimes.length !== 1 ? 's' : ''} active</div>` : ''}
-      <div>🔒 <strong>${lockedSections.size}</strong> locked section${lockedSections.size !== 1 ? 's' : ''}</div>
-      <div>⚡ Generating up to <strong>${count}</strong> schedule options</div>
+      <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> <strong>${selected.size}</strong> course${selected.size !== 1 ? 's' : ''} selected</div>
+      <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Day preference: <strong>${prefs.dayPref}</strong></div>
+      <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><circle cx="12" cy="13" r="8"></circle><polyline points="12 9 12 13 14 15"></polyline><line x1="12" y1="2" x2="12" y2="4"></line></svg> Gap between classes: <strong>${document.getElementById('minGap').value} – ${document.getElementById('maxGap').value} min</strong></div>
+      ${extra ? `<div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg> Course range: <strong>${document.getElementById('minCourses').value} – ${document.getElementById('maxCourses').value}</strong></div>` : ''}
+      ${busyTimes.length ? `<div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg> <strong>${busyTimes.length}</strong> busy time${busyTimes.length !== 1 ? 's' : ''} active</div>` : ''}
+      <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-left: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> <strong>${lockedSections.size}</strong> locked section${lockedSections.size !== 1 ? 's' : ''}</div>
+      <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Generating up to <strong>${count}</strong> schedule options</div>
     </div>`;
     }
 
@@ -2564,7 +2564,7 @@
         generated.push({ sig, schedule, courses: Object.keys(schedule).length });
       }
 
-      if (!generated.length) { toast('⚠️ Could not generate any conflict-free schedules. Try relaxing preferences.'); return; }
+      if (!generated.length) { toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Could not generate any conflict-free schedules. Try relaxing preferences.'); return; }
       toast(`Generated ${generated.length} schedule${generated.length !== 1 ? 's' : ''}!`);
       renderGeneratedResults(generated);
     }
@@ -2586,7 +2586,7 @@
       <div style="padding:8px 12px;font-size:.73rem;color:var(--muted)">${Object.entries(g.schedule).map(([k, s]) => `<span style="font-family:'DM Mono',monospace;font-weight:700">${k}</span> §${s.section}`).join(' · ')}</div>
       <div class="gc-actions">
         <button class="btn btn-green btn-sm" onclick="applyGenerated(${i},generatedResults)">Apply</button>
-        <button class="btn btn-ghost btn-sm" onclick="saveGenerated(${i},generatedResults)">💾 Save</button>
+        <button class="btn btn-ghost btn-sm" onclick="saveGenerated(${i},generatedResults)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save</button>
       </div>`;
         grid.appendChild(card);
       });
@@ -2638,7 +2638,7 @@
       }
       document.getElementById('genResultsModal').classList.remove('open');
       renderCalendar(); renderTray(); autoSave();
-      toast('✅ Schedule applied!');
+      toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Schedule applied!');
       switchView('manual');
     }
 
@@ -2660,7 +2660,7 @@
       }
       savedSchedules.push(sched);
       persistSaved();
-      toast(`💾 Saved "${name}"`);
+      toast(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Saved "${name}"`);
       document.getElementById('savedCount').textContent = savedSchedules.length;
     }
 
@@ -2668,7 +2668,7 @@
     // SAVE / LOAD SCHEDULES
     // ─────────────────────────────────────────────────────────────────────────────
     function openSaveModal() {
-      if (!selected.size) { toast('⚠️ Add courses before saving'); return; }
+      if (!selected.size) { toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Add courses before saving'); return; }
       document.getElementById('saveNameInput').value = '';
       document.getElementById('makePrimaryCheck').checked = false;
       document.getElementById('saveModal').classList.add('open');
@@ -2690,7 +2690,7 @@
       persistSaved();
       document.getElementById('saveModal').classList.remove('open');
       document.getElementById('savedCount').textContent = savedSchedules.length;
-      toast(`💾 Saved "${name}"`);
+      toast(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Saved "${name}"`);
     }
     function persistSaved() { localStorage.setItem('unt_vsb_saved', JSON.stringify(savedSchedules)); }
     function deleteSavedSchedule(id) {
@@ -2702,7 +2702,7 @@
     }
     function makePrimary(id) {
       savedSchedules.forEach(s => s.primary = s.id === id);
-      persistSaved(); renderSavedSchedules(); toast('✅ Primary schedule set');
+      persistSaved(); renderSavedSchedules(); toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Primary schedule set');
     }
     function loadSavedSchedule(id) {
       const sched = savedSchedules.find(s => s.id === id);
@@ -2720,14 +2720,14 @@
       if (!sched) return;
       const crns = Object.values(sched.selections || {}).filter(s => s.class_nbr).map(s => s.class_nbr);
       Object.values(sched.recitations || {}).filter(r => r.class_nbr).forEach(r => crns.push(r.class_nbr));
-      if (!crns.length) { toast('⚠️ No CRNs found — add courses first'); return; }
-      toast(`🛒 CRNs to add to myUNT cart: ${crns.join(', ')}`);
+      if (!crns.length) { toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> No CRNs found — add courses first'); return; }
+      toast(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> CRNs to add to myUNT cart: ${crns.join(', ')}`);
     }
 
     function renderSavedSchedules() {
       const grid = document.getElementById('savedGrid');
       if (!savedSchedules.length) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:10px">📅</div><strong>No saved schedules yet</strong><br><span style="font-size:.82rem">Build a schedule and click 💾 Save, or use Auto-Generate.</span></div>`;
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><strong>No saved schedules yet</strong><br><span style="font-size:.82rem">Build a schedule and click <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save, or use Auto-Generate.</span></div>`;
         return;
       }
       grid.innerHTML = '';
@@ -2758,9 +2758,9 @@
       ${crns.length ? `<div style="padding:4px 12px 8px;font-size:.72rem;color:var(--muted)">CRNs: <strong style="font-family:'DM Mono',monospace">${crns.join(' · ')}</strong></div>` : ''}
       <div class="sc-actions">
         <button class="btn btn-green btn-sm" onclick="loadSavedSchedule('${sched.id}')">Load</button>
-        <button class="btn btn-ghost btn-sm" onclick="pushToCart('${sched.id}')">🛒 Push to Cart</button>
-        ${!sched.primary ? `<button class="btn btn-ghost btn-sm" onclick="makePrimary('${sched.id}')">★ Primary</button>` : ''}
-        <button class="btn btn-danger btn-sm" onclick="deleteSavedSchedule('${sched.id}')">🗑</button>
+        <button class="btn btn-ghost btn-sm" onclick="pushToCart('${sched.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Push to Cart</button>
+        ${!sched.primary ? `<button class="btn btn-ghost btn-sm" onclick="makePrimary('${sched.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Primary</button>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="deleteSavedSchedule('${sched.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
       </div>`;
         grid.appendChild(card);
       });
@@ -2802,7 +2802,7 @@
           const ev = document.createElement('div');
           ev.className = 'ev ev-busy';
           ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:0;right:0;`;
-          ev.innerHTML = `<div class="ev-code" style="color:var(--danger)">⛔ ${bt.name}</div>`;
+          ev.innerHTML = `<div class="ev-code" style="color:var(--danger)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg> ${bt.name}</div>`;
           ev.title = `Busy: ${bt.name}`;
           cell.appendChild(ev);
         });
@@ -2920,20 +2920,20 @@
         item.innerHTML = `
       <div class="tray-dot" style="background:${sec._color}"></div>
       <div class="tray-info">
-        <div class="tray-code">${key} — Sec ${sec.section}${isLocked ? ' 🔒' : ''}</div>
+        <div class="tray-code">${key} — Sec ${sec.section}${isLocked ? ' <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-left: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' : ''}</div>
         <div class="tray-sub">${timeStr} · ${sec.instructor || 'TBA'}</div>
       </div>
-      <button class="tray-x" onclick="removeCourse('${key}')">✕</button>`;
+      <button class="tray-x" onclick="removeCourse('${key}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>`;
         tray.appendChild(item);
         const selRec = selectedRecitations.get(key);
         if (selRec) {
           const recTimeStr = !selRec.days ? 'Online' : `${selRec.days} ${formatTime(selRec.start_time)}–${formatTime(selRec.end_time)}`;
           const recItem = document.createElement('div'); recItem.className = 'tray-item'; recItem.style.cssText = 'padding-left:26px;background:#f7fdf9;';
-          recItem.innerHTML = `<div class="tray-dot" style="background:${sec._color};opacity:.6;"></div><div class="tray-info"><div class="tray-code" style="font-size:.7rem;">↳ Rec ${selRec.section}${selRec.class_nbr ? ` (CRN ${selRec.class_nbr})` : ''}</div><div class="tray-sub">${recTimeStr} · ${selRec.instructor || 'TBA'}</div></div><button class="tray-x" onclick="removeRec('${key}')">✕</button>`;
+          recItem.innerHTML = `<div class="tray-dot" style="background:${sec._color};opacity:.6;"></div><div class="tray-info"><div class="tray-code" style="font-size:.7rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 2px;"><polyline points="15 10 20 15 15 20"></polyline><path d="M4 4v7a4 4 0 0 0 4 4h12"></path></svg> Rec ${selRec.section}${selRec.class_nbr ? ` (CRN ${selRec.class_nbr})` : ''}</div><div class="tray-sub">${recTimeStr} · ${selRec.instructor || 'TBA'}</div></div><button class="tray-x" onclick="removeRec('${key}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>`;
           tray.appendChild(recItem);
         } else if (sec.recitations && sec.recitations.length > 0) {
           const nudge = document.createElement('div'); nudge.className = 'tray-item'; nudge.style.cssText = 'padding-left:26px;background:#fffbeb;';
-          nudge.innerHTML = `<div class="tray-dot" style="background:var(--warn);"></div><div class="tray-info"><div class="tray-code" style="font-size:.7rem;color:var(--warn);">↳ Pick a recitation</div><div class="tray-sub">Expand the section above to choose</div></div>`;
+          nudge.innerHTML = `<div class="tray-dot" style="background:var(--warn);"></div><div class="tray-info"><div class="tray-code" style="font-size:.7rem;color:var(--warn);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 2px;"><polyline points="15 10 20 15 15 20"></polyline><path d="M4 4v7a4 4 0 0 0 4 4h12"></path></svg> Pick a recitation</div><div class="tray-sub">Expand the section above to choose</div></div>`;
           tray.appendChild(nudge);
         }
       }
@@ -2969,17 +2969,17 @@
     function showResumeBanner(saved, date) {
       const banner = document.createElement('div'); banner.id = 'resumeBanner';
       banner.style.cssText = `position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1a1d23;color:#fff;border-radius:12px;padding:14px 18px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);display:flex;align-items:center;gap:14px;font-size:.82rem;max-width:420px;width:calc(100vw - 40px);`;
-      banner.innerHTML = `<div style="flex:1;min-width:0"><div style="font-weight:700;margin-bottom:2px">📅 Saved schedule found</div><div style="color:#9ca3af;font-size:.75rem">${saved.selections.length} course${saved.selections.length !== 1 ? 's' : ''} · ${date}</div></div><button id="resumeBtn" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Resume</button><button id="freshBtn" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Start Fresh</button>`;
+      banner.innerHTML = `<div style="flex:1;min-width:0"><div style="font-weight:700;margin-bottom:2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Saved schedule found</div><div style="color:#9ca3af;font-size:.75rem">${saved.selections.length} course${saved.selections.length !== 1 ? 's' : ''} · ${date}</div></div><button id="resumeBtn" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Resume</button><button id="freshBtn" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Start Fresh</button>`;
       document.body.appendChild(banner);
       document.getElementById('resumeBtn').onclick = () => { banner.remove(); applyResume(saved); };
-      document.getElementById('freshBtn').onclick = () => { localStorage.removeItem('unt_vsb_current'); banner.remove(); toast('Starting fresh 🌱'); };
+      document.getElementById('freshBtn').onclick = () => { localStorage.removeItem('unt_vsb_current'); banner.remove(); toast('Starting fresh <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M12 22c0-8 6-12 6-12s-4-2-8 2-8-2-8-2 6 4 6 12"></path><path d="M12 22V10"></path></svg>'); };
     }
     async function applyResume(saved) {
       if (!dataReady) {
         toast('Loading data…');
         await new Promise(res => { const c = setInterval(() => { if (dataReady || dataError) { clearInterval(c); res(); } }, 100); });
       }
-      if (dataError) { toast('⚠️ Couldn\'t load data'); return; }
+      if (dataError) { toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Couldn\'t load data'); return; }
       for (const s of saved.selections) {
         let sec = allCourses.find(c => c.class_nbr === s.classNbr) || allCourses.find(c => c.subject === s.subject && c.course_number === s.courseNumber && c.section === s.section);
         if (!sec) continue;
@@ -2988,7 +2988,7 @@
         selected.set(s.courseKey, { ...sec, _color: color, _key: s.courseKey });
         if (!sectionsCache.has(s.courseKey)) sectionsCache.set(s.courseKey, allCourses.filter(c => c.subject === sec.subject && c.course_number === sec.course_number));
       }
-      renderCalendar(); renderTray(); toast(`✅ Restored ${selected.size} course${selected.size !== 1 ? 's' : ''}`);
+      renderCalendar(); renderTray(); toast(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Restored ${selected.size} course${selected.size !== 1 ? 's' : ''}`);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
