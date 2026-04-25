@@ -5,44 +5,61 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UNT Schedule Builder</title>
+  <script>
+    // Theme detection & application (immediate to prevent flash)
+    (function() {
+      const savedTheme = localStorage.getItem('unt_vsb_theme');
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (systemDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
   <style>
     :root {
-      /* Jungle Theme Palette */
+      /* Light Jungle Theme */
       --green: #1B5E20;
       --green-d: #0D3B13;
       --green-l: #C8E6C9;
       --gold: #F9A825;
-      --bg: #E8DCCA; /* Jungle Tan */
+      --bg: #E8DCCA;
       --surface: rgba(255, 255, 255, 0.8);
-      --border: #BBA882; /* Jungle Tan Dark */
-      --text: #0A2F11; /* Jungle Canopy */
-      --muted: #4E342E; /* Jungle Bark */
+      --border: #BBA882;
+      --text: #0A2F11;
+      --muted: #4E342E;
       --danger: #e53e3e;
       --warn: #d97706;
       --info: #3b82f6;
-
-      /* Animation Timings */
       --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --glass-bg: rgba(255, 255, 255, 0.5);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] {
+      --green: #2E7D32;
+      --green-d: #1B5E20;
+      --green-l: rgba(27, 94, 32, 0.3);
+      --gold: #FFB300;
+      --bg: #0A2F11; /* Jungle Canopy */
+      --surface: rgba(13, 59, 19, 0.7);
+      --border: #1B5E20;
+      --text: #E8DCCA;
+      --muted: #BBA882;
+      --glass-bg: rgba(0, 0, 0, 0.3);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
     /* Glassmorphism Utility */
     .glass-glossy {
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.5) 0%,
-        rgba(255, 255, 255, 0.25) 50%,
-        rgba(255, 255, 255, 0.4) 100%
-      );
-      box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.08),
-        inset 0 1px 1px rgba(255, 255, 255, 0.6),
-        inset 0 -1px 1px rgba(255, 255, 255, 0.1);
+      background: var(--glass-bg);
+      box-shadow: var(--shadow);
       -webkit-backdrop-filter: blur(24px) saturate(1.8);
       backdrop-filter: blur(24px) saturate(1.8);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 1px solid var(--glass-border);
     }
 
     /* Sparkle text animation */
@@ -85,14 +102,19 @@
 
     body {
       font-family: 'DM Sans', sans-serif;
-      background: linear-gradient(-45deg, #E8DCCA, #F4F1EA, #E8DCCA, #DCD0B9);
+      background: linear-gradient(-45deg, var(--bg), #F4F1EA, var(--bg), var(--border));
       background-size: 400% 400%;
       animation: jungle-gradient 20s ease infinite;
       color: var(--text);
       height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden
+      overflow: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    [data-theme="dark"] body {
+      background: linear-gradient(-45deg, #0A2F11, #1B5E20, #0A2F11, #051A09);
     }
 
     /* ── Header ── */
@@ -1565,6 +1587,9 @@
     <div class="header-right">
       <button class="header-tab active" id="tabManual" onclick="switchView('manual')">My Schedule</button>
       <button class="header-tab" id="tabSaved" onclick="switchView('saved')">Saved (<span id="savedCount">0</span>)</button>
+      <button class="header-tab" id="themeToggle" onclick="toggleTheme()" title="Toggle Theme" style="padding: 5px 8px;">
+        <span id="themeIcon">🌓</span>
+      </button>
       <select class="term-select" id="termSelect">
         <option value="1268" selected>Fall 2026</option>
       </select>
@@ -1977,6 +2002,21 @@
     const DAYS = ["M", "T", "W", "R", "F"];
     const DAY_LABELS = { M: "Mon", T: "Tue", W: "Wed", R: "Thu", F: "Fri" };
     const START_H = 7, END_H = 22, SLOT = 48;
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // THEME TOGGLE
+    // ─────────────────────────────────────────────────────────────────────────────
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('unt_vsb_theme', next);
+      updateThemeIcon(next);
+    }
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('themeIcon');
+      if (icon) icon.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
 
     // ─────────────────────────────────────────────────────────────────────────────
     // VIEW SWITCHING
@@ -2949,6 +2989,7 @@
     renderCalendar();
     document.getElementById('savedCount').textContent = savedSchedules.length;
     populateBusyTimeDropdowns();
+    updateThemeIcon(document.documentElement.getAttribute('data-theme'));
     setTimeout(loadAutoSaved, 500);
   </script>
 </body>
