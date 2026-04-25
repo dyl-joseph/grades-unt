@@ -15,79 +15,74 @@
     })();
   </script>
   <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
     rel="stylesheet" />
   <style>
     :root {
-      /* Light Jungle Theme */
-      --green: #1B5E20;
-      --green-d: #0D3B13;
-      --green-l: #C8E6C9;
-      --gold: #F9A825;
-      --bg: #E8DCCA;
-      --surface: rgba(255, 255, 255, 0.8);
-      --border: #BBA882;
-      --text: #0A2F11;
-      --muted: #4E342E;
-      --danger: #e53e3e;
-      --warn: #d97706;
-      --info: #3b82f6;
-      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      --glass-bg: rgba(255, 255, 255, 0.5);
-      --glass-border: rgba(255, 255, 255, 0.3);
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      /* Primary (Forest Green) */
+      --green: #27815A;
+      --green-d: #1B5E3B;
+      --green-l: #E8F8F0;
+      --gold: #B8763B;
+      --bg: #FFFFFF;
+      --surface: #FFFFFF;
+      --bg-secondary: #F8F9FA;
+      --bg-tertiary: #F1F3F5;
+      --border: #E2E5E9;
+      --border-subtle: #F1F3F5;
+      --text: #23282F;
+      --muted: #6E7785;
+      --fg-secondary: #4A5261;
+      --danger: #E05252;
+      --warn: #B8763B;
+      --info: #27815A;
+      --success: #2DA563;
+      --transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.14);
+      --shadow: var(--shadow-md);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-full: 9999px;
+      /* Course Block Colors */
+      --course-1: #4F6AE8; --course-1-bg: #EEF1FD;
+      --course-2: #E05280; --course-2-bg: #FDEEF2;
+      --course-3: #2DA563; --course-3-bg: #EEFAF3;
+      --course-4: #E8A84F; --course-4-bg: #FDF5EB;
+      --course-5: #8B5CF6; --course-5-bg: #F3EFFE;
+      --course-6: #06B6D4; --course-6-bg: #ECFEFF;
+      --course-7: #F97316; --course-7-bg: #FFF7ED;
+      --course-8: #EC4899; --course-8-bg: #FDF2F8;
     }
 
     [data-theme="dark"] {
-      --green: #2E7D32;
-      --green-d: #1B5E20;
-      --green-l: rgba(27, 94, 32, 0.3);
-      --gold: #FFB300;
-      --bg: #0A2F11;
-      /* Jungle Canopy */
-      --surface: rgba(13, 59, 19, 0.7);
-      --border: #1B5E20;
-      --text: #E8DCCA;
-      --muted: #BBA882;
-      --glass-bg: rgba(0, 0, 0, 0.3);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    }
-
-    /* Glassmorphism Utility */
-    .glass-glossy {
-      background: var(--glass-bg);
-      box-shadow: var(--shadow);
-      -webkit-backdrop-filter: blur(24px) saturate(1.8);
-      backdrop-filter: blur(24px) saturate(1.8);
-      border: 1px solid var(--glass-border);
-    }
-
-    /* Sparkle text animation */
-    @keyframes sparkle-shift {
-      0% {
-        background-position: -200% center;
-      }
-
-      100% {
-        background-position: 200% center;
-      }
-    }
-
-    .sparkle-text {
-      background-image: linear-gradient(105deg,
-          currentColor 0%,
-          currentColor 44%,
-          rgba(134, 239, 172, 0.9) 47%,
-          rgba(134, 239, 172, 1) 49%,
-          rgba(134, 239, 172, 0.9) 51%,
-          currentColor 54%,
-          currentColor 100%);
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: sparkle-shift 3s ease-in-out infinite;
+      --green: #27815A;
+      --green-d: #1B5E3B;
+      --green-l: rgba(39,129,90,0.15);
+      --gold: #D4975C;
+      --bg: #0B1026;
+      --surface: #1E2644;
+      --bg-secondary: #0F1630;
+      --bg-tertiary: #161E3A;
+      --border: rgba(255,255,255,0.08);
+      --border-subtle: rgba(255,255,255,0.04);
+      --text: #E8E0D6;
+      --muted: #6E6860;
+      --fg-secondary: #B0A89E;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+      --shadow: var(--shadow-md);
+      --course-1-bg: rgba(79,106,232,0.12);
+      --course-2-bg: rgba(224,82,128,0.12);
+      --course-3-bg: rgba(45,165,99,0.12);
+      --course-4-bg: rgba(232,168,79,0.12);
+      --course-5-bg: rgba(139,92,246,0.12);
+      --course-6-bg: rgba(6,182,212,0.12);
+      --course-7-bg: rgba(249,115,22,0.12);
+      --course-8-bg: rgba(236,72,153,0.12);
     }
 
     *,
@@ -98,60 +93,42 @@
       padding: 0
     }
 
-    @keyframes jungle-gradient {
-      0% {
-        background-position: 0% 50%;
-      }
-
-      50% {
-        background-position: 100% 50%;
-      }
-
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: linear-gradient(-45deg, var(--bg), #F4F1EA, var(--bg), var(--border));
-      background-size: 400% 400%;
-      animation: jungle-gradient 20s ease infinite;
+      font-family: 'Albert Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: var(--bg);
       color: var(--text);
       height: 100vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    [data-theme="dark"] body {
-      background: linear-gradient(-45deg, #0A2F11, #1B5E20, #0A2F11, #051A09);
+      transition: background 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: 0.01em;
+      line-height: 1.5;
     }
 
     /* ── Header ── */
     header {
-      background: rgba(27, 94, 32, 0.9);
-      color: #fff;
-      padding: 0 24px;
-      height: 56px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 0 20px;
+      height: 52px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+      box-shadow: var(--shadow-sm);
       z-index: 200;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px)
+      border-bottom: 1px solid var(--border);
     }
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       font-weight: 700;
-      font-size: 1rem
+      font-size: 1.125rem;
+      color: var(--text);
     }
 
     .header-right {
@@ -161,49 +138,54 @@
     }
 
     .term-select {
-      background: rgba(255, 255, 255, .15);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, .3);
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .78rem;
-      font-weight: 600;
+      background: var(--bg-tertiary);
+      color: var(--fg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      font-family: 'Albert Sans', sans-serif;
+      font-size: .8125rem;
+      font-weight: 700;
       cursor: pointer;
       outline: none;
       appearance: none;
       -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='white'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E7785'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 8px center;
-      padding-right: 24px
+      background-position: right 10px center;
+      padding-right: 26px
     }
 
     .term-select:hover {
-      background-color: rgba(255, 255, 255, .25)
+      background-color: var(--bg-secondary)
     }
 
     .term-select option {
-      background: var(--green);
-      color: #fff
+      background: var(--surface);
+      color: var(--text)
     }
 
     .header-tab {
-      background: rgba(255, 255, 255, .12);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, .25);
-      border-radius: 6px;
-      padding: 5px 12px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .78rem;
-      font-weight: 600;
+      background: transparent;
+      color: var(--fg-secondary);
+      border: none;
+      border-radius: var(--radius-full);
+      padding: 8px 16px;
+      font-family: 'Albert Sans', sans-serif;
+      font-size: .8125rem;
+      font-weight: 400;
       cursor: pointer;
-      transition: all .15s
+      transition: all 150ms cubic-bezier(0.22, 1, 0.36, 1)
     }
 
-    .header-tab:hover,
+    .header-tab:hover {
+      background: var(--bg-secondary)
+    }
+
     .header-tab.active {
-      background: rgba(255, 255, 255, .28)
+      background: var(--green-l);
+      color: var(--green);
+      font-weight: 700
     }
 
     /* ── App layout ── */
@@ -214,14 +196,14 @@
     }
 
     .left {
-      width: 350px;
+      width: 340px;
+      min-width: 340px;
       flex-shrink: 0;
       background: var(--surface);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      backdrop-filter: blur(8px);
     }
 
     .right {
@@ -234,19 +216,21 @@
     /* ── Buttons ── */
     .btn {
       border: none;
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .84rem;
-      font-weight: 600;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-family: 'Albert Sans', sans-serif;
+      font-size: .8125rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: var(--transition);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: all 150ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
     }
 
     .btn-green {
@@ -259,9 +243,9 @@
     }
 
     .btn-ghost {
-      background: var(--bg);
+      background: var(--bg-tertiary);
       color: var(--text);
-      border: 1.5px solid var(--border)
+      border: 1px solid var(--border)
     }
 
     .btn-ghost:hover {
@@ -270,12 +254,12 @@
     }
 
     .btn-warn {
-      background: var(--warn);
+      background: var(--gold);
       color: #fff
     }
 
     .btn-warn:hover {
-      background: #b45309
+      background: #A06530
     }
 
     .btn-sm {
@@ -315,21 +299,20 @@
 
     .search-row input {
       flex: 1;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 11px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .86rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: 'Albert Sans', sans-serif;
+      font-size: .875rem;
       outline: none;
-      background: rgba(255, 255, 255, 0.4);
-      backdrop-filter: blur(4px);
+      background: var(--bg);
+      color: var(--text);
       transition: var(--transition);
     }
 
     .search-row input:focus {
       border-color: var(--green);
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
+      box-shadow: 0 0 0 2px rgba(39, 129, 90, 0.15);
     }
 
     .results-scroll {
@@ -370,7 +353,7 @@
     }
 
     .cc-header:hover {
-      background: rgba(27, 94, 32, 0.05);
+      background: var(--bg-secondary);
     }
 
     .cc-header.open {
@@ -385,11 +368,11 @@
     }
 
     .cc-code {
-      font-family: 'DM Mono', monospace;
+      font-family: 'Albert Sans', sans-serif;
       font-weight: 700;
-      font-size: .84rem;
-      color: var(--green);
-      letter-spacing: -0.2px;
+      font-size: .875rem;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
     }
 
     .cc-name {
@@ -425,7 +408,7 @@
 
     .sections-dd {
       display: none;
-      background: rgba(255, 255, 255, 0.4);
+      background: var(--bg-secondary);
       border-top: 1px solid var(--border)
     }
 
@@ -450,11 +433,11 @@
     }
 
     .sec-row:hover {
-      background: rgba(27, 94, 32, 0.08)
+      background: var(--bg-secondary)
     }
 
     .sec-row.previewing {
-      background: rgba(27, 94, 32, 0.12)
+      background: var(--green-l)
     }
 
     .sec-row.selected {
@@ -518,10 +501,11 @@
     }
 
     .sec-id {
-      font-family: 'DM Mono', monospace;
-      font-size: .78rem;
+      font-family: 'Albert Sans', sans-serif;
+      font-size: .8125rem;
       font-weight: 700;
-      color: var(--text)
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
     }
 
     .sec-badge {
@@ -533,18 +517,18 @@
     }
 
     .b-open {
-      background: #d1fae5;
-      color: #065f46
+      background: #EEFAF3;
+      color: #2DA563
     }
 
     .b-closed {
-      background: #fee2e2;
-      color: #991b1b
+      background: #FDEEEE;
+      color: #E05252
     }
 
     .b-wait {
-      background: #fef3c7;
-      color: #92400e
+      background: #F2DCC4;
+      color: #B8763B
     }
 
     .sec-time {
@@ -690,9 +674,10 @@
     }
 
     .tray-code {
-      font-size: .76rem;
+      font-size: .8125rem;
       font-weight: 700;
-      font-family: 'DM Mono', monospace
+      font-family: 'Albert Sans', sans-serif;
+      font-variant-numeric: tabular-nums;
     }
 
     .tray-sub {
@@ -735,8 +720,9 @@
     }
 
     .crn-box {
-      font-family: 'DM Mono', monospace;
-      font-size: .72rem;
+      font-family: 'Albert Sans', sans-serif;
+      font-variant-numeric: tabular-nums;
+      font-size: .75rem;
       color: var(--muted);
       flex: 1;
       text-align: center
@@ -761,30 +747,28 @@
 
     .calendar {
       display: grid;
-      grid-template-columns: 46px repeat(5, 1fr);
+      grid-template-columns: 56px repeat(5, 1fr);
       min-width: 500px;
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
+      background: var(--bg);
+      border-radius: var(--radius-lg);
       border: 1px solid var(--border);
       overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08)
+      box-shadow: var(--shadow-sm)
     }
 
     .cal-corner {
-      background: var(--green-d)
+      background: var(--bg-secondary)
     }
 
     .cal-day-hdr {
-      background: var(--green);
-      color: #fff;
+      background: var(--bg-secondary);
+      color: var(--fg-secondary);
       text-align: center;
-      padding: 12px 4px;
-      font-size: .74rem;
+      padding: 10px 0;
+      font-size: .75rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .8px;
-      border-right: 1px solid rgba(255, 255, 255, 0.1)
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border-subtle)
     }
 
     .cal-day-hdr:last-child {
@@ -793,23 +777,25 @@
 
     .time-lbl {
       text-align: right;
-      padding: 0 6px 0 0;
-      font-size: .6rem;
-      font-family: 'DM Mono', monospace;
-      color: #c0c4cc;
-      height: 48px;
+      padding: 0 8px 0 0;
+      font-size: .6875rem;
+      font-family: 'Albert Sans', sans-serif;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+      height: 60px;
       display: flex;
       align-items: flex-start;
-      padding-top: 3px;
-      border-top: 1px solid var(--border);
+      padding-top: 4px;
+      border-top: 1px solid var(--border-subtle);
       border-right: 1px solid var(--border)
     }
 
     .cal-cell {
-      border-top: 1px solid var(--border);
-      border-right: 1px solid var(--border);
-      height: 48px;
-      position: relative
+      border-top: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-subtle);
+      height: 60px;
+      position: relative;
+      background: var(--bg)
     }
 
     .cal-cell:last-child {
@@ -845,23 +831,21 @@
     /* ── Calendar events ── */
     .ev {
       position: absolute;
-      border-radius: 6px;
-      padding: 4px 6px;
-      font-size: .65rem;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: .625rem;
       font-weight: 700;
-      line-height: 1.2;
+      line-height: 1.3;
       overflow: hidden;
       z-index: 10;
       cursor: pointer;
-      transition: var(--transition);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 150ms cubic-bezier(0.22, 1, 0.36, 1);
+      border-left: 3px solid;
     }
 
     .ev:hover {
-      filter: saturate(1.2) brightness(1.05);
       z-index: 25;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: var(--shadow-md);
       transform: scale(1.02);
     }
 
@@ -940,7 +924,7 @@
 
     .schedule-card:hover {
       border-color: var(--green);
-      box-shadow: 0 3px 12px rgba(27, 94, 32, .15)
+      box-shadow: var(--shadow-md)
     }
 
     .schedule-card.primary {
@@ -981,30 +965,30 @@
     }
 
     .sc-mini-hdr {
-      background: var(--green);
-      color: #fff;
+      background: var(--bg-secondary);
+      color: var(--fg-secondary);
       text-align: center;
       padding: 2px 1px;
       font-weight: 700
     }
 
     .sc-mini-corner {
-      background: var(--green-d)
+      background: var(--bg-secondary)
     }
 
     .sc-mini-lbl {
-      background: #f5f5f5;
+      background: var(--bg-secondary);
       text-align: right;
       padding: 1px 3px 1px 0;
       color: #aaa;
       border-top: 1px solid #eee;
-      font-family: 'DM Mono', monospace
+      font-family: 'Albert Sans', sans-serif; font-variant-numeric: tabular-nums
     }
 
     .sc-mini-cell {
-      background: #fff;
-      border-top: 1px solid #eee;
-      border-left: 1px solid #eee;
+      background: var(--bg);
+      border-top: 1px solid var(--border-subtle);
+      border-left: 1px solid var(--border-subtle);
       height: 8px;
       position: relative
     }
@@ -1048,17 +1032,16 @@
     }
 
     .modal {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(20px);
-      border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
       width: 520px;
       max-width: calc(100vw - 32px);
       max-height: 85vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 1px solid var(--border);
     }
 
     .modal-hdr {
@@ -1095,11 +1078,10 @@
 
     .modal-footer {
       padding: 16px 24px;
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      border-top: 1px solid var(--border);
       display: flex;
       gap: 10px;
       justify-content: flex-end;
-      background: rgba(255, 255, 255, 0.3);
     }
 
     /* ── Busy times ── */
@@ -1166,20 +1148,20 @@
 
     .form-input {
       width: 100%;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      padding: 9px 12px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .86rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: 'Albert Sans', sans-serif;
+      font-size: .875rem;
       outline: none;
-      background: rgba(255, 255, 255, 0.5);
+      background: var(--bg);
+      color: var(--text);
       transition: var(--transition);
     }
 
     .form-input:focus {
       border-color: var(--green);
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
+      box-shadow: 0 0 0 2px rgba(39, 129, 90, 0.15);
     }
 
     .form-row {
@@ -1289,13 +1271,13 @@
     }
 
     .pref-btn.active-dontw {
-      background: #fee2e2;
+      background: #FDEEEE;
       border-color: var(--danger);
       color: var(--danger)
     }
 
     .pref-btn.active-dontp {
-      background: #fef3c7;
+      background: #F2DCC4;
       border-color: var(--warn);
       color: var(--warn)
     }
@@ -1307,9 +1289,9 @@
     }
 
     .pref-btn.active-prefer {
-      background: #d1fae5;
-      border-color: #059669;
-      color: #065f46
+      background: #EEFAF3;
+      border-color: var(--success);
+      color: var(--success)
     }
 
     .pref-btn.active-want {
@@ -1363,17 +1345,18 @@
       position: fixed;
       bottom: 18px;
       right: 18px;
-      background: #1a1d23;
-      color: #fff;
-      padding: 9px 15px;
-      border-radius: 8px;
-      font-size: .8rem;
-      font-weight: 500;
+      background: #23282F;
+      color: #E8E0D6;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      font-size: .8125rem;
+      font-weight: 700;
       z-index: 9999;
       opacity: 0;
       transform: translateY(6px);
-      transition: all .22s;
-      pointer-events: none
+      transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+      box-shadow: var(--shadow-lg);
     }
 
     .toast.show {
@@ -1410,18 +1393,17 @@
 
     .generated-card {
       background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--shadow-sm);
       transition: var(--transition);
-      backdrop-filter: blur(8px)
     }
 
     .generated-card:hover {
       border-color: var(--green);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12)
+      box-shadow: var(--shadow-md)
     }
 
     .gc-header {
@@ -1430,7 +1412,7 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border);
-      background: #f9fafb
+      background: var(--bg-secondary)
     }
 
     .gc-title {
@@ -1462,31 +1444,30 @@
 
     .schedule-card {
       background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--shadow-sm);
       transition: var(--transition);
       display: flex;
       flex-direction: column;
-      backdrop-filter: blur(8px)
     }
 
     .schedule-card:hover {
       border-color: var(--green);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12)
+      box-shadow: var(--shadow-md)
     }
 
     .schedule-card.primary {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 2px var(--gold), 0 8px 24px rgba(0, 0, 0, 0.12)
+      border-color: var(--green);
+      box-shadow: 0 0 0 2px var(--green), var(--shadow-md)
     }
 
     .sc-header {
       padding: 12px 16px;
-      background: rgba(255, 255, 255, 0.4);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05)
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border)
     }
 
     .sc-name {
@@ -1498,13 +1479,12 @@
     }
 
     .primary-badge {
-      background: var(--gold);
-      color: #fff;
-      font-size: .6rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 800;
-      letter-spacing: .5px
+      background: var(--green-l);
+      color: var(--green);
+      font-size: .6875rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
     }
 
     .sc-hours {
@@ -1518,8 +1498,7 @@
       display: flex;
       gap: 8px;
       margin-top: auto;
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
-      background: rgba(255, 255, 255, 0.2)
+      border-top: 1px solid var(--border);
     }
 
     /* ── Scrollbars ── */
@@ -1559,28 +1538,31 @@
 
     /* ── Campus badge ── */
     .campus-badge {
-      font-size: .6rem;
-      padding: 1px 5px;
-      background: #e0f2fe;
-      color: #075985;
-      border-radius: 4px;
+      font-size: .625rem;
+      padding: 2px 7px;
+      background: var(--green-l);
+      color: var(--green);
+      border-radius: var(--radius-full);
       font-weight: 700
     }
 
     /* save modal */
     .save-name-input {
       width: 100%;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 13px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .9rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: 'Albert Sans', sans-serif;
+      font-size: .875rem;
       outline: none;
+      background: var(--bg);
+      color: var(--text);
       margin-bottom: 10px
     }
 
     .save-name-input:focus {
-      border-color: var(--green)
+      border-color: var(--green);
+      box-shadow: 0 0 0 2px rgba(39, 129, 90, 0.15);
     }
 
     .primary-check-row {
@@ -1590,12 +1572,18 @@
       font-size: .84rem;
       cursor: pointer
     }
+
+    /* Focus accessibility */
+    :focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 2px;
+    }
   </style>
 </head>
 
 <body>
   <header>
-    <div class="logo sparkle-text">UNT Schedule Builder</div>
+    <div class="logo">UNT Schedule Builder</div>
     <div class="header-right">
       <button class="header-tab active" id="tabManual" onclick="switchView('manual')">My Schedule</button>
       <button class="header-tab" id="tabSaved" onclick="switchView('saved')">Saved (<span
@@ -1637,7 +1625,7 @@
               Added to Schedule
               <div style="display:flex;gap:8px;align-items:center">
                 <button class="header-tab btn-sm"
-                  style="background:rgba(27,94,32,.1);color:var(--green);border:1px solid var(--green-l);border-radius:6px;padding:3px 9px;font-size:.67rem;font-weight:700;cursor:pointer"
+                  style="background:var(--green-l);color:var(--green);border:1px solid var(--border);border-radius:var(--radius-full);padding:4px 10px;font-size:.6875rem;font-weight:700;cursor:pointer"
                   onclick="openBusyModal()">⏰ Busy Times</button>
                 <button class="tray-clear-btn" onclick="clearAll()">Clear all</button>
               </div>
@@ -1958,7 +1946,7 @@
       } catch (err) {
         dataError = true;
         const b = document.getElementById('dataBanner');
-        if (b) b.textContent = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Could not load unt_sections.json — ${err.message}`;
+        if (b) b.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Could not load unt_sections.json — ${err.message}`;
       }
     })();
 
@@ -2012,7 +2000,7 @@
     // Saved schedules: [{id, name, primary, selections, recitations, colors, createdAt}]
     let savedSchedules = JSON.parse(localStorage.getItem('unt_vsb_saved') || '[]');
 
-    const PALETTE = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1", "#14b8a6", "#a855f7"];
+    const PALETTE = ["#4F6AE8", "#E05280", "#2DA563", "#E8A84F", "#8B5CF6", "#06B6D4", "#F97316", "#EC4899", "#6366f1", "#14b8a6", "#a855f7", "#84cc16"];
     const DAYS = ["M", "T", "W", "R", "F"];
     const DAY_LABELS = { M: "Mon", T: "Tue", W: "Wed", R: "Thu", F: "Fri" };
     const START_H = 7, END_H = 22, SLOT = 48;
@@ -2207,7 +2195,7 @@
           <div style="width:6px;height:6px;border-radius:1px;margin-top:5px;flex-shrink:0;background:${color};opacity:.7;"></div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:5px;">
-              <span style="font-family:'DM Mono',monospace;font-size:.73rem;font-weight:700;">Rec ${rec.section}${rec.class_nbr ? ` — CRN ${rec.class_nbr}` : ''}</span>
+              <span style="font-family:'Albert Sans',sans-serif;font-variant-numeric:tabular-nums;font-size:.73rem;font-weight:700;">Rec ${rec.section}${rec.class_nbr ? ` — CRN ${rec.class_nbr}` : ''}</span>
               <span class="sec-badge ${recBadgeCls}" style="font-size:.58rem;">${rec.status || '—'}</span>
             </div>
             <div style="font-size:.75rem;font-weight:600;margin-top:3px;">${recTimeStr}</div>
@@ -2583,7 +2571,7 @@
         <div class="gc-hours">${totalHrs} hrs · ${g.courses} courses</div>
       </div>
       ${mini}
-      <div style="padding:8px 12px;font-size:.73rem;color:var(--muted)">${Object.entries(g.schedule).map(([k, s]) => `<span style="font-family:'DM Mono',monospace;font-weight:700">${k}</span> §${s.section}`).join(' · ')}</div>
+      <div style="padding:8px 12px;font-size:.73rem;color:var(--muted)">${Object.entries(g.schedule).map(([k, s]) => `<span style="font-family:'Albert Sans',sans-serif;font-variant-numeric:tabular-nums;font-weight:700">${k}</span> §${s.section}`).join(' · ')}</div>
       <div class="gc-actions">
         <button class="btn btn-green btn-sm" onclick="applyGenerated(${i},generatedResults)">Apply</button>
         <button class="btn btn-ghost btn-sm" onclick="saveGenerated(${i},generatedResults)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save</button>
@@ -2616,7 +2604,7 @@
       DAYS.forEach(d => { html += `<div style="background:var(--green);color:#fff;text-align:center;padding:2px;font-weight:700">${DAY_LABELS[d].slice(0, 2)}</div>`; });
       for (let r = 0; r < rows; r++) {
         const hr = MINI_START + r;
-        html += `<div style="background:#f5f5f5;text-align:right;padding:1px 2px 1px 0;color:#aaa;border-top:1px solid #eee;font-family:'DM Mono',monospace">${hr < 12 ? hr + 'a' : hr === 12 ? '12p' : (hr - 12) + 'p'}</div>`;
+        html += `<div style="background:var(--bg-secondary);text-align:right;padding:1px 2px 1px 0;color:var(--muted);border-top:1px solid var(--border-subtle);font-family:'Albert Sans',sans-serif;font-variant-numeric:tabular-nums">${hr < 12 ? hr + 'a' : hr === 12 ? '12p' : (hr - 12) + 'p'}</div>`;
         DAYS.forEach(d => {
           const ev = cells[d].find(e => {
             const sSl = Math.floor((e.sMin - MINI_START * 60) / 60), eSl = Math.floor((e.eMin - MINI_START * 60) / 60);
@@ -2750,12 +2738,12 @@
           const c = (sched.colors || {})[k] || '#888';
           return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
             <div style="width:8px;height:8px;border-radius:2px;background:${c};flex-shrink:0"></div>
-            <span style="font-size:.75rem;font-family:'DM Mono',monospace;font-weight:700">${k}</span>
+            <span style="font-size:.75rem;font-family:'Albert Sans',sans-serif;font-variant-numeric:tabular-nums;font-weight:700">${k}</span>
             <span style="font-size:.72rem;color:var(--muted)">§${s.section}${s.class_nbr ? ` CRN ${s.class_nbr}` : ''}</span>
           </div>`;
         }).join('')}
       </div>
-      ${crns.length ? `<div style="padding:4px 12px 8px;font-size:.72rem;color:var(--muted)">CRNs: <strong style="font-family:'DM Mono',monospace">${crns.join(' · ')}</strong></div>` : ''}
+      ${crns.length ? `<div style="padding:4px 12px 8px;font-size:.72rem;color:var(--muted)">CRNs: <strong style="font-family:'Albert Sans',sans-serif;font-variant-numeric:tabular-nums">${crns.join(' · ')}</strong></div>` : ''}
       <div class="sc-actions">
         <button class="btn btn-green btn-sm" onclick="loadSavedSchedule('${sched.id}')">Load</button>
         <button class="btn btn-ghost btn-sm" onclick="pushToCart('${sched.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Push to Cart</button>
@@ -2968,8 +2956,8 @@
     }
     function showResumeBanner(saved, date) {
       const banner = document.createElement('div'); banner.id = 'resumeBanner';
-      banner.style.cssText = `position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1a1d23;color:#fff;border-radius:12px;padding:14px 18px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);display:flex;align-items:center;gap:14px;font-size:.82rem;max-width:420px;width:calc(100vw - 40px);`;
-      banner.innerHTML = `<div style="flex:1;min-width:0"><div style="font-weight:700;margin-bottom:2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Saved schedule found</div><div style="color:#9ca3af;font-size:.75rem">${saved.selections.length} course${saved.selections.length !== 1 ? 's' : ''} · ${date}</div></div><button id="resumeBtn" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Resume</button><button id="freshBtn" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Start Fresh</button>`;
+      banner.style.cssText = `position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#23282F;color:#E8E0D6;border-radius:var(--radius-lg);padding:14px 18px;z-index:9999;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:14px;font-size:.8125rem;max-width:420px;width:calc(100vw - 40px);`;
+      banner.innerHTML = `<div style="flex:1;min-width:0"><div style="font-weight:700;margin-bottom:2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Saved schedule found</div><div style="color:#9ca3af;font-size:.75rem">${saved.selections.length} course${saved.selections.length !== 1 ? 's' : ''} · ${date}</div></div><button id="resumeBtn" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'Albert Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Resume</button><button id="freshBtn" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'Albert Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Start Fresh</button>`;
       document.body.appendChild(banner);
       document.getElementById('resumeBtn').onclick = () => { banner.remove(); applyResume(saved); };
       document.getElementById('freshBtn').onclick = () => { localStorage.removeItem('unt_vsb_current'); banner.remove(); toast('Starting fresh <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M12 22c0-8 6-12 6-12s-4-2-8 2-8-2-8-2 6 4 6 12"></path><path d="M12 22V10"></path></svg>'); };
