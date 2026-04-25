@@ -741,6 +741,7 @@
     /* ── Calendar grid ── */
     .cal-wrap {
       flex: 1;
+      min-height: 0;
       overflow: hidden;
       padding: 12px 14px;
       display: flex;
@@ -1637,7 +1638,7 @@
               <div style="display:flex;gap:8px;align-items:center">
                 <button class="header-tab btn-sm"
                   style="background:var(--green-l);color:var(--green);border:1px solid var(--border);border-radius:var(--radius-full);padding:4px 10px;font-size:.6875rem;font-weight:700;cursor:pointer"
-                  onclick="openBusyModal()">⏰ Busy Times</button>
+                  onclick="openBusyModal()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:2px"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Busy Times</button>
                 <button class="tray-clear-btn" onclick="clearAll()">Clear all</button>
               </div>
             </div>
@@ -1671,7 +1672,7 @@
       <div class="cal-bar">
         <div class="cal-bar-title">My Saved Schedules</div>
         <div class="crn-box" id="savedSubtitle">Your saved schedule options</div>
-        <button class="btn btn-ghost btn-sm" onclick="switchView('manual')">← Back to Builder</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchView('manual')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:2px"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> Back to Builder</button>
       </div>
       <div class="schedules-panel active" id="savedPanel">
         <div id="savedGrid" class="schedule-grid"></div>
@@ -1684,7 +1685,7 @@
   <div class="modal-overlay" id="busyModal">
     <div class="modal">
       <div class="modal-hdr">
-        <div class="modal-title">⏰ Add Busy Times</div>
+        <div class="modal-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:4px"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Add Busy Times</div>
         <button class="modal-close" onclick="closeBusyModal()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body">
@@ -1875,7 +1876,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeAutoGenModal()">Cancel</button>
-        <button class="btn btn-green" onclick="advancePrefTab()">Next →</button>
+        <button class="btn btn-green" onclick="advancePrefTab()">Next <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-left:2px"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
       </div>
     </div>
   </div>
@@ -2140,9 +2141,9 @@
       <div class="sec-top">
         <span class="sec-id">Section ${sec.section}${sec.class_nbr ? ` — CRN ${sec.class_nbr}` : ''}</span>
         <div style="display:flex;gap:4px;align-items:center">
-          ${isSel ? `<button class="lock-btn${isLocked ? ' locked' : ''}" title="${isLocked ? 'Unlock' : 'Lock'} this section" onclick="toggleLock(event,'${courseKey}')">${isLocked ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-left: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' : '🔓'}</button>` : ''}
+          ${isSel ? `<button class="lock-btn${isLocked ? ' locked' : ''}" title="${isLocked ? 'Unlock' : 'Lock'} this section" onclick="toggleLock(event,'${courseKey}')">${isLocked ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-left: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>'}</button>` : ''}
           <span class="sec-badge ${badgeCls}">${sec.status || '—'}</span>
-          <button class="sec-badge" style="background:#e0f2fe;color:#075985;cursor:pointer;border:none;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:10px" onclick="showSecDetail(event,'${courseKey}',${JSON.stringify(sec).replace(/'/g, "&#39;")})">ℹ</button>
+          <button class="sec-badge" style="background:#e0f2fe;color:#075985;cursor:pointer;border:none;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:10px" onclick="showSecDetail(event,'${courseKey}',${JSON.stringify(sec).replace(/'/g, "&#39;")})"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></button>
         </div>
       </div>
       <div class="sec-time">${timeStr}</div>
@@ -2192,7 +2193,7 @@
           recWrap.style.cssText = `background:#f7fdf9;border-bottom:1px solid #e0f2e9;`;
           const recHdr = document.createElement('div');
           recHdr.style.cssText = `padding:4px 18px 3px;font-size:.62rem;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:.5px;`;
-          recHdr.textContent = '▸ Pick a Recitation';
+          recHdr.textContent = 'Pick a Recitation';
           recWrap.appendChild(recHdr);
           const curRec = selectedRecitations.get(courseKey);
           sec.recitations.forEach(rec => {
@@ -2251,7 +2252,7 @@
 
     function toggleLock(e, courseKey) {
       e.stopPropagation();
-      if (lockedSections.has(courseKey)) { lockedSections.delete(courseKey); toast(`🔓 Unlocked ${courseKey}`); }
+      if (lockedSections.has(courseKey)) { lockedSections.delete(courseKey); toast(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg> Unlocked ${courseKey}`); }
       else { lockedSections.add(courseKey); toast(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-left: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Locked ${courseKey}`); }
       refreshDd(courseKey);
     }
