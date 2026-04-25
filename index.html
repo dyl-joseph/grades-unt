@@ -1,655 +1,1685 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>UNT Schedule Builder</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root {
-  --green:#00853E;--green-d:#005f2c;--green-l:#e8f5ee;--gold:#FFB81C;
-  --bg:#f1f3f6;--surface:#fff;--border:#e2e5ea;--text:#1a1d23;--muted:#6b7280;
-  --danger:#e53e3e;--warn:#d97706;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
-header{background:var(--green);color:#fff;padding:0 18px;height:50px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:200}
-.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem}
-.term-select{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:4px 10px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='white'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
-.term-select:hover{background:rgba(255,255,255,.25)}
-.term-select option{background:var(--green);color:#fff}
-.app{display:flex;flex:1;overflow:hidden}
-.left{width:350px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-.search-wrap{padding:12px;border-bottom:1px solid var(--border);flex-shrink:0}
-.search-label{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-.search-row{display:flex;gap:6px}
-.search-row input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none;background:var(--bg);transition:border-color .15s}
-.search-row input:focus{border-color:var(--green);background:#fff}
-.btn{border:none;border-radius:8px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .15s}
-.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:var(--green-d)}
-.btn-ghost{background:var(--bg);color:var(--text);border:1.5px solid var(--border)}.btn-ghost:hover{border-color:var(--green);color:var(--green)}
-.results-scroll{flex:1;overflow-y:auto;padding:4px 0}
-.state-msg{padding:28px 18px;text-align:center;color:var(--muted);font-size:.84rem;line-height:1.7}
-.state-msg strong{display:block;font-size:1.05rem;margin-bottom:5px;color:var(--text)}
-.course-card{border-bottom:1px solid #f0f2f5}
-.cc-header{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;cursor:pointer;transition:background .1s;user-select:none}
-.cc-header:hover,.cc-header.open{background:var(--green-l)}
-.cc-left{display:flex;flex-direction:column;gap:2px}
-.cc-code{font-family:'DM Mono',monospace;font-weight:600;font-size:.84rem;color:var(--green)}
-.cc-name{font-size:.74rem;color:var(--muted)}
-.cc-right{display:flex;align-items:center;gap:7px}
-.cc-count{font-size:.69rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 7px}
-.cc-arrow{font-size:.72rem;color:var(--muted);transition:transform .2s;display:inline-block}
-.cc-header.open .cc-arrow{transform:rotate(180deg)}
-.sections-dd{display:none;background:#fafbfc;border-top:1px solid var(--border)}
-.sections-dd.open{display:block}
-.sec-row{display:flex;align-items:flex-start;padding:8px 12px 8px 18px;gap:9px;cursor:pointer;border-bottom:1px solid #f0f2f5;transition:background .1s;position:relative}
-.sec-row:last-child{border-bottom:none}
-.sec-row:hover{background:#f0faf4}
-.sec-row.previewing{background:#e6f4ec}
-.sec-row.selected{background:var(--green-l);border-left:3px solid var(--green);padding-left:15px}
-.sec-row.conflict{opacity:.45;cursor:not-allowed}
-.sec-row.conflict::after{content:'conflict';position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:.6rem;color:var(--danger);font-weight:700;text-transform:uppercase}
-.sec-dot{width:8px;height:8px;border-radius:2px;margin-top:5px;flex-shrink:0}
-.sec-info{flex:1;min-width:0}
-.sec-top{display:flex;align-items:center;justify-content:space-between;gap:5px}
-.sec-id{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:700;color:var(--text)}
-.sec-badge{font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:10px;flex-shrink:0}
-.b-open{background:#d1fae5;color:#065f46}.b-closed{background:#fee2e2;color:#991b1b}.b-wait{background:#fef3c7;color:#92400e}
-.sec-time{font-size:.8rem;font-weight:600;margin-top:4px;color:var(--text)}
-.sec-meta{font-size:.73rem;color:var(--muted);margin-top:3px;display:flex;flex-direction:column;gap:2px}
-.sec-meta-label{font-weight:600;color:#9ca3af;font-size:.65rem;text-transform:uppercase;letter-spacing:.3px}
-.seats-row{display:flex;align-items:center;gap:5px;margin-top:5px}
-.seats-row span{font-size:.7rem;color:var(--muted);white-space:nowrap}
-.seats-bar{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
-.seats-fill{height:100%;border-radius:2px;background:var(--green)}
-.seats-fill.warn{background:var(--warn)}.seats-fill.full{background:var(--danger)}
-.tray{border-top:1px solid var(--border);flex-shrink:0;max-height:165px;overflow-y:auto;background:var(--surface)}
-.tray-hdr{padding:7px 13px 3px;font-size:.67rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;display:flex;justify-content:space-between;align-items:center}
-.tray-clear-btn{font-size:.67rem;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;padding:0}
-.tray-clear-btn:hover{color:var(--danger)}
-.tray-empty{padding:5px 13px 10px;font-size:.77rem;color:var(--muted)}
-.tray-item{display:flex;align-items:center;gap:8px;padding:5px 13px}
-.tray-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
-.tray-info{flex:1;min-width:0}
-.tray-code{font-size:.76rem;font-weight:700;font-family:'DM Mono',monospace}
-.tray-sub{font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tray-x{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;padding:2px 4px;border-radius:4px}
-.tray-x:hover{color:var(--danger)}
-.right{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.cal-bar{padding:9px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;gap:12px}
-.cal-bar-title{font-size:.82rem;font-weight:700}
-.crn-box{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);flex:1;text-align:center}
-.crn-box strong{color:var(--text)}
-.cal-wrap{flex:1;overflow:auto;padding:12px 14px}
-.calendar{display:grid;grid-template-columns:46px repeat(5,1fr);min-width:500px;background:var(--surface);border-radius:10px;border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06)}
-.cal-corner{background:var(--green)}
-.cal-day-hdr{background:var(--green);color:#fff;text-align:center;padding:8px 4px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-right:1px solid rgba(255,255,255,.12)}
-.cal-day-hdr:last-child{border-right:none}
-.time-lbl{text-align:right;padding:0 6px 0 0;font-size:.6rem;font-family:'DM Mono',monospace;color:#c0c4cc;height:48px;display:flex;align-items:flex-start;padding-top:3px;border-top:1px solid var(--border);border-right:1px solid var(--border)}
-.cal-cell{border-top:1px solid var(--border);border-right:1px solid var(--border);height:48px;position:relative}
-.cal-cell:last-child{border-right:none}
-.ev{position:absolute;border-radius:5px;padding:3px 5px;font-size:.65rem;font-weight:600;line-height:1.3;overflow:hidden;z-index:10;cursor:pointer;transition:filter .12s,box-shadow .12s,opacity .12s;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.ev:hover{filter:brightness(1.1);z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.18)}
-.ev-selected{z-index:15}
-.ev-selected:hover{z-index:20}
-.ev-code{font-size:.67rem;font-weight:700}
-.ev-room{font-size:.59rem;opacity:.8}
-.ev-ghost{opacity:.28;border:2px dashed;background:transparent !important;box-shadow:none !important;cursor:pointer;z-index:5}
-.ev-ghost:hover{opacity:.65;border-style:solid;box-shadow:0 2px 8px rgba(0,0,0,.12) !important;z-index:6 !important}
-.ev-ghost-hover{opacity:1;border:2px solid;box-shadow:0 2px 10px rgba(0,0,0,.18) !important;z-index:6 !important}
-.online-area{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
-.online-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:.72rem;color:var(--muted)}
-.chip-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
-.toast{position:fixed;bottom:18px;right:18px;background:#1a1d23;color:#fff;padding:9px 15px;border-radius:8px;font-size:.8rem;font-weight:500;z-index:9999;opacity:0;transform:translateY(6px);transition:all .22s;pointer-events:none}
-.toast.show{opacity:1;transform:translateY(0)}
-.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,133,62,.2);border-top-color:var(--green);border-radius:50%;animation:sp .65s linear infinite;vertical-align:middle}
-@keyframes sp{to{transform:rotate(360deg)}}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:2px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNT Schedule Builder</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    :root {
+      --green: #1B5E20;
+      --green-d: #0d3b13;
+      --green-l: #c8e6c9;
+      --gold: #F9A825;
+      --bg: #F4F1EA;
+      --surface: #fff;
+      --border: #DCD0B9;
+      --text: #0A2F11;
+      --muted: #4E342E;
+      --danger: #e53e3e;
+      --warn: #d97706;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    header {
+      background: var(--green);
+      color: #fff;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+      z-index: 200;
+      border-bottom: 1px solid rgba(0, 0, 0, .1)
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1rem
+    }
+
+    .term-select {
+      background: rgba(255, 255, 255, .15);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .3);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='white'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 24px
+    }
+
+    .term-select:hover {
+      background: rgba(255, 255, 255, .25)
+    }
+
+    .term-select option {
+      background: var(--green);
+      color: #fff
+    }
+
+    .app {
+      display: flex;
+      flex: 1;
+      overflow: hidden
+    }
+
+    .left {
+      width: 350px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .search-wrap {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0
+    }
+
+    .search-label {
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 6px
+    }
+
+    .search-row {
+      display: flex;
+      gap: 6px
+    }
+
+    .search-row input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 11px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .86rem;
+      outline: none;
+      background: var(--bg);
+      transition: border-color .15s
+    }
+
+    .search-row input:focus {
+      border-color: var(--green);
+      background: #fff
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .btn-green {
+      background: var(--green);
+      color: #fff
+    }
+
+    .btn-green:hover {
+      background: var(--green-d)
+    }
+
+    .btn-ghost {
+      background: var(--bg);
+      color: var(--text);
+      border: 1.5px solid var(--border)
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--green);
+      color: var(--green)
+    }
+
+    .results-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0
+    }
+
+    .state-msg {
+      padding: 28px 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: .84rem;
+      line-height: 1.7
+    }
+
+    .state-msg strong {
+      display: block;
+      font-size: 1.05rem;
+      margin-bottom: 5px;
+      color: var(--text)
+    }
+
+    .course-card {
+      border-bottom: 1px solid #f0f2f5
+    }
+
+    .cc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 13px;
+      cursor: pointer;
+      transition: background .1s;
+      user-select: none
+    }
+
+    .cc-header:hover,
+    .cc-header.open {
+      background: var(--green-l)
+    }
+
+    .cc-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px
+    }
+
+    .cc-code {
+      font-family: 'DM Mono', monospace;
+      font-weight: 600;
+      font-size: .84rem;
+      color: var(--green)
+    }
+
+    .cc-name {
+      font-size: .74rem;
+      color: var(--muted)
+    }
+
+    .cc-right {
+      display: flex;
+      align-items: center;
+      gap: 7px
+    }
+
+    .cc-count {
+      font-size: .69rem;
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 7px
+    }
+
+    .cc-arrow {
+      font-size: .72rem;
+      color: var(--muted);
+      transition: transform .2s;
+      display: inline-block
+    }
+
+    .cc-header.open .cc-arrow {
+      transform: rotate(180deg)
+    }
+
+    .sections-dd {
+      display: none;
+      background: #fafbfc;
+      border-top: 1px solid var(--border)
+    }
+
+    .sections-dd.open {
+      display: block
+    }
+
+    .sec-row {
+      display: flex;
+      align-items: flex-start;
+      padding: 8px 12px 8px 18px;
+      gap: 9px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f2f5;
+      transition: background .1s;
+      position: relative
+    }
+
+    .sec-row:last-child {
+      border-bottom: none
+    }
+
+    .sec-row:hover {
+      background: #f0faf4
+    }
+
+    .sec-row.previewing {
+      background: #e6f4ec
+    }
+
+    .sec-row.selected {
+      background: var(--green-l);
+      border-left: 3px solid var(--green);
+      padding-left: 15px
+    }
+
+    .sec-row.conflict {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .sec-row.conflict::after {
+      content: 'conflict';
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: .6rem;
+      color: var(--danger);
+      font-weight: 700;
+      text-transform: uppercase
+    }
+
+    .sec-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      margin-top: 5px;
+      flex-shrink: 0
+    }
+
+    .sec-info {
+      flex: 1;
+      min-width: 0
+    }
+
+    .sec-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 5px
+    }
+
+    .sec-id {
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--text)
+    }
+
+    .sec-badge {
+      font-size: .62rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      flex-shrink: 0
+    }
+
+    .b-open {
+      background: #d1fae5;
+      color: #065f46
+    }
+
+    .b-closed {
+      background: #fee2e2;
+      color: #991b1b
+    }
+
+    .b-wait {
+      background: #fef3c7;
+      color: #92400e
+    }
+
+    .sec-time {
+      font-size: .8rem;
+      font-weight: 600;
+      margin-top: 4px;
+      color: var(--text)
+    }
+
+    .sec-meta {
+      font-size: .73rem;
+      color: var(--muted);
+      margin-top: 3px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px
+    }
+
+    .sec-meta-label {
+      font-weight: 600;
+      color: #9ca3af;
+      font-size: .65rem;
+      text-transform: uppercase;
+      letter-spacing: .3px
+    }
+
+    .seats-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px
+    }
+
+    .seats-row span {
+      font-size: .7rem;
+      color: var(--muted);
+      white-space: nowrap
+    }
+
+    .seats-bar {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden
+    }
+
+    .seats-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--green)
+    }
+
+    .seats-fill.warn {
+      background: var(--warn)
+    }
+
+    .seats-fill.full {
+      background: var(--danger)
+    }
+
+    .tray {
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      max-height: 165px;
+      overflow-y: auto;
+      background: var(--surface)
+    }
+
+    .tray-hdr {
+      padding: 7px 13px 3px;
+      font-size: .67rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    .tray-clear-btn {
+      font-size: .67rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0
+    }
+
+    .tray-clear-btn:hover {
+      color: var(--danger)
+    }
+
+    .tray-empty {
+      padding: 5px 13px 10px;
+      font-size: .77rem;
+      color: var(--muted)
+    }
+
+    .tray-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 13px
+    }
+
+    .tray-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      flex-shrink: 0
+    }
+
+    .tray-info {
+      flex: 1;
+      min-width: 0
+    }
+
+    .tray-code {
+      font-size: .76rem;
+      font-weight: 700;
+      font-family: 'DM Mono', monospace
+    }
+
+    .tray-sub {
+      font-size: .68rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .tray-x {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: .85rem;
+      padding: 2px 4px;
+      border-radius: 4px
+    }
+
+    .tray-x:hover {
+      color: var(--danger)
+    }
+
+    .right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .cal-bar {
+      padding: 9px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 12px
+    }
+
+    .cal-bar-title {
+      font-size: .82rem;
+      font-weight: 700
+    }
+
+    .crn-box {
+      font-family: 'DM Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      flex: 1;
+      text-align: center
+    }
+
+    .crn-box strong {
+      color: var(--text)
+    }
+
+    .cal-wrap {
+      flex: 1;
+      overflow: auto;
+      padding: 12px 14px
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: 46px repeat(5, 1fr);
+      min-width: 500px;
+      background: var(--surface);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, .06)
+    }
+
+    .cal-corner {
+      background: var(--green-d)
+    }
+
+    .cal-day-hdr {
+      background: var(--green);
+      color: #fff;
+      text-align: center;
+      padding: 10px 4px;
+      font-size: .74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      border-right: 1px solid rgba(255, 255, 255, .1)
+    }
+
+    .cal-day-hdr:last-child {
+      border-right: none
+    }
+
+    .time-lbl {
+      text-align: right;
+      padding: 0 6px 0 0;
+      font-size: .6rem;
+      font-family: 'DM Mono', monospace;
+      color: #c0c4cc;
+      height: 48px;
+      display: flex;
+      align-items: flex-start;
+      padding-top: 3px;
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border)
+    }
+
+    .cal-cell {
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      height: 48px;
+      position: relative
+    }
+
+    .cal-cell:last-child {
+      border-right: none
+    }
+
+    .ev {
+      position: absolute;
+      border-radius: 5px;
+      padding: 3px 5px;
+      font-size: .65rem;
+      font-weight: 600;
+      line-height: 1.3;
+      overflow: hidden;
+      z-index: 10;
+      cursor: pointer;
+      transition: filter .12s, box-shadow .12s, opacity .12s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .1)
+    }
+
+    .ev:hover {
+      filter: brightness(1.1);
+      z-index: 20;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .18)
+    }
+
+    .ev-selected {
+      z-index: 15
+    }
+
+    .ev-selected:hover {
+      z-index: 20
+    }
+
+    .ev-code {
+      font-size: .67rem;
+      font-weight: 700
+    }
+
+    .ev-room {
+      font-size: .59rem;
+      opacity: .8
+    }
+
+    .ev-ghost {
+      opacity: .28;
+      border: 2px dashed;
+      background: transparent !important;
+      box-shadow: none !important;
+      cursor: pointer;
+      z-index: 5
+    }
+
+    .ev-ghost:hover {
+      opacity: .65;
+      border-style: solid;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .12) !important;
+      z-index: 6 !important
+    }
+
+    .ev-ghost-hover {
+      opacity: 1;
+      border: 2px solid;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .18) !important;
+      z-index: 6 !important
+    }
+
+    .online-area {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px
+    }
+
+    .online-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: .72rem;
+      color: var(--muted)
+    }
+
+    .chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      background: #1a1d23;
+      color: #fff;
+      padding: 9px 15px;
+      border-radius: 8px;
+      font-size: .8rem;
+      font-weight: 500;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: all .22s;
+      pointer-events: none
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    .spin {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0, 133, 62, .2);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: sp .65s linear infinite;
+      vertical-align: middle
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 2px
+    }
+  </style>
 </head>
+
 <body>
-<header>
-  <div class="logo">UNT Schedule Builder</div>
-  <select class="term-select" id="termSelect">
-    <option value="1268" selected>Fall 2026</option>
-  </select>
-</header>
-<div class="app">
-  <div class="left">
-    <div class="search-wrap">
-      <div class="search-label">Search Courses</div>
-      <div class="search-row">
-        <input id="searchInput" type="text" placeholder="MATH 1650, Calculus, instructor…" autocomplete="off"/>
-        <button class="btn btn-green" onclick="doSearch()">Search</button>
+  <header>
+    <div class="logo">UNT Schedule Builder</div>
+    <select class="term-select" id="termSelect">
+      <option value="1268" selected>Fall 2026</option>
+    </select>
+  </header>
+  <div class="app">
+    <div class="left">
+      <div class="search-wrap">
+        <div class="search-label">Search Courses</div>
+        <div class="search-row">
+          <input id="searchInput" type="text" placeholder="MATH 1650, Calculus, instructor…" autocomplete="off" />
+          <button class="btn btn-green" onclick="doSearch()">Search</button>
+        </div>
+      </div>
+      <div id="resultsList" class="results-scroll">
+        <div class="state-msg">
+          <div id="dataBanner"
+            style="font-size:.75rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span class="spin"></span> Loading course data…
+          </div>
+          <strong>Build your schedule</strong>Search a course, expand it, hover sections to preview on the calendar,
+          then click to lock in.
+        </div>
+      </div>
+      <div class="tray">
+        <div class="tray-hdr">Added to Schedule <button class="tray-clear-btn" onclick="clearAll()">Clear all</button>
+        </div>
+        <div id="trayList">
+          <div class="tray-empty">No courses added yet</div>
+        </div>
       </div>
     </div>
-    <div id="resultsList" class="results-scroll">
-      <div class="state-msg"><strong>Build your schedule</strong>Search a course, expand it, hover sections to preview on the calendar, then click to lock in.</div>
-    </div>
-    <div class="tray">
-      <div class="tray-hdr">Added to Schedule <button class="tray-clear-btn" onclick="clearAll()">Clear all</button></div>
-      <div id="trayList"><div class="tray-empty">No courses added yet</div></div>
-    </div>
-  </div>
-  <div class="right">
-    <div class="cal-bar">
-      <div class="cal-bar-title">Weekly Schedule</div>
-      <div class="crn-box" id="crnBox">Add courses to see your CRNs</div>
-      <button class="btn btn-ghost" onclick="clearAll()" style="font-size:.73rem;padding:5px 11px">Clear All</button>
-    </div>
-    <div class="cal-wrap">
-      <div id="calGrid" class="calendar"></div>
-      <div id="onlineArea" class="online-area"></div>
+    <div class="right">
+      <div class="cal-bar">
+        <div class="cal-bar-title">Weekly Schedule</div>
+        <div class="crn-box" id="crnBox">Add courses to see your CRNs</div>
+        <button class="btn btn-ghost" onclick="clearAll()" style="font-size:.73rem;padding:5px 11px">Clear All</button>
+      </div>
+      <div class="cal-wrap">
+        <div id="calGrid" class="calendar"></div>
+        <div id="onlineArea" class="online-area"></div>
+      </div>
     </div>
   </div>
-</div>
-<div id="toast" class="toast"></div>
+  <div id="toast" class="toast"></div>
 
-<script>
-const SUPABASE_URL = "https://pezgajwesesihrdxvpdl.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlemdhandlc2VzaWhyZHh2cGRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NzMzMzEsImV4cCI6MjA5MjM0OTMzMX0.hkHO3D_5YSoG2IvLK2rsAf75xQaBATdF_0NicdeUJtA";
-const TERM = "1268";
+  <script>
+    // ── Data layer: local JSON instead of Supabase ──────────────────────────
+    // allCourses is populated on page load; search/filter runs entirely in memory.
+    let allCourses = [];      // flat array of normalized section objects
+    let dataReady = false;   // true once JSON has loaded
+    let dataError = false;
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+    // fix_json.js already outputs snake_case with parsed days/times — no translation needed.
+    function normalize(c) { return c; }
 
-const selected      = new Map(); // courseKey -> sec
-const courseColors  = new Map();
-const sectionsCache = new Map();
-let previewSecs     = [];        // ghost blocks on calendar
-let openCourseKey   = null;      // which course card is currently expanded
-let colorIdx        = 0;
+    // Kick off JSON load immediately — page is usable before it finishes
+    (async function loadData() {
+      try {
+        const res = await fetch('./unt_sections.json');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        allCourses = (json.courses || []).map(normalize);
+        dataReady = true;
+        // Update the loading banner if it's still showing
+        const banner = document.getElementById('dataBanner');
+        if (banner) banner.remove();
+        toast(`Loaded ${allCourses.length} sections ✓`);
+      } catch (err) {
+        dataError = true;
+        const banner = document.getElementById('dataBanner');
+        if (banner) banner.textContent = `⚠️ Could not load unt_sections.json — ${err.message}`;
+      }
+    })();
 
-const PALETTE   = ["#3b82f6","#8b5cf6","#10b981","#f59e0b","#ef4444","#ec4899","#06b6d4","#84cc16","#f97316","#6366f1","#14b8a6","#a855f7"];
-const DAYS      = ["M","T","W","R","F"];
-const DAY_LABELS= {M:"Mon",T:"Tue",W:"Wed",R:"Thu",F:"Fri"};
-const START_H   = 7, END_H = 22, SLOT = 48;
+    // ── Query helpers that replace Supabase calls ──────────────────────────
+    function queryCourses(raw) {
+      const q = raw.trim().toUpperCase();
+      const exact = q.match(/^([A-Z]+)\s+(\d{3,4}[A-Z]?)$/);
+      if (exact) {
+        return allCourses.filter(c => c.subject === exact[1] && c.course_number === exact[2]);
+      }
+      if (/^[A-Z]{2,6}$/.test(q)) {
+        return allCourses.filter(c => c.subject === q);
+      }
+      // Free-text: search instructor, room, course_title
+      const ql = raw.toLowerCase();
+      return allCourses.filter(c =>
+        (c.instructor || '').toLowerCase().includes(ql) ||
+        (c.room || '').toLowerCase().includes(ql) ||
+        (c.course_title || '').toLowerCase().includes(ql)
+      );
+    }
 
-document.getElementById("searchInput").addEventListener("keydown", e => { if(e.key==="Enter") doSearch(); });
+    function getSections(subject, course_number) {
+      return allCourses
+        .filter(c => c.subject === subject && c.course_number === course_number)
+        .sort((a, b) => (a.section || '').localeCompare(b.section || ''));
+    }
 
-/* ── Search ── */
-async function doSearch() {
-  const raw = document.getElementById("searchInput").value.trim();
-  if (!raw) return;
-  const list = document.getElementById("resultsList");
-  list.innerHTML = `<div class="state-msg"><span class="spin"></span><br><br>Searching…</div>`;
+    // ── App state ──────────────────────────────────────────────────────────
+    const selected = new Map(); // courseKey -> sec
+    const selectedRecitations = new Map(); // courseKey -> recitation sec (or null)
+    const courseColors = new Map();
+    const sectionsCache = new Map();
+    let previewSecs = [];
+    let openCourseKey = null;
+    let colorIdx = 0;
 
-  const q = raw.toUpperCase();
-  let query = db.from("unt_schedule").select("subject,course_number").eq("term", TERM);
+    const PALETTE = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1", "#14b8a6", "#a855f7"];
+    const DAYS = ["M", "T", "W", "R", "F"];
+    const DAY_LABELS = { M: "Mon", T: "Tue", W: "Wed", R: "Thu", F: "Fri" };
+    const START_H = 7, END_H = 22, SLOT = 48;
 
-  const exact = q.match(/^([A-Z]+)\s+(\d{4}[A-Z]?)$/);
-  if (exact) {
-    query = query.eq("subject", exact[1]).eq("course_number", exact[2]);
-  } else if (/^[A-Z]{2,6}$/.test(q)) {
-    query = query.eq("subject", q);
-  } else {
-    query = query.or(`instructor.ilike.%${raw}%,room.ilike.%${raw}%`);
-  }
+    document.getElementById("searchInput").addEventListener("keydown", e => { if (e.key === "Enter") doSearch(); });
 
-  const { data, error } = await query.limit(300);
-  if (error) { list.innerHTML = `<div class="state-msg">Error: ${error.message}</div>`; return; }
+    /* ── Search ── */
+    function doSearch() {
+      const raw = document.getElementById("searchInput").value.trim();
+      if (!raw) return;
+      const list = document.getElementById("resultsList");
 
-  const seen = new Map();
-  (data||[]).forEach(r => { const k=`${r.subject} ${r.course_number}`; if(!seen.has(k)) seen.set(k,r); });
+      if (!dataReady) {
+        list.innerHTML = `<div class="state-msg"><span class="spin"></span><br><br>Data still loading, hang on…</div>`;
+        return;
+      }
 
-  if (!seen.size) { list.innerHTML = `<div class="state-msg"><strong>No results</strong>Try MATH, CSCI, or a course title.</div>`; return; }
+      const matches = queryCourses(raw);
 
-  list.innerHTML = "";
-  for (const [key, row] of seen) list.appendChild(buildCard(key, row));
-}
+      // Deduplicate to unique course keys
+      const seen = new Map();
+      matches.forEach(c => {
+        const k = `${c.subject} ${c.course_number}`;
+        if (!seen.has(k)) seen.set(k, c);
+      });
 
-function safeId(k) { return k.replace(/[\s]+/g,"_"); }
+      if (!seen.size) {
+        list.innerHTML = `<div class="state-msg"><strong>No results</strong>Try MATH, CSCI 1100, or an instructor name.</div>`;
+        return;
+      }
 
-/* ── Course card ── */
-function buildCard(courseKey, row) {
-  const wrap = document.createElement("div");
-  wrap.className = "course-card";
-  const hdr = document.createElement("div");
-  hdr.className = "cc-header";
-  hdr.innerHTML = `
-    <div class="cc-left">
-      <div class="cc-code">${courseKey}</div>
-      <div class="cc-name">${row.subject} ${row.course_number}</div>
-    </div>
-    <div class="cc-right">
-      <div class="cc-count" id="cnt_${safeId(courseKey)}">…</div>
-      <span class="cc-arrow">▾</span>
-    </div>`;
-  const dd = document.createElement("div");
-  dd.className = "sections-dd";
-  dd.id = `dd_${safeId(courseKey)}`;
-  hdr.onclick = () => toggleCard(courseKey, row, hdr, dd);
-  wrap.appendChild(hdr);
-  wrap.appendChild(dd);
+      list.innerHTML = "";
+      for (const [key, row] of seen) list.appendChild(buildCard(key, row));
+    }
 
-  db.from("unt_schedule").select("id",{count:"exact",head:true})
-    .eq("term",TERM).eq("subject",row.subject).eq("course_number",row.course_number)
-    .then(({count}) => {
-      const el = document.getElementById(`cnt_${safeId(courseKey)}`);
-      if (el) el.textContent = `${count??0} sections`;
-    });
-  return wrap;
-}
+    function safeId(k) { return k.replace(/[\s]+/g, "_"); }
 
-async function toggleCard(courseKey, row, hdr, dd) {
-  const wasOpen = hdr.classList.contains("open");
-  document.querySelectorAll(".cc-header.open").forEach(h => {
-    h.classList.remove("open"); h.nextElementSibling.classList.remove("open");
-  });
-  // clear previews when closing
-  if (wasOpen) {
-    openCourseKey = null;
-    previewSecs = []; renderCalendar();
-    return;
-  }
+    /* ── Course card ── */
+    function buildCard(courseKey, row) {
+      const sectionCount = getSections(row.subject, row.course_number).length;
+      const wrap = document.createElement("div");
+      wrap.className = "course-card";
+      const hdr = document.createElement("div");
+      hdr.className = "cc-header";
+      hdr.innerHTML = `
+        <div class="cc-left">
+          <div class="cc-code">${courseKey}</div>
+          <div class="cc-name">${row.course_title || courseKey}</div>
+        </div>
+        <div class="cc-right">
+          <div class="cc-count">${sectionCount} section${sectionCount !== 1 ? 's' : ''}</div>
+          <span class="cc-arrow">▾</span>
+        </div>`;
+      const dd = document.createElement("div");
+      dd.className = "sections-dd";
+      dd.id = `dd_${safeId(courseKey)}`;
+      hdr.onclick = () => toggleCard(courseKey, row, hdr, dd);
+      wrap.appendChild(hdr);
+      wrap.appendChild(dd);
+      return wrap;
+    }
 
-  hdr.classList.add("open"); dd.classList.add("open");
-  openCourseKey = courseKey;
+    function toggleCard(courseKey, row, hdr, dd) {
+      const wasOpen = hdr.classList.contains("open");
+      document.querySelectorAll(".cc-header.open").forEach(h => {
+        h.classList.remove("open"); h.nextElementSibling.classList.remove("open");
+      });
+      if (wasOpen) {
+        openCourseKey = null;
+        previewSecs = []; renderCalendar();
+        return;
+      }
 
-  // Fetch sections if not cached
-  if (!sectionsCache.has(courseKey)) {
-    dd.innerHTML = `<div style="padding:12px;text-align:center"><span class="spin"></span></div>`;
-    const { data } = await db.from("unt_schedule").select("*")
-      .eq("term",TERM).eq("subject",row.subject).eq("course_number",row.course_number).order("section");
-    sectionsCache.set(courseKey, (data||[]));
-  }
+      hdr.classList.add("open"); dd.classList.add("open");
+      openCourseKey = courseKey;
 
-  if (!courseColors.has(courseKey)) {
-    courseColors.set(courseKey, PALETTE[colorIdx % PALETTE.length]); colorIdx++;
-  }
+      // Sections come from memory — instant, no await needed
+      if (!sectionsCache.has(courseKey)) {
+        const secs = getSections(row.subject, row.course_number);
+        sectionsCache.set(courseKey, secs);
+      }
 
-  // Show all sections as ghost previews on calendar
-  rebuildGhosts(courseKey);
+      if (!courseColors.has(courseKey)) {
+        courseColors.set(courseKey, PALETTE[colorIdx % PALETTE.length]); colorIdx++;
+      }
 
-  // Render section list
-  dd.innerHTML = "";
-  const secs = sectionsCache.get(courseKey) || [];
-  if (!secs.length) {
-    dd.innerHTML = `<div style="padding:10px 14px;font-size:.78rem;color:var(--muted)">No sections found.</div>`;
-    return;
-  }
-  secs.forEach(sec => dd.appendChild(buildSecRow(courseKey, sec)));
-}
+      rebuildGhosts(courseKey);
 
-/* ── Rebuild ghost blocks for the open course ── */
-function rebuildGhosts(courseKey) {
-  if (!courseKey) { previewSecs = []; renderCalendar(); return; }
-  const color = courseColors.get(courseKey);
-  const secs  = sectionsCache.get(courseKey) || [];
-  const _sel  = selected.get(courseKey);
-  previewSecs = secs
-    .filter(s => !_sel || s.id !== _sel.id)
-    .map(s => ({...s, _color:color, _key:courseKey, _isHovered:false}));
-  renderCalendar();
-}
+      dd.innerHTML = "";
+      const secs = sectionsCache.get(courseKey) || [];
+      if (!secs.length) {
+        dd.innerHTML = `<div style="padding:10px 14px;font-size:.78rem;color:var(--muted)">No sections found.</div>`;
+        return;
+      }
+      secs.forEach(sec => dd.appendChild(buildSecRow(courseKey, sec)));
+    }
 
-/* ── Section row ── */
-function buildSecRow(courseKey, sec) {
-  const color    = courseColors.get(courseKey) || PALETTE[0];
-  const isOnline = !sec.days;
-  // Use sec.id as the unique key (class_nbr is null in the DB)
-  const selSec   = selected.get(courseKey);
-  const isSel    = !!selSec && selSec.id === sec.id;
-  const isConf   = !isOnline && !isSel && checkConflict(sec, courseKey);
+    /* ── Rebuild ghost blocks for the open course ── */
+    function rebuildGhosts(courseKey) {
+      if (!courseKey) { previewSecs = []; renderCalendar(); return; }
+      const color = courseColors.get(courseKey);
+      const secs = sectionsCache.get(courseKey) || [];
+      const _sel = selected.get(courseKey);
+      previewSecs = secs
+        .filter(s => !_sel || s.id !== _sel.id)
+        .map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
+      renderCalendar();
+    }
 
-  const row = document.createElement("div");
-  row.className = "sec-row"+(isSel?" selected":"")+(isConf?" conflict":"");
+    /* ── Section row ── */
+    function buildSecRow(courseKey, sec) {
+      const color = courseColors.get(courseKey) || PALETTE[0];
+      const isOnline = !sec.days;
+      // Use sec.id as the unique key (class_nbr is null in the DB)
+      const selSec = selected.get(courseKey);
+      const isSel = !!selSec && selSec.id === sec.id;
+      const isConf = !isOnline && !isSel && checkConflict(sec, courseKey);
 
-  const pct = sec.seats_total ? Math.round((1-sec.seats_open/sec.seats_total)*100) : 0;
-  const fillCls  = pct>=100?"full":pct>=75?"warn":"";
-  const badgeCls = (sec.status||"").toLowerCase().includes("open")?"b-open"
-                 : (sec.status||"").toLowerCase().includes("wait")?"b-wait":"b-closed";
-  const timeStr  = isOnline
-    ? "Online — No Set Time"
-    : `${sec.days}  ${formatTime(sec.start_time)} – ${formatTime(sec.end_time)}`;
+      const row = document.createElement("div");
+      row.className = "sec-row" + (isSel ? " selected" : "") + (isConf ? " conflict" : "");
 
-  row.innerHTML = `
+      const pct = sec.seats_total ? Math.round((1 - sec.seats_open / sec.seats_total) * 100) : 0;
+      const fillCls = pct >= 100 ? "full" : pct >= 75 ? "warn" : "";
+      const badgeCls = (sec.status || "").toLowerCase().includes("open") ? "b-open"
+        : (sec.status || "").toLowerCase().includes("wait") ? "b-wait" : "b-closed";
+      const timeStr = isOnline
+        ? "Online — No Set Time"
+        : `${sec.days}  ${formatTime(sec.start_time)} – ${formatTime(sec.end_time)}`;
+
+      row.innerHTML = `
     <div class="sec-dot" style="background:${color}"></div>
     <div class="sec-info">
       <div class="sec-top">
         <span class="sec-id">Section ${sec.section}${sec.class_nbr ? ` — CRN ${sec.class_nbr}` : ""}</span>
-        <span class="sec-badge ${badgeCls}">${sec.status||"—"}</span>
+        <span class="sec-badge ${badgeCls}">${sec.status || "—"}</span>
       </div>
       <div class="sec-time">${timeStr}</div>
       <div class="sec-meta">
-        <span><span class="sec-meta-label">Room</span> ${sec.room||"TBA"}</span>
-        <span><span class="sec-meta-label">Instructor</span> ${sec.instructor||"TBA"}</span>
+        <span><span class="sec-meta-label">Room</span> ${sec.room || "TBA"}</span>
+        <span><span class="sec-meta-label">Instructor</span> ${sec.instructor || "TBA"}</span>
       </div>
       <div class="seats-row">
-        <span>${sec.seats_open??0}/${sec.seats_total??0} open</span>
-        <div class="seats-bar"><div class="seats-fill ${fillCls}" style="width:${Math.min(pct,100)}%"></div></div>
+        <span>${sec.seats_open ?? 0}/${sec.seats_total ?? 0} open</span>
+        <div class="seats-bar"><div class="seats-fill ${fillCls}" style="width:${Math.min(pct, 100)}%"></div></div>
       </div>
     </div>`;
 
-  if (!isConf && !isSel) {
-    row.addEventListener("mouseenter", () => {
-      const allSecs = sectionsCache.get(courseKey) || [];
-      const curSel = selected.get(courseKey);
-      // Ghost all unselected sections; brighten the one being hovered
-      previewSecs = allSecs
-        .filter(s => !curSel || s.id !== curSel.id)
-        .map(s => ({...s, _color:color, _key:courseKey, _isHovered:s.id===sec.id}));
-      renderCalendar();
-      row.classList.add("previewing");
-    });
-    row.addEventListener("mouseleave", () => {
-      const allSecs = sectionsCache.get(courseKey) || [];
-      const curSel = selected.get(courseKey);
-      // Back to ghosting all unselected sections equally
-      previewSecs = allSecs
-        .filter(s => !curSel || s.id !== curSel.id)
-        .map(s => ({...s, _color:color, _key:courseKey, _isHovered:false}));
-      row.classList.remove("previewing");
-      renderCalendar();
-    });
-    row.addEventListener("click", () => {
-      toggleSection(courseKey, sec, color);
-    });
-  }
-  // Selected row: hover shows other ghosts dimmed, click to deselect
-  if (isSel) {
-    row.addEventListener("mouseenter", () => {
-      const allSecs = sectionsCache.get(courseKey) || [];
-      // Show ghosts for unselected, nothing extra for selected (it's solid)
-      previewSecs = allSecs
-        .filter(s => s.id !== sec.id)
-        .map(s => ({...s, _color:color, _key:courseKey, _isHovered:false}));
-      renderCalendar();
-    });
-    row.addEventListener("mouseleave", () => {
-      const allSecs = sectionsCache.get(courseKey) || [];
-      previewSecs = allSecs
-        .filter(s => s.id !== sec.id)
-        .map(s => ({...s, _color:color, _key:courseKey, _isHovered:false}));
-      renderCalendar();
-    });
-    row.addEventListener("click", () => {
-      toggleSection(courseKey, sec, color);
-    });
-  }
-  return row;
-}
+      if (!isConf && !isSel) {
+        row.addEventListener("mouseenter", () => {
+          const allSecs = sectionsCache.get(courseKey) || [];
+          const curSel = selected.get(courseKey);
+          // Ghost all unselected sections; brighten the one being hovered
+          previewSecs = allSecs
+            .filter(s => !curSel || s.id !== curSel.id)
+            .map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: s.id === sec.id }));
+          renderCalendar();
+          row.classList.add("previewing");
+        });
+        row.addEventListener("mouseleave", () => {
+          const allSecs = sectionsCache.get(courseKey) || [];
+          const curSel = selected.get(courseKey);
+          // Back to ghosting all unselected sections equally
+          previewSecs = allSecs
+            .filter(s => !curSel || s.id !== curSel.id)
+            .map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
+          row.classList.remove("previewing");
+          renderCalendar();
+        });
+        row.addEventListener("click", () => {
+          toggleSection(courseKey, sec, color);
+        });
+      }
+      // Selected row: hover shows other ghosts dimmed, click to deselect
+      if (isSel) {
+        row.addEventListener("mouseenter", () => {
+          const allSecs = sectionsCache.get(courseKey) || [];
+          // Show ghosts for unselected, nothing extra for selected (it's solid)
+          previewSecs = allSecs
+            .filter(s => s.id !== sec.id)
+            .map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
+          renderCalendar();
+        });
+        row.addEventListener("mouseleave", () => {
+          const allSecs = sectionsCache.get(courseKey) || [];
+          previewSecs = allSecs
+            .filter(s => s.id !== sec.id)
+            .map(s => ({ ...s, _color: color, _key: courseKey, _isHovered: false }));
+          renderCalendar();
+        });
+        row.addEventListener("click", () => {
+          toggleSection(courseKey, sec, color);
+        });
 
-/* ── Toggle section selected ── */
-function toggleSection(courseKey, sec, color) {
-  const selSec = selected.get(courseKey);
-  if (selSec && selSec.id === sec.id) {
-    selected.delete(courseKey); toast(`Removed ${courseKey}`);
-  } else {
-    selected.set(courseKey, {...sec, _color:color, _key:courseKey}); toast(`Added ${courseKey} Section ${sec.section}`);
-  }
-  // Rebuild ghosts so the newly-selected section disappears and others stay
-  rebuildGhosts(openCourseKey);
-  renderTray(); refreshDd(courseKey);
-}
+        // If this section has recitations, append a sub-picker right after this row
+        if (sec.recitations && sec.recitations.length > 0) {
+          const recWrap = document.createElement("div");
+          recWrap.style.cssText = `background:#f7fdf9;border-bottom:1px solid #e0f2e9;`;
 
-function refreshDd(courseKey) {
-  const dd = document.getElementById(`dd_${safeId(courseKey)}`);
-  if (!dd || !dd.classList.contains("open")) return;
-  dd.innerHTML = "";
-  const secs = sectionsCache.get(courseKey) || [];
-  secs.forEach(sec => dd.appendChild(buildSecRow(courseKey, sec)));
-}
+          const recHdr = document.createElement("div");
+          recHdr.style.cssText = `padding:4px 18px 3px;font-size:.62rem;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:.5px;`;
+          recHdr.textContent = "▸ Pick a Recitation";
+          recWrap.appendChild(recHdr);
 
-/* ── Data helpers ── */
-function formatTime(t) {
-  if (!t) return null;
-  // Supabase TIME comes back as "HH:MM:SS"
-  const m = t.match(/^(\d+):(\d+)/);
-  if (!m) return t;
-  let h=+m[1], mi=+m[2];
-  const ampm = h>=12 ? 'PM' : 'AM';
-  if (h>12) h-=12; if (h===0) h=12;
-  return `${h}:${String(mi).padStart(2,'0')} ${ampm}`;
-}
+          const curRec = selectedRecitations.get(courseKey);
 
-function toMin(t) {
-  // Supabase TIME columns come back as "HH:MM:SS" (24h) — just parse hours + minutes
-  if (!t) return null;
-  const m = t.match(/^(\d+):(\d+)/);
-  if (!m) return null;
-  return +m[1]*60 + +m[2];
-}
+          sec.recitations.forEach(rec => {
+            const isOnlineRec = !rec.days;
+            const isSelRec = curRec && curRec.id === rec.id;
+            const recTimeStr = isOnlineRec ? "Online — No Set Time" : `${rec.days}  ${formatTime(rec.start_time)} – ${formatTime(rec.end_time)}`;
+            const recBadgeCls = (rec.status || "").toLowerCase().includes("open") ? "b-open"
+              : (rec.status || "").toLowerCase().includes("wait") ? "b-wait" : "b-closed";
 
-function overlaps(a,b) {
-  if (!a.days||!b.days) return false;
-  if (!a.days.split("").some(d=>b.days.split("").includes(d))) return false;
-  const aS=toMin(a.start_time),aE=toMin(a.end_time),bS=toMin(b.start_time),bE=toMin(b.end_time);
-  if (!aS||!bS) return false;
-  return aS<bE && bS<aE;
-}
+            const recRow = document.createElement("div");
+            recRow.style.cssText = `display:flex;align-items:flex-start;padding:6px 12px 6px 28px;gap:9px;cursor:pointer;border-top:1px solid #e9f5ec;transition:background .1s;position:relative;` +
+              (isSelRec ? `background:#c8e6c9;border-left:3px solid var(--green);padding-left:25px;` : ``);
 
-function checkConflict(sec,skipKey) {
-  for (const [k,s] of selected) { if (k!==skipKey && overlaps(sec,s)) return true; }
-  return false;
-}
+            recRow.innerHTML = `
+              <div style="width:6px;height:6px;border-radius:1px;margin-top:5px;flex-shrink:0;background:${color};opacity:.7;"></div>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:5px;">
+                  <span style="font-family:'DM Mono',monospace;font-size:.73rem;font-weight:700;color:var(--text);">Rec ${rec.section}${rec.class_nbr ? ` — CRN ${rec.class_nbr}` : ""}</span>
+                  <span class="sec-badge ${recBadgeCls}" style="font-size:.58rem;">${rec.status || "—"}</span>
+                </div>
+                <div style="font-size:.75rem;font-weight:600;margin-top:3px;">${recTimeStr}</div>
+                <div style="font-size:.68rem;color:var(--muted);margin-top:2px;">${rec.room || "TBA"} · ${rec.instructor || "TBA"}</div>
+              </div>
+              ${isSelRec ? `<span style="font-size:.7rem;color:var(--green);font-weight:700;">✓</span>` : ""}
+            `;
 
-/* ── Calendar render ── */
-function renderCalendar() {
-  const grid=document.getElementById("calGrid"), onlineArea=document.getElementById("onlineArea");
-  grid.innerHTML=""; onlineArea.innerHTML="";
+            if (!isOnlineRec || true) { // always clickable
+              recRow.addEventListener("mouseenter", () => { if (!isSelRec) recRow.style.background = "#e6f4ec"; });
+              recRow.addEventListener("mouseleave", () => { if (!isSelRec) recRow.style.background = ""; });
+              recRow.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleRecitation(courseKey, rec, color);
+              });
+            }
+            recWrap.appendChild(recRow);
+          });
 
-  const corner=document.createElement("div"); corner.className="cal-corner"; grid.appendChild(corner);
-  DAYS.forEach(d=>{
-    const el=document.createElement("div"); el.className="cal-day-hdr"; el.textContent=DAY_LABELS[d]; grid.appendChild(el);
-  });
-
-  for (let h=0; h<END_H-START_H; h++) {
-    const hr=START_H+h;
-    const lbl=document.createElement("div"); lbl.className="time-lbl";
-    lbl.textContent=hr<12?`${hr}a`:hr===12?"12p":`${hr-12}p`; grid.appendChild(lbl);
-    DAYS.forEach(d=>{
-      const cell=document.createElement("div"); cell.className="cal-cell"; cell.dataset.day=d; cell.dataset.hour=hr; grid.appendChild(cell);
-    });
-  }
-
-  // Convert hex color to a solid opaque tint (mixed with white)
-  function tintColor(hex, amount) {
-    const r = parseInt(hex.slice(1,3),16);
-    const g = parseInt(hex.slice(3,5),16);
-    const b = parseInt(hex.slice(5,7),16);
-    const tr = Math.round(r + (255-r) * amount);
-    const tg = Math.round(g + (255-g) * amount);
-    const tb = Math.round(b + (255-b) * amount);
-    return `rgb(${tr},${tg},${tb})`;
-  }
-
-  // ── Collect ALL events per day for overlap computation ──
-  // Each event: { sec, color, ghost, hovered, sMin, eMin, day }
-  const dayEvents = {}; // day -> [event objects]
-  DAYS.forEach(d => dayEvents[d] = []);
-
-  function collectEvents(sec, color, ghost, hovered) {
-    if (!sec.days) return;
-    const sMin = toMin(sec.start_time), eMin = toMin(sec.end_time);
-    if (!sMin || !eMin) return;
-    sec.days.split("").filter(d => DAYS.includes(d)).forEach(day => {
-      const startHr = Math.floor(sMin / 60);
-      if (startHr < START_H || startHr >= END_H) return;
-      dayEvents[day].push({ sec, color, ghost, hovered, sMin, eMin, id: sec.id + (ghost ? '_ghost' : '_sel') });
-    });
-  }
-
-  // Collect selected (solid) events
-  for (const [key, sec] of selected) {
-    if (!sec.days) {
-      const chip = document.createElement("div"); chip.className = "online-chip";
-      chip.innerHTML = `<div class="chip-dot" style="background:${sec._color}"></div>${key} — Online`;
-      onlineArea.appendChild(chip);
-    } else {
-      collectEvents(sec, sec._color, false, false);
+          // Return a fragment containing both the row and recitation picker
+          const frag = document.createDocumentFragment();
+          frag.appendChild(row);
+          frag.appendChild(recWrap);
+          return frag;
+        }
+      }
+      return row;
     }
-  }
 
-  // Collect ghost preview events
-  previewSecs.forEach(sec => {
-    if (sec.days) collectEvents(sec, sec._color, true, sec._isHovered);
-  });
-
-  // ── Compute overlap groups per day and place blocks ──
-  function computeColumns(events) {
-    // Sort by start time, then by end time descending (longer events first)
-    events.sort((a, b) => a.sMin - b.sMin || b.eMin - a.eMin);
-    const columns = []; // each column is an array of events; tracks end time of last event
-    const evColMap = new Map(); // event -> { col, totalCols }
-
-    // Assign columns greedily
-    events.forEach(ev => {
-      let placed = false;
-      for (let c = 0; c < columns.length; c++) {
-        if (columns[c].endTime <= ev.sMin) {
-          columns[c].endTime = ev.eMin;
-          columns[c].events.push(ev);
-          evColMap.set(ev, { col: c });
-          placed = true;
-          break;
-        }
-      }
-      if (!placed) {
-        columns.push({ endTime: ev.eMin, events: [ev] });
-        evColMap.set(ev, { col: columns.length - 1 });
-      }
-    });
-
-    // Now compute how many columns each event's overlap group spans
-    // For simplicity, find connected components of overlapping events
-    events.forEach(ev => {
-      const info = evColMap.get(ev);
-      // Find max columns among all events overlapping with this one
-      let maxCol = info.col;
-      events.forEach(other => {
-        if (ev.sMin < other.eMin && other.sMin < ev.eMin) {
-          const otherCol = evColMap.get(other).col;
-          if (otherCol > maxCol) maxCol = otherCol;
-        }
-      });
-      info.totalCols = maxCol + 1;
-    });
-
-    return evColMap;
-  }
-
-  DAYS.forEach(day => {
-    const events = dayEvents[day];
-    if (!events.length) return;
-    const colMap = computeColumns(events);
-    const cells = grid.querySelectorAll(`.cal-cell[data-day="${day}"]`);
-
-    events.forEach(({ sec, color, ghost, hovered, sMin, eMin }) => {
-      const ev_entry = events.find(e => e.sec === sec && e.ghost === ghost);
-      const { col, totalCols } = colMap.get(ev_entry);
-      const startHr = Math.floor(sMin / 60);
-      const cell = cells[startHr - START_H];
-      if (!cell) return;
-
-      const topPx = ((sMin % 60) / 60) * SLOT;
-      const heightPx = Math.max(((eMin - sMin) / 60) * SLOT, 18);
-      const widthPct = 100 / totalCols;
-      const leftPct = col * widthPct;
-
-      const ev = document.createElement("div");
-      ev.className = "ev" + (ghost ? (hovered ? " ev-ghost-hover" : " ev-ghost") : " ev-selected");
-
-      if (ghost) {
-        ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;border-color:${color};color:${color};`;
+    /* ── Toggle section selected ── */
+    function toggleSection(courseKey, sec, color) {
+      const selSec = selected.get(courseKey);
+      if (selSec && selSec.id === sec.id) {
+        selected.delete(courseKey);
+        selectedRecitations.delete(courseKey);
+        toast(`Removed ${courseKey}`);
       } else {
-        const bg = tintColor(color, 0.84);
-        ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;background:${bg};border-left:3px solid ${color};color:${color};`;
+        selected.set(courseKey, { ...sec, _color: color, _key: courseKey });
+        selectedRecitations.delete(courseKey); // clear old recitation pick when switching sections
+        toast(`Added ${courseKey} Section ${sec.section}`);
+      }
+      // Rebuild ghosts so the newly-selected section disappears and others stay
+      rebuildGhosts(openCourseKey);
+      renderTray(); refreshDd(courseKey);
+    }
+
+    /* ── Toggle recitation selected ── */
+    function toggleRecitation(courseKey, rec, color) {
+      const curRec = selectedRecitations.get(courseKey);
+      if (curRec && curRec.id === rec.id) {
+        selectedRecitations.delete(courseKey);
+        toast(`Removed recitation for ${courseKey}`);
+      } else {
+        selectedRecitations.set(courseKey, { ...rec, _color: color, _key: courseKey, _isRec: true });
+        toast(`Added recitation ${rec.section} for ${courseKey}`);
+      }
+      renderCalendar(); renderTray(); refreshDd(courseKey);
+    }
+
+    function refreshDd(courseKey) {
+      const dd = document.getElementById(`dd_${safeId(courseKey)}`);
+      if (!dd || !dd.classList.contains("open")) return;
+      dd.innerHTML = "";
+      const secs = sectionsCache.get(courseKey) || [];
+      secs.forEach(sec => dd.appendChild(buildSecRow(courseKey, sec)));
+    }
+
+    /* ── Data helpers ── */
+    function formatTime(t) {
+      // JSON times are already "9:05AM" / "10:55AM" — just return as-is
+      if (!t || t === 'TBA') return t;
+      // Also handle legacy HH:MM:SS from any old data
+      const hms = t.match(/^(\d+):(\d+):\d+$/);
+      if (hms) {
+        let h = +hms[1], mi = +hms[2];
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        if (h > 12) h -= 12; if (h === 0) h = 12;
+        return `${h}:${String(mi).padStart(2, '0')} ${ampm}`;
+      }
+      return t;
+    }
+
+    function toMin(t) {
+      if (!t || t === 'TBA') return null;
+      // "9:05AM" / "10:55PM"
+      const ampm = t.match(/^(\d{1,2}):(\d{2})(AM|PM)$/i);
+      if (ampm) {
+        let h = +ampm[1], m = +ampm[2], ap = ampm[3].toUpperCase();
+        if (ap === 'PM' && h !== 12) h += 12;
+        if (ap === 'AM' && h === 12) h = 0;
+        return h * 60 + m;
+      }
+      // Legacy HH:MM or HH:MM:SS
+      const plain = t.match(/^(\d+):(\d+)/);
+      if (plain) return +plain[1] * 60 + +plain[2];
+      return null;
+    }
+
+    function overlaps(a, b) {
+      if (!a.days || !b.days) return false;
+      if (!a.days.split("").some(d => b.days.split("").includes(d))) return false;
+      const aS = toMin(a.start_time), aE = toMin(a.end_time), bS = toMin(b.start_time), bE = toMin(b.end_time);
+      if (!aS || !bS) return false;
+      return aS < bE && bS < aE;
+    }
+
+    function checkConflict(sec, skipKey) {
+      for (const [k, s] of selected) { if (k !== skipKey && overlaps(sec, s)) return true; }
+      return false;
+    }
+
+    /* ── Calendar render ── */
+    function renderCalendar() {
+      const grid = document.getElementById("calGrid"), onlineArea = document.getElementById("onlineArea");
+      grid.innerHTML = ""; onlineArea.innerHTML = "";
+
+      const corner = document.createElement("div"); corner.className = "cal-corner"; grid.appendChild(corner);
+      DAYS.forEach(d => {
+        const el = document.createElement("div"); el.className = "cal-day-hdr"; el.textContent = DAY_LABELS[d]; grid.appendChild(el);
+      });
+
+      for (let h = 0; h < END_H - START_H; h++) {
+        const hr = START_H + h;
+        const lbl = document.createElement("div"); lbl.className = "time-lbl";
+        lbl.textContent = hr < 12 ? `${hr}a` : hr === 12 ? "12p" : `${hr - 12}p`; grid.appendChild(lbl);
+        DAYS.forEach(d => {
+          const cell = document.createElement("div"); cell.className = "cal-cell"; cell.dataset.day = d; cell.dataset.hour = hr; grid.appendChild(cell);
+        });
       }
 
-      const label = sec._key || `${sec.subject} ${sec.course_number}`;
-      ev.innerHTML = `<div class="ev-code">${label}</div>${heightPx > 28 ? `<div class="ev-room">${sec.room || ""}</div>` : ""}`;
-      ev.title = `${label} Sec ${sec.section}\n${sec.start_time} – ${sec.end_time}\n${sec.room || ""}\n${sec.instructor || ""}`;
+      // Convert hex color to a solid opaque tint (mixed with white)
+      function tintColor(hex, amount) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        const tr = Math.round(r + (255 - r) * amount);
+        const tg = Math.round(g + (255 - g) * amount);
+        const tb = Math.round(b + (255 - b) * amount);
+        return `rgb(${tr},${tg},${tb})`;
+      }
 
-      // Ghost blocks are clickable → select that section
-      if (ghost && sec._key) {
-        const courseKey = sec._key;
-        const isConf = checkConflict(sec, courseKey);
-        if (!isConf) {
-          ev.addEventListener("click", (e) => {
-            e.stopPropagation();
-            toggleSection(courseKey, sec, color);
-          });
-          ev.addEventListener("mouseenter", () => {
-            ev.classList.remove("ev-ghost");
-            ev.classList.add("ev-ghost-hover");
-            highlightSidebarRow(courseKey, sec.id, true);
-          });
-          ev.addEventListener("mouseleave", () => {
-            ev.classList.remove("ev-ghost-hover");
-            ev.classList.add("ev-ghost");
-            highlightSidebarRow(courseKey, sec.id, false);
-          });
+      // ── Collect ALL events per day for overlap computation ──
+      // Each event: { sec, color, ghost, hovered, sMin, eMin, day }
+      const dayEvents = {}; // day -> [event objects]
+      DAYS.forEach(d => dayEvents[d] = []);
+
+      function collectEvents(sec, color, ghost, hovered) {
+        if (!sec.days) return;
+        const sMin = toMin(sec.start_time), eMin = toMin(sec.end_time);
+        if (!sMin || !eMin) return;
+        sec.days.split("").filter(d => DAYS.includes(d)).forEach(day => {
+          const startHr = Math.floor(sMin / 60);
+          if (startHr < START_H || startHr >= END_H) return;
+          dayEvents[day].push({ sec, color, ghost, hovered, sMin, eMin, id: sec.id + (ghost ? '_ghost' : '_sel') });
+        });
+      }
+
+      // Collect selected (solid) events
+      for (const [key, sec] of selected) {
+        if (!sec.days) {
+          const chip = document.createElement("div"); chip.className = "online-chip";
+          chip.innerHTML = `<div class="chip-dot" style="background:${sec._color}"></div>${key} — Online`;
+          onlineArea.appendChild(chip);
         } else {
-          ev.style.cursor = "not-allowed";
+          collectEvents(sec, sec._color, false, false);
+        }
+
+        // If a recitation is selected for this course, render it solid
+        const selRec = selectedRecitations.get(key);
+        if (selRec) {
+          if (!selRec.days) {
+            const chip = document.createElement("div"); chip.className = "online-chip";
+            chip.innerHTML = `<div class="chip-dot" style="background:${sec._color}"></div>${key} — Rec Online`;
+            onlineArea.appendChild(chip);
+          } else {
+            collectEvents({ ...selRec, _isRec: true }, sec._color, false, false);
+          }
+        } else if (sec.recitations && sec.recitations.length > 0) {
+          // Show recitation options as ghosts so student can pick one
+          const isOpenCourse = (openCourseKey === key);
+          sec.recitations.forEach(rec => {
+            if (rec.days) {
+              collectEvents({ ...rec, _color: sec._color, _key: key, _isRec: true, _isRecGhost: true },
+                sec._color, true, isOpenCourse && false);
+            }
+          });
         }
       }
 
-      cell.appendChild(ev);
-    });
-  });
+      // Collect ghost preview events
+      previewSecs.forEach(sec => {
+        if (sec.days) collectEvents(sec, sec._color, true, sec._isHovered);
+      });
 
-  const crnBox=document.getElementById("crnBox");
-  if (!selected.size) { crnBox.textContent="Add courses to see your CRNs"; }
-  else {
-    const crns=[...selected.values()].map(s=>s.class_nbr).filter(Boolean);
-    crnBox.innerHTML=crns.length ? `CRNs: <strong>${crns.join("  ·  ")}</strong>` : `${selected.size} course${selected.size>1?"s":""} added`;
-  }
-}
+      // ── Compute overlap groups per day and place blocks ──
+      function computeColumns(events) {
+        // Sort by start time, then by end time descending (longer events first)
+        events.sort((a, b) => a.sMin - b.sMin || b.eMin - a.eMin);
+        const columns = []; // each column is an array of events; tracks end time of last event
+        const evColMap = new Map(); // event -> { col, totalCols }
 
-/* ── Tray ── */
-function renderTray() {
-  const tray=document.getElementById("trayList");
-  if (!selected.size) { tray.innerHTML=`<div class="tray-empty">No courses added yet</div>`; return; }
-  tray.innerHTML="";
-  for (const [key,sec] of selected) {
-    const timeStr=!sec.days?"Online":`${sec.days} ${formatTime(sec.start_time)}–${formatTime(sec.end_time)}`;
-    const item=document.createElement("div"); item.className="tray-item";
-    item.innerHTML=`
+        // Assign columns greedily
+        events.forEach(ev => {
+          let placed = false;
+          for (let c = 0; c < columns.length; c++) {
+            if (columns[c].endTime <= ev.sMin) {
+              columns[c].endTime = ev.eMin;
+              columns[c].events.push(ev);
+              evColMap.set(ev, { col: c });
+              placed = true;
+              break;
+            }
+          }
+          if (!placed) {
+            columns.push({ endTime: ev.eMin, events: [ev] });
+            evColMap.set(ev, { col: columns.length - 1 });
+          }
+        });
+
+        // Now compute how many columns each event's overlap group spans
+        // For simplicity, find connected components of overlapping events
+        events.forEach(ev => {
+          const info = evColMap.get(ev);
+          // Find max columns among all events overlapping with this one
+          let maxCol = info.col;
+          events.forEach(other => {
+            if (ev.sMin < other.eMin && other.sMin < ev.eMin) {
+              const otherCol = evColMap.get(other).col;
+              if (otherCol > maxCol) maxCol = otherCol;
+            }
+          });
+          info.totalCols = maxCol + 1;
+        });
+
+        return evColMap;
+      }
+
+      DAYS.forEach(day => {
+        const events = dayEvents[day];
+        if (!events.length) return;
+        const colMap = computeColumns(events);
+        const cells = grid.querySelectorAll(`.cal-cell[data-day="${day}"]`);
+
+        events.forEach(({ sec, color, ghost, hovered, sMin, eMin }) => {
+          const ev_entry = events.find(e => e.sec === sec && e.ghost === ghost);
+          const { col, totalCols } = colMap.get(ev_entry);
+          const startHr = Math.floor(sMin / 60);
+          const cell = cells[startHr - START_H];
+          if (!cell) return;
+
+          const topPx = ((sMin % 60) / 60) * SLOT;
+          const heightPx = Math.max(((eMin - sMin) / 60) * SLOT, 18);
+          const widthPct = 100 / totalCols;
+          const leftPct = col * widthPct;
+
+          const ev = document.createElement("div");
+          ev.className = "ev" + (ghost ? (hovered ? " ev-ghost-hover" : " ev-ghost") : " ev-selected");
+
+          if (ghost) {
+            ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;border-color:${color};color:${color};`;
+          } else if (sec._isRec) {
+            // Recitation: use a striped pattern to visually distinguish from lecture
+            const bg = tintColor(color, 0.84);
+            ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;background:repeating-linear-gradient(45deg,${bg},${bg} 4px,${tintColor(color, 0.92)} 4px,${tintColor(color, 0.92)} 8px);border-left:3px solid ${color};color:${color};`;
+          } else {
+            const bg = tintColor(color, 0.84);
+            ev.style.cssText = `top:${topPx}px;height:${heightPx}px;left:${leftPct}%;width:${widthPct}%;background:${bg};border-left:3px solid ${color};color:${color};`;
+          }
+
+          const label = sec._key || `${sec.subject} ${sec.course_number}`;
+          const recLabel = sec._isRec ? " REC" : "";
+          ev.innerHTML = `<div class="ev-code">${label}${recLabel}</div>${heightPx > 28 ? `<div class="ev-room">${sec.room || ""}</div>` : ""}`;
+          ev.title = `${label}${recLabel} Sec ${sec.section}\n${formatTime(sec.start_time)} – ${formatTime(sec.end_time)}\n${sec.room || ""}\n${sec.instructor || ""}`;
+
+          // Ghost blocks: recitation ghosts open the dropdown; section ghosts select
+          if (ghost && sec._key) {
+            const courseKey = sec._key;
+            if (sec._isRecGhost) {
+              // Recitation ghost → click to select this recitation
+              const recColor = color;
+              ev.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleRecitation(courseKey, sec, recColor);
+              });
+              ev.addEventListener("mouseenter", () => {
+                ev.classList.remove("ev-ghost"); ev.classList.add("ev-ghost-hover");
+              });
+              ev.addEventListener("mouseleave", () => {
+                ev.classList.remove("ev-ghost-hover"); ev.classList.add("ev-ghost");
+              });
+            } else {
+              const isConf = checkConflict(sec, courseKey);
+              if (!isConf) {
+                ev.addEventListener("click", (e) => {
+                  e.stopPropagation();
+                  toggleSection(courseKey, sec, color);
+                });
+                ev.addEventListener("mouseenter", () => {
+                  ev.classList.remove("ev-ghost");
+                  ev.classList.add("ev-ghost-hover");
+                  highlightSidebarRow(courseKey, sec.id, true);
+                });
+                ev.addEventListener("mouseleave", () => {
+                  ev.classList.remove("ev-ghost-hover");
+                  ev.classList.add("ev-ghost");
+                  highlightSidebarRow(courseKey, sec.id, false);
+                });
+              } else {
+                ev.style.cursor = "not-allowed";
+              }
+            }
+          }
+
+          cell.appendChild(ev);
+        });
+      });
+
+      const crnBox = document.getElementById("crnBox");
+      if (!selected.size) { crnBox.textContent = "Add courses to see your CRNs"; }
+      else {
+        const crns = [];
+        for (const [key, s] of selected) {
+          if (s.class_nbr) crns.push(s.class_nbr);
+          const rec = selectedRecitations.get(key);
+          if (rec && rec.class_nbr) crns.push(rec.class_nbr);
+        }
+        crnBox.innerHTML = crns.length ? `CRNs: <strong>${crns.join("  ·  ")}</strong>` : `${selected.size} course${selected.size > 1 ? "s" : ""} added`;
+      }
+    }
+
+    /* ── Tray ── */
+    function renderTray() {
+      const tray = document.getElementById("trayList");
+      if (!selected.size) { tray.innerHTML = `<div class="tray-empty">No courses added yet</div>`; return; }
+      tray.innerHTML = "";
+      for (const [key, sec] of selected) {
+        const timeStr = !sec.days ? "Online" : `${sec.days} ${formatTime(sec.start_time)}–${formatTime(sec.end_time)}`;
+        const item = document.createElement("div"); item.className = "tray-item";
+        item.innerHTML = `
       <div class="tray-dot" style="background:${sec._color}"></div>
       <div class="tray-info">
         <div class="tray-code">${key} — Sec ${sec.section}</div>
-        <div class="tray-sub">${timeStr} · ${sec.instructor||"TBA"}</div>
+        <div class="tray-sub">${timeStr} · ${sec.instructor || "TBA"}</div>
       </div>
       <button class="tray-x" onclick="removeCourse('${key}')">✕</button>`;
-    tray.appendChild(item);
-  }
-}
+        tray.appendChild(item);
 
-function removeCourse(key) {
-  selected.delete(key); renderCalendar(); renderTray(); refreshDd(key); toast(`Removed ${key}`);
-}
-
-function clearAll() {
-  selected.clear(); previewSecs=[]; openCourseKey=null; renderCalendar(); renderTray();
-  document.querySelectorAll(".sections-dd.open").forEach(dd=>{
-    const key=dd.id.replace("dd_","").replace(/_/g," "); refreshDd(key);
-  });
-}
-
-/* ── Highlight sidebar section row when hovering a ghost on the calendar ── */
-function highlightSidebarRow(courseKey, secId, on) {
-  const dd = document.getElementById(`dd_${safeId(courseKey)}`);
-  if (!dd) return;
-  const rows = dd.querySelectorAll(".sec-row");
-  const secs = sectionsCache.get(courseKey) || [];
-  rows.forEach((row, i) => {
-    if (secs[i] && secs[i].id === secId) {
-      if (on) row.classList.add("previewing");
-      else row.classList.remove("previewing");
+        // Show recitation row in tray if one is selected
+        const selRec = selectedRecitations.get(key);
+        if (selRec) {
+          const recTimeStr = !selRec.days ? "Online" : `${selRec.days} ${formatTime(selRec.start_time)}–${formatTime(selRec.end_time)}`;
+          const recItem = document.createElement("div");
+          recItem.className = "tray-item";
+          recItem.style.cssText = "padding-left:26px;background:#f7fdf9;";
+          recItem.innerHTML = `
+        <div class="tray-dot" style="background:${sec._color};opacity:.6;"></div>
+        <div class="tray-info">
+          <div class="tray-code" style="font-size:.7rem;">↳ Rec ${selRec.section}${selRec.class_nbr ? ` (CRN ${selRec.class_nbr})` : ""}</div>
+          <div class="tray-sub">${recTimeStr} · ${selRec.instructor || "TBA"}</div>
+        </div>
+        <button class="tray-x" onclick="toggleRecitation('${key}', selectedRecitations.get('${key}'), '${sec._color}')">✕</button>`;
+          tray.appendChild(recItem);
+        } else if (sec.recitations && sec.recitations.length > 0) {
+          // Nudge to pick a recitation
+          const nudge = document.createElement("div");
+          nudge.className = "tray-item";
+          nudge.style.cssText = "padding-left:26px;background:#fffbeb;";
+          nudge.innerHTML = `
+        <div class="tray-dot" style="background:var(--warn);"></div>
+        <div class="tray-info">
+          <div class="tray-code" style="font-size:.7rem;color:var(--warn);">↳ Pick a recitation</div>
+          <div class="tray-sub">Expand the section above to choose</div>
+        </div>`;
+          tray.appendChild(nudge);
+        }
+      }
     }
-  });
-}
 
-let _tt;
-function toast(msg) {
-  const el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show");
-  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove("show"),2200);
-}
+    function removeCourse(key) {
+      selected.delete(key); selectedRecitations.delete(key); renderCalendar(); renderTray(); refreshDd(key); toast(`Removed ${key}`);
+    }
 
-renderCalendar();
-</script>
+    function clearAll() {
+      selected.clear(); selectedRecitations.clear(); previewSecs = []; openCourseKey = null; renderCalendar(); renderTray();
+      document.querySelectorAll(".sections-dd.open").forEach(dd => {
+        const key = dd.id.replace("dd_", "").replace(/_/g, " "); refreshDd(key);
+      });
+    }
+
+    /* ── Highlight sidebar section row when hovering a ghost on the calendar ── */
+    function highlightSidebarRow(courseKey, secId, on) {
+      const dd = document.getElementById(`dd_${safeId(courseKey)}`);
+      if (!dd) return;
+      const rows = dd.querySelectorAll(".sec-row");
+      const secs = sectionsCache.get(courseKey) || [];
+      rows.forEach((row, i) => {
+        if (secs[i] && secs[i].id === secId) {
+          if (on) row.classList.add("previewing");
+          else row.classList.remove("previewing");
+        }
+      });
+    }
+
+    let _tt;
+    function toast(msg) {
+      const el = document.getElementById("toast"); el.textContent = msg; el.classList.add("show");
+      clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove("show"), 2200);
+    }
+
+    /* ── localStorage: auto-save & resume ────────────────────────────────── */
+    const STORAGE_KEY = "unt_vsb_schedule";
+
+    function saveSchedule() {
+      if (!selected.size) {
+        localStorage.removeItem(STORAGE_KEY);
+        return;
+      }
+      const selections = [...selected.entries()].map(([courseKey, sec]) => {
+        const rec = selectedRecitations.get(courseKey);
+        return {
+          courseKey,
+          classNbr: sec.class_nbr,
+          section: sec.section,
+          subject: sec.subject,
+          courseNumber: sec.course_number,
+          recitationId: rec ? rec.id : null,
+          recitationClassNbr: rec ? rec.class_nbr : null,
+        };
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        saved_at: new Date().toISOString(),
+        term: "1268",
+        selections,
+      }));
+    }
+
+    function loadSavedSchedule() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      let saved;
+      try { saved = JSON.parse(raw); } catch { return; }
+      if (!saved.selections?.length) return;
+
+      // Show resume banner
+      const date = new Date(saved.saved_at).toLocaleDateString("en-US", {
+        month: "short", day: "numeric", hour: "numeric", minute: "2-digit"
+      });
+      showResumeBanner(saved, date);
+    }
+
+    function showResumeBanner(saved, date) {
+      // Remove any existing banner
+      document.getElementById("resumeBanner")?.remove();
+
+      const banner = document.createElement("div");
+      banner.id = "resumeBanner";
+      banner.style.cssText = `
+        position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+        background:#1a1d23; color:#fff; border-radius:12px;
+        padding:14px 18px; z-index:9999; box-shadow:0 4px 20px rgba(0,0,0,.3);
+        display:flex; align-items:center; gap:14px; font-size:.82rem;
+        animation: slideUp .25s ease; max-width:420px; width:calc(100vw - 40px);
+      `;
+      banner.innerHTML = `
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;margin-bottom:2px">📅 Saved schedule found</div>
+          <div style="color:#9ca3af;font-size:.75rem">${saved.selections.length} course${saved.selections.length !== 1 ? 's' : ''} · saved ${date}</div>
+        </div>
+        <button id="resumeBtn" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Resume</button>
+        <button id="freshBtn" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap">Start Fresh</button>
+      `;
+
+      // Add slide-up keyframe once
+      if (!document.getElementById("resumeStyle")) {
+        const s = document.createElement("style");
+        s.id = "resumeStyle";
+        s.textContent = `@keyframes slideUp { from { opacity:0; transform:translateX(-50%) translateY(12px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }`;
+        document.head.appendChild(s);
+      }
+
+      document.body.appendChild(banner);
+
+      document.getElementById("resumeBtn").onclick = () => {
+        banner.remove();
+        applyResume(saved);
+      };
+      document.getElementById("freshBtn").onclick = () => {
+        localStorage.removeItem(STORAGE_KEY);
+        banner.remove();
+        toast("Starting fresh 🌱");
+      };
+    }
+
+    async function applyResume(saved) {
+      // Wait for data to be ready if it isn't yet
+      if (!dataReady) {
+        toast("Loading data, resuming in a moment…");
+        await new Promise(resolve => {
+          const check = setInterval(() => {
+            if (dataReady || dataError) { clearInterval(check); resolve(); }
+          }, 100);
+        });
+      }
+      if (dataError) { toast("⚠️ Couldn't load data to resume schedule"); return; }
+
+      const missing = [];
+      const changed = [];
+
+      for (const s of saved.selections) {
+        // Find matching section in fresh JSON by classNbr
+        let sec = allCourses.find(c => c.class_nbr === s.classNbr);
+
+        // Fallback: match by subject + courseNumber + section if classNbr changed
+        if (!sec) {
+          sec = allCourses.find(c =>
+            c.subject === s.subject &&
+            c.course_number === s.courseNumber &&
+            c.section === s.section
+          );
+          if (sec) changed.push(s.courseKey); // found but CRN changed
+        }
+
+        if (!sec) {
+          missing.push(s.courseKey);
+          continue;
+        }
+
+        // Add color + restore
+        if (!courseColors.has(s.courseKey)) {
+          courseColors.set(s.courseKey, PALETTE[colorIdx % PALETTE.length]);
+          colorIdx++;
+        }
+        const color = courseColors.get(s.courseKey);
+        selected.set(s.courseKey, { ...sec, _color: color, _key: s.courseKey });
+
+        // Restore recitation if saved
+        if (s.recitationId && sec.recitations) {
+          const rec = sec.recitations.find(r => r.id === s.recitationId) ||
+            sec.recitations.find(r => r.class_nbr === s.recitationClassNbr);
+          if (rec) selectedRecitations.set(s.courseKey, { ...rec, _color: color, _key: s.courseKey, _isRec: true });
+        }
+
+        // Pre-populate sectionsCache so expanding works instantly
+        if (!sectionsCache.has(s.courseKey)) {
+          sectionsCache.set(s.courseKey, allCourses.filter(c =>
+            c.subject === sec.subject && c.course_number === sec.course_number
+          ));
+        }
+      }
+
+      renderCalendar();
+      renderTray();
+
+      // Report what happened
+      const restored = saved.selections.length - missing.length;
+      let msg = `✅ Restored ${restored} course${restored !== 1 ? 's' : ''}`;
+      if (changed.length) msg += ` · ${changed.length} CRN updated`;
+      toast(msg);
+
+      if (missing.length) {
+        setTimeout(() => {
+          toast(`⚠️ ${missing.join(", ")} no longer available`);
+        }, 2500);
+      }
+    }
+
+    /* ── Hook saveSchedule into every action that changes the schedule ─────── */
+    // Wrap toggleSection to auto-save after every add/remove
+    const _origToggle = toggleSection;
+    toggleSection = function (courseKey, sec, color) {
+      _origToggle(courseKey, sec, color);
+      saveSchedule();
+    };
+
+    // Wrap toggleRecitation to auto-save
+    const _origToggleRec = toggleRecitation;
+    toggleRecitation = function (courseKey, rec, color) {
+      _origToggleRec(courseKey, rec, color);
+      saveSchedule();
+    };
+
+    // Wrap clearAll to clear storage too
+    const _origClearAll = clearAll;
+    clearAll = function () {
+      _origClearAll();
+      localStorage.removeItem(STORAGE_KEY);
+    };
+
+    // Wrap removeCourse to auto-save
+    const _origRemove = removeCourse;
+    removeCourse = function (key) {
+      _origRemove(key);
+      saveSchedule();
+    };
+
+    /* ── Init ────────────────────────────────────────────────────────────────*/
+    renderCalendar();
+
+    // Check for saved schedule after a tiny delay so the page renders first
+    setTimeout(loadSavedSchedule, 400);
+  </script>
 </body>
+
 </html>

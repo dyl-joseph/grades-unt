@@ -1,0 +1,14 @@
+
+> unt-grade-distribution@0.1.0 dev
+> next dev
+
+ΓÜá Port 3000 is in use by process 25724, using available port 3001 instead.
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://10.125.247.249:3001
+- Environments: .env.local
+
+Γ£ô Starting...
+Γ¿» Unable to acquire lock at C:\Users\Akhil.DESKTOP-TV2N8F4\Downloads\grades-unt\unt-grade-distribution\.next\dev\lock, is another instance of next dev running?
+  Suggestion: If you intended to restart next dev, terminate the other process, and then try again.
+[?25h
