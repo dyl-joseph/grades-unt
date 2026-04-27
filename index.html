@@ -1618,7 +1618,7 @@
           <div class="search-wrap">
             <div class="search-label">Search Courses</div>
             <div class="search-row">
-              <input id="searchInput" type="text" placeholder="MATH 1650, Calculus, instructor…" autocomplete="off" />
+              <input id="searchInput" type="text" placeholder="MATH 1650, instructor…" autocomplete="off" />
               <button class="btn btn-green" onclick="doSearch()">Search</button>
             </div>
           </div>
@@ -2041,7 +2041,7 @@
       const matches = queryCourses(raw);
       const seen = new Map();
       matches.forEach(c => { const k = `${c.subject} ${c.course_number}`; if (!seen.has(k)) seen.set(k, c); });
-      if (!seen.size) { list.innerHTML = `<div class="state-msg"><strong>No results</strong>Try MATH, CSCI 1100, or an instructor name.</div>`; return; }
+      if (!seen.size) { list.innerHTML = `<div class="state-msg"><strong>No results</strong>Try MATH, CSCE 1040, or an instructor name.</div>`; return; }
       list.innerHTML = '';
       for (const [key, row] of seen) list.appendChild(buildCard(key, row));
     }
