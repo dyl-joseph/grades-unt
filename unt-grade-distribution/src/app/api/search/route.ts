@@ -8,6 +8,8 @@ import {
   recordSearchQuery,
   recordSearchSkip,
 } from "@/lib/metrics";
+import { validateExtensionOrigin } from "@/lib/cors";
+import { checkInstallRateLimit } from "@/lib/rate-limit";
 
 /* ── In-memory LRU cache ─────────────────────────────── */
 const MAX_ENTRIES = 500;
@@ -40,7 +42,23 @@ function setInCache(key: string, data: CacheEntry["data"]) {
   cache.set(key, { data, ts: Date.now() });
 }
 
+function rateLimitHeaders(request: NextRequest): Record<string, string> {
+  const installLimit = checkInstallRateLimit(request);
+  return { "X-RateLimit-Remaining": String(installLimit.remaining) };
+}
+
 export async function GET(request: NextRequest) {
+  const originReject = validateExtensionOrigin(request);
+  if (originReject) return originReject;
+
+  const installLimit = checkInstallRateLimit(request);
+  if (!installLimit.allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded" },
+      { status: 429, headers: { "Retry-After": String(installLimit.retryAfter ?? 60) } }
+    );
+  }
+
   const requestStart = performance.now();
   const q = (request.nextUrl.searchParams.get("q") ?? "").trim();
   if (q.length < 2) {
@@ -48,7 +66,7 @@ export async function GET(request: NextRequest) {
     recordSearchSkip(q, durationMs);
     return NextResponse.json(
       { courses: [], instructors: [] },
-      { headers: buildSearchHeaders({ totalDurationMs: durationMs, cacheState: "skip", queryKind: "skip" }) }
+      { headers: { ...rateLimitHeaders(request), ...buildSearchHeaders({ totalDurationMs: durationMs, cacheState: "skip", queryKind: "skip" }) } }
     );
   }
 
@@ -64,12 +82,12 @@ export async function GET(request: NextRequest) {
       queryKind
     );
     return NextResponse.json(cached, {
-      headers: buildSearchHeaders({
+      headers: { ...rateLimitHeaders(request), ...buildSearchHeaders({
         totalDurationMs: durationMs,
         cacheState: "hit",
         queryKind,
         resultCounts: { courses: cached.courses.length, instructors: cached.instructors.length },
-      }),
+      }) },
     });
   }
 
@@ -121,13 +139,13 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json(result, {
-      headers: buildSearchHeaders({
+      headers: { ...rateLimitHeaders(request), ...buildSearchHeaders({
         totalDurationMs,
         dbDurationMs,
         cacheState: "miss",
         queryKind,
         resultCounts: { courses: result.courses.length, instructors: result.instructors.length },
-      }),
+      }) },
     });
   } catch (error) {
     console.error("Search API error:", error);
@@ -135,7 +153,7 @@ export async function GET(request: NextRequest) {
     recordSearchError(cacheKey, durationMs, error, queryKind);
     return NextResponse.json(
       { error: "Database query failed", details: error instanceof Error ? error.message : String(error) },
-      { status: 500, headers: buildSearchHeaders({ totalDurationMs: durationMs, cacheState: "error", queryKind }) }
+      { status: 500, headers: { ...rateLimitHeaders(request), ...buildSearchHeaders({ totalDurationMs: durationMs, cacheState: "error", queryKind }) } }
     );
   }
 }
