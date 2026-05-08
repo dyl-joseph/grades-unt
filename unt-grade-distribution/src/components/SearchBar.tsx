@@ -145,9 +145,7 @@ export default function SearchBar({
   const navigate = (type: "course" | "instructor", id: string) => {
     const navId = `${type}-${id}`;
     setNavigatingId(navId);
-    setIsOpen(false);
     setQuery("");
-    resetResults();
     if (type === "course") {
       router.push(`/course/${id}`);
     } else {
