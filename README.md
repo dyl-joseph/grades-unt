@@ -1,64 +1,54 @@
-# grades-unt
+# UNT Schedule Builder
 
-## Choosing classes is a gamble. It shouldn't be.
-You don't always know what you're signing up for (easy or hard!) until it's too late. We created a website to view all the grades of every class AND professor at UNT.
+## Choosing classes is a puzzle. Let's solve it.
 
-## View (almost) any class at UNT from last semester: 
-We got data from UNT about all the grade distributions from Fall 2025. With this data, we made an app to easily view all the data. 
+Building a conflict-free schedule at UNT is tedious — cross-referencing section times, checking for overlaps, and juggling preferences. This tool automates all of it.
 
-### **Links:** 
-- [untgrades.app](https://untgrades.app)
+### **Link:** [vsb.untgrades.app](https://vsb.untgrades.app)
+
+## Features
+
+- **Course search** — filter by prefix, number, title, or instructor
+- **Weekly calendar grid** — visual schedule with conflict detection
+- **Section selection** — pick specific sections with ghost/hover previews
+- **Recitation picking** — auto-pair lectures with their recitations/lab sections
+- **Lock sections** — lock a section in place and regenerate around it
+- **Busy times** — block off unavailable time slots
+- **Auto-generate schedules** — generate all valid combinations with preferences (time of day, number of classes, professors, campus, delivery mode)
+- **Save/load schedules** — persist schedules to localStorage, switch between saved builds
+- **CRN display** — copy CRNs for registration
+- **Dark/light theme** — toggle with auto-detect and persistence
 
 ## Technical Implementation
-### Frontend: 
-- React v19.2.3
-- Next.js 16.1.6
-- Typescript 
-- Tailwind CSS (v4) 
-- Recharts (v3.7.0) - draws grade distribution charts
-- jsPDF + jspdf-autotable (4.2.0, 5.0.7) - PDF exporter
-- Vercel Analytics + Vercel Speed Insights - real-user page views, Web Vitals, and route performance monitoring
 
-### Backend:
-- postgress-sql
-- Next.js API (16.1.6) - routes data 
-- Prisma ORM (7.4.2) - fetches data from Supabase and gives it to the website
-- PostgreSQL - database manager in Supabase
-- pg [node-postgress] (8.19.0) - allow the website to use postgress and process postrgress data
+### Frontend:
+- Vanilla HTML/CSS/JavaScript — single-file SPA (`index.html`), no framework, no build step
+- No dependencies — zero npm packages, zero CDN links
 
-### Hosting: 
-- Supabase (database)
-- Vercel (hosting the website itself)
+### Data Pipeline:
+- `unt_sections.sql` — raw UNT course scheduling data in SQL INSERT format
+- `sql_to_html.py` — Python script that extracts from the SQL file and rebuilds the embedded `allCourses` data in `index.html`
+- `unt_sections.json` — same data in JSON format
 
-### Observability:
-- Vercel Speed Insights helps monitor real-user loading performance across the home page, search-driven navigation, and the database-backed course and instructor pages.
-- Speed Insights is useful for finding slow routes and poor Web Vitals, but it does not replace direct database query profiling by itself.
+### Hosting:
+- GitHub Pages via `CNAME` file pointing to `vsb.untgrades.app`
 
-## File Structure: 
-/unt-grade-distribution: contains all the code. put it all into a folder for "modulization".
+## File Structure:
 
-documentation files (any .md files): in the repo's root file. makes it easier to see and read all the documentation docs that have been made (e.g. look at [DOCUMENTATION.md](https://github.com/dyl-joseph/grades-unt/blob/main/DOCUMENTATION.md)). 
+```
+index.html          — The entire VSB app (single-file SPA)
+sql_to_html.py      — Data pipeline: SQL → embedded JS data in index.html
+unt_sections.json   — Raw UNT course scheduling data (JSON)
+unt_sections.sql    — Raw UNT course scheduling data (SQL INSERT format)
+CNAME               — GitHub Pages custom domain (vsb.untgrades.app)
+README.md           — This file
+DOCUMENTATION.md    — Technical documentation
+```
 
-## Contributions: 
+## Contributions
 
 ### Maintainers:
 
 [Dylan Joseph](https://github.com/dyl-joseph)
 
-[Gautham Nair](https://github.com/GauthamRNair)
-
 [Akhil Tumati](https://github.com/YouSoMoose)
-
-### Initial Contributors:
-
-[Sai Are](https://github.com/FrostNinja397)
-
-## Planned Features
-
-- **SPOT Evaluations** — Integrate Student Perceptions of Teaching data for instructors
-- **More Semesters** — Expand grade distribution data to cover additional semesters
-- **Add API endpoints** — Aggregate course and instructor data:
-  - `/api/course?aggregate=<prefix>:<number>`: Returns aggregate grade data for a course by summing all its sections.
-  - `/api/instructor?aggregate=<id>`: Returns aggregate grade data for an instructor by summing all their sections.
-  - For now, aggregation is performed manually by summing all section grade counts and enrollment.
-  - Integrate these endpoints with the compare page for efficient aggregate graph rendering.
