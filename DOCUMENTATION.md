@@ -1,8 +1,8 @@
-# UNT Grade Explorer — Technical Documentation
+# UNT Schedule Builder — Technical Documentation
 
-> A full-stack web application for exploring grade distributions across courses and instructors at the University of North Texas.
+> A single-file static SPA for building conflict-free class schedules at the University of North Texas.
 
-**Live URL:** Deployed on Vercel (auto-deploys on push to `main`)  
+**Live URL:** [vsb.untgrades.app](https://vsb.untgrades.app)
 **Repository:** [github.com/dyl-joseph/grades-unt](https://github.com/dyl-joseph/grades-unt)
 
 ---
@@ -12,17 +12,21 @@
 1. [Architecture Overview](#1-architecture-overview)
 2. [Tech Stack](#2-tech-stack)
 3. [Project Structure](#3-project-structure)
-4. [Database Schema](#4-database-schema)
-5. [Data Pipeline](#5-data-pipeline)
-6. [Frontend — Pages & Routing](#6-frontend--pages--routing)
-7. [Search System](#7-search-system)
-8. [Shopping Cart & PDF Export](#8-shopping-cart--pdf-export)
-9. [Theming & Visual Design](#9-theming--visual-design)
-10. [Components Reference](#10-components-reference)
-11. [Hooks & Utilities](#11-hooks--utilities)
-12. [Configuration Files](#12-configuration-files)
-13. [Deployment](#13-deployment)
-14. [Development Guide](#14-development-guide)
+4. [Data Pipeline](#4-data-pipeline)
+5. [Core Application State](#5-core-application-state)
+6. [Course Search](#6-course-search)
+7. [Calendar Rendering](#7-calendar-rendering)
+8. [Section Selection & Conflict Detection](#8-section-selection--conflict-detection)
+9. [Recitation Handling](#9-recitation-handling)
+10. [Auto-Generate Schedules](#10-auto-generate-schedules)
+11. [Busy Times](#11-busy-times)
+12. [Save & Load Schedules](#12-save--load-schedules)
+13. [Auto-Save & Resume](#13-auto-save--resume)
+14. [Theming](#14-theming)
+15. [localStorage Keys](#15-localstorage-keys)
+16. [Color System](#16-color-system)
+17. [Deployment](#17-deployment)
+18. [Data Update Workflow](#18-data-update-workflow)
 
 ---
 
@@ -30,757 +34,497 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                        Browser                          │
-│  ┌──────────┐  ┌──────────────┐  ┌───────────────────┐ │
-│  │ SearchBar│→ │ /api/search  │  │ Server Components │ │
-│  │ (client) │  │ (API Route)  │  │ (course, instruc.)│ │
-│  └──────────┘  └──────┬───────┘  └────────┬──────────┘ │
-│                       │                    │            │
-│                ┌──────▼───────┐            │            │
-│                │  LRU Cache   │            │            │
-│                │ (in-memory)  │            │            │
-│                └──────┬───────┘            │            │
-│  ┌────────────────────┴────────────────────┘            │
-│  │           Prisma ORM (PrismaPg adapter)              │
-│  └────────────────────┬─────────────────────            │
-│                       │                                 │
-│            ┌──────────▼──────────┐                      │
-│            │  Supabase PostgreSQL │                     │
-│            │  (PgBouncer pooler)  │                     │
-│            └─────────────────────┘                      │
+│ Browser                                                 │
+│                                                         │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │ index.html (single file, ~3000 lines)             │  │
+│  │                                                   │  │
+│  │  <style>  ─ all CSS (light + dark theme)          │  │
+│  │  <body>   ─ all HTML structure                    │  │
+│  │  <script> ─ all JS logic + embedded course data   │  │
+│  │                                                   │  │
+│  │  const allCourses = [{...}, {...}, ...]            │  │
+│  └───────────────────────────────────────────────────┘  │
+│                                                         │
+│  localStorage                                           │
+│  ├── unt_vsb_theme    ─ "dark" | "light"               │
+│  ├── unt_vsb_saved    ─ JSON array of saved schedules  │
+│  └── unt_vsb_current  ─ auto-saved current selections  │
 └─────────────────────────────────────────────────────────┘
 ```
 
-The app follows a **hybrid rendering model**:
-
-- **Server Components** (default): Course detail pages and instructor detail pages are rendered on the server. They call Prisma directly — no API route needed. This means the database query, data aggregation, and HTML generation all happen server-side before the page reaches the browser.
-- **Client Components** (`"use client"`): Interactive elements like the search bar, theme toggle, cart, and charts are client-rendered. The search bar calls a Next.js API route (`/api/search`) which queries the database and returns JSON.
-- **API Routes**: A single API route (`/api/search/route.ts`) handles autocomplete search queries. Responses are stored in an in-memory LRU cache (500 entries, 5-minute TTL) so repeat searches skip the database entirely.
-- **Observability**: Vercel Analytics (`@vercel/analytics/next`) and Vercel Speed Insights (`@vercel/speed-insights/next`) are loaded in the root layout for privacy-friendly page-view tracking, Web Vitals, and real-user route performance monitoring.
+The app is a **zero-dependency, zero-build-step static SPA**. Everything — HTML, CSS, JavaScript, and course data — lives in a single `index.html` file. There is no framework, no bundler, no server, and no database. All state is managed in-memory with `localStorage` for persistence.
 
 ---
 
 ## 2. Tech Stack
 
-### Frontend
-
-| Technology | Version | Purpose |
-|---|---|---|
-| **Next.js** | 16.1.6 | React framework with App Router, Server Components, file-based routing |
-| **React** | 19.2.3 | UI library with React Compiler enabled |
-| **TypeScript** | ^5 | Type safety across the entire codebase |
-| **Tailwind CSS** | v4 | Utility-first CSS with `@variant dark` for class-based dark mode |
-| **Recharts** | 3.7.0 | Responsive SVG bar charts for grade distributions |
-| **jsPDF** | 4.2.0 | Client-side PDF generation |
-| **jspdf-autotable** | 5.0.7 | Table layout plugin for jsPDF |
-| **@vercel/analytics** | latest | Privacy-friendly page-view & Web Vitals analytics |
-| **@vercel/speed-insights** | latest | Real-user route performance and Web Vitals monitoring |
-
-### Backend
-
-| Technology | Version | Purpose |
-|---|---|---|
-| **Prisma ORM** | 7.4.2 | Type-safe database access with `@prisma/adapter-pg` driver adapter |
-| **PostgreSQL** | — | Relational database hosted on Supabase |
-| **pg (node-postgres)** | 8.19.0 | Low-level PostgreSQL driver (used by Prisma adapter and seed scripts) |
-| **csv-parse** | 6.1.0 | CSV parsing for seed scripts |
-
-### Infrastructure
-
 | Technology | Purpose |
 |---|---|
-| **Vercel** | Hosting, serverless functions, auto-deploy on push |
-| **Supabase** | Managed PostgreSQL with connection pooling (PgBouncer) |
-| **Vercel Analytics** | Page-view tracking and Web Vitals monitoring |
-| **Vercel Speed Insights** | Real-user route performance monitoring across pages and navigations |
-| **ESLint** | v9 with `eslint-config-next` for code linting |
-| **React Compiler** | `babel-plugin-react-compiler` 1.0.0 for automatic memoization |
+| **Vanilla HTML5** | Page structure |
+| **Vanilla CSS3** | Styling with CSS custom properties for theming |
+| **Vanilla JavaScript** | All application logic (no framework) |
+| **Google Fonts** | Albert Sans typeface (1 external dependency) |
+| **GitHub Pages** | Static hosting via CNAME file |
+| **Python 3** | `sql_to_html.py` data pipeline script |
+
+No npm, no Node.js runtime, no build tools, no package.json.
 
 ---
 
 ## 3. Project Structure
 
 ```
-unt-grade-distribution/
-├── .env                          # Environment variables (not committed)
-├── .env.example                  # Template for environment variables
-├── next.config.ts                # Next.js configuration (React Compiler enabled)
-├── postcss.config.mjs            # PostCSS with @tailwindcss/postcss
-├── prisma.config.ts              # Prisma 7 configuration with defineConfig
-├── tsconfig.json                 # TypeScript configuration
-├── package.json                  # Dependencies and scripts
-│
-├── prisma/
-│   ├── schema.prisma             # Database schema (3 models, 7 indexes)
-│   ├── seed.ts                   # Seeding script (raw pg client)
-│   ├── generate-sql.ts           # Offline SQL file generator for Supabase
-│   ├── data/
-│   │   └── grades.csv            # Source data (UNT grade distributions)
-│   └── sql-chunks/               # Generated SQL files (for manual import)
-│
-├── public/                       # Static assets
-│
-└── src/
-    ├── app/
-    │   ├── globals.css            # Tailwind v4 theme, glass effects, sparkle animation
-    │   ├── layout.tsx             # Root layout (fonts, Vines, Providers, Navbar)
-    │   ├── page.tsx               # Home page (title + centered search)
-    │   ├── not-found.tsx          # Custom 404 page
-    │   ├── api/search/route.ts    # Search API endpoint
-    │   ├── cart/page.tsx          # Shopping cart page
-    │   ├── course/[prefix]/[number]/page.tsx   # Course detail page
-    │   └── instructor/[id]/page.tsx            # Instructor detail page
-    │
-    ├── components/
-    │   ├── SearchBar.tsx          # Autocomplete search with keyboard navigation
-    │   ├── Navbar.tsx             # Sticky navigation bar
-    │   ├── ThemeToggle.tsx        # Dark/light mode switch
-    │   ├── Vines.tsx              # Decorative SVG vine overlays
-    │   ├── GradeChart.tsx         # Recharts bar chart wrapper
-    │   ├── LazyChart.tsx          # IntersectionObserver wrapper for lazy-loading charts
-    │   ├── SectionCard.tsx        # Individual section display card
-    │   ├── GpaBadge.tsx           # Color-coded GPA pill badge
-    │   ├── AddToCartButton.tsx    # Add/remove course from cart
-    │   ├── CartIcon.tsx           # Navbar cart link with badge count
-    │   ├── CourseCartButton.tsx   # Client wrapper for cart button on server page
-    │   ├── ShareButton.tsx        # Copy-to-clipboard share link
-    │   └── Providers.tsx          # Client-side context providers wrapper
-    │
-    ├── context/
-    │   └── CartContext.tsx         # Shopping cart state (useReducer + localStorage)
-    │
-    ├── hooks/
-    │   ├── useDebounce.ts         # Generic debounce hook
-    │   └── useTheme.ts            # Dark mode detection via MutationObserver
-    │
-    └── lib/
-        ├── prisma.ts              # Prisma client singleton with PgBouncer awareness
-        ├── types.ts               # Shared TypeScript types
-        ├── grades.ts              # GPA calculation, chart data, aggregation
-        └── pdf.ts                 # PDF generation with jsPDF + autotable
+/
+├── index.html           The entire VSB app (single-file SPA, ~3000 lines)
+├── sql_to_html.py       Data pipeline: extracts from SQL → rebuilds allCourses in index.html
+├── unt_sections.json    Raw UNT course scheduling data (JSON, ~182K lines)
+├── unt_sections.sql     Raw UNT course scheduling data (SQL INSERT format)
+├── CNAME                GitHub Pages custom domain → vsb.untgrades.app
+├── README.md            Project overview
+├── DOCUMENTATION.md     This file
+├── .gitignore           Git ignore rules
+└── .github/
+    └── FUNDING.yml      Ko-fi sponsorship link
 ```
 
 ---
 
-## 4. Database Schema
+## 4. Data Pipeline
 
-The database uses **3 normalized tables** with a straightforward relational model:
+Course data flows from raw SQL to embedded JavaScript:
 
 ```
-┌──────────┐       ┌──────────────┐       ┌──────────────┐
-│  Course   │──1:N──│   Section    │──N:1──│  Instructor  │
-│           │       │              │       │              │
-│ id (PK)   │       │ id (PK)      │       │ id (PK)      │
-│ prefix    │       │ sectionNumber│       │ firstName    │
-│ number    │       │ courseId (FK) │       │ lastName     │
-│ title     │       │ instructorId │       │              │
-│           │       │ gradeA..I    │       │              │
-│           │       │ totalEnroll  │       │              │
-└──────────┘       └──────────────┘       └──────────────┘
+unt_sections.sql ──→ sql_to_html.py ──→ index.html
+                                         (const allCourses = [...])
 ```
 
-### Models
+### Source Data (`unt_sections.sql`)
 
-#### Course
-- **Primary Key:** `id` (autoincrement)
-- **Fields:** `prefix` (e.g., "ACCT"), `number` (e.g., "2010"), `title` (e.g., "PRINCIPLES OF ACCOUNTING")
-- **Unique Constraint:** `(prefix, number)` — ensures no duplicate courses
-- **Index:** `prefix` — speeds up prefix-based autocomplete searches
+A single SQL `INSERT` statement containing a JSON array in the `courses` column. The JSON array holds ~7700 course section objects with nested recitation data.
 
-#### Instructor
-- **Primary Key:** `id` (autoincrement)
-- **Fields:** `firstName`, `lastName`
-- **Unique Constraint:** `(firstName, lastName)` — ensures no duplicate instructors
-- **Index:** `lastName` — speeds up name search lookups
+### Pipeline Script (`sql_to_html.py`)
 
-#### Section
-- **Primary Key:** `id` (autoincrement)
-- **Fields:** `sectionNumber`, `courseId` (FK), `instructorId` (FK), plus 9 grade count columns (`gradeA` through `gradeI`) and `totalEnroll`
-- **Unique Constraint:** `(courseId, sectionNumber)` — ensures no duplicate sections per course
-- **Indexes:** `courseId`, `instructorId` — optimizes JOIN operations when loading course and instructor pages
+Python script (159 lines) that:
 
-### Grade Columns
+1. **Extracts** the JSON array from the SQL file using regex to locate the `[` bracket after the `total_sections` number
+2. **Flattens** each course object — strips `course_title` and `description` (unused by the app), keeps only operational fields (`subject`, `course_number`, `section`, `class_nbr`, `days`, `start_time`, `end_time`, `instructor`, `seats_open`, etc.)
+3. **Transforms IDs** — removes the trailing positional index that the SQL format appends (e.g., `AARS_6810_001_13851_0` → `AARS_6810_001_13851`)
+4. **Transforms recitation IDs** — converts `rec_CLASSNBR` format to `SEC_CLASSNBR` format
+5. **Rebuilds** the `const allCourses = [...]` line in `index.html` with compact JSON (`separators=(",",":")`, no extra whitespace)
 
-Each section stores raw student counts for 9 grade categories:
+### Course Object Format (in `allCourses`)
 
-| Column | Meaning |
-|---|---|
-| `gradeA` | Number of A grades |
-| `gradeB` | Number of B grades |
-| `gradeC` | Number of C grades |
-| `gradeD` | Number of D grades |
-| `gradeF` | Number of F grades |
-| `gradeP` | Number of P (Pass) grades |
-| `gradeNP` | Number of NP (No Pass) grades |
-| `gradeW` | Number of W (Withdrawal) grades |
-| `gradeI` | Number of I (Incomplete) grades |
-| `totalEnroll` | Sum of all grade counts (computed during seeding) |
+Each course section in the embedded data:
 
-### Dataset Size
-
-- **1,936 courses** (unique prefix + number combinations)
-- **1,967 instructors**
-- **4,305 sections** (each with full grade distribution data)
+```javascript
+{
+  id: "CSCE_2100_001_12345",
+  subject: "CSCE",
+  course_number: "2100",
+  term: "Fall 2025",
+  section: "001",
+  class_nbr: 12345,       // CRN
+  status: "Open",
+  session: "Regular",
+  meeting_dates: "08/25-12/10",
+  days: "MWF",
+  start_time: "10:00 AM",
+  end_time: "10:50 AM",
+  start_min: 600,         // minutes from midnight (computed)
+  end_min: 650,
+  room: "BLB 140",
+  instructor: "Smith,John",
+  seats_open: 5,
+  seats_total: 40,
+  recitations: [           // optional, for lecture sections with labs
+    { id: "501_12346", section: "501", class_nbr: 12346, days: "R", ... }
+  ]
+}
+```
 
 ---
 
-## 5. Data Pipeline
+## 5. Core Application State
 
-Grade data originates from a CSV file (`prisma/data/grades.csv`) that contains UNT grade distribution records. There are **two seeding methods**:
+All state lives in module-level variables inside the `<script>` tag:
 
-### Method 1: Direct Seed Script (`prisma/seed.ts`)
-
-Connects directly to PostgreSQL and upserts data row by row:
-
-1. **Parses the CSV** using `csv-parse/sync`
-2. **Extracts course info** from the `COURSE NAME` column (format: `"AARS 6840 - ORG AGING & HEALTH"`)
-   - Splits on `" - "` to separate prefix+number from title
-   - Regex `^([A-Z]+)\s+(.+)$` extracts prefix and number
-3. **Extracts instructor info** from `TEACHER NAME` column (format: `"Moore,Ami R"`)
-   - Splits on first comma to separate last name from first name
-4. **Parses grade counts** from columns A, B, C, D, F, P, NP, W, I
-   - Rounds floats to integers
-   - Computes `totalEnroll` as the sum of all grades
-5. **Upserts courses and instructors** with `INSERT ... ON CONFLICT DO UPDATE`
-   - Uses in-memory `Map` caches to avoid repeated DB lookups for the same course/instructor
-6. **Upserts sections** with all grade data
-
-```bash
-npx prisma db seed   # or: npx tsx prisma/seed.ts
-```
-
-**Connection:** Uses `DIRECT_URL` (port 5432, no pooler) for reliability during bulk operations.
-
-### Method 2: SQL File Generator (`prisma/generate-sql.ts`)
-
-For environments where direct DB connections are restricted (e.g., Supabase free tier), generates SQL files that can be pasted into the Supabase SQL Editor:
-
-1. Parses the same CSV offline
-2. Generates `00-courses-instructors.sql` with `TRUNCATE` + bulk `INSERT` for courses and instructors
-3. Generates chunked section files (`01-sections-1-500.sql`, `02-sections-501-1000.sql`, etc.) with 500 rows each
-4. Section inserts use subqueries for FK resolution: `(SELECT id FROM courses WHERE prefix='...' AND number='...')`
-
-```bash
-npx tsx prisma/generate-sql.ts
-```
-
-Files are output to `prisma/sql-chunks/`.
-
-### Why Two Methods?
-
-The direct seed script is faster and simpler, but requires a direct PostgreSQL connection. Supabase's SQL Editor has statement size limits, so the SQL generator chunks the data into manageable files. Both methods produce identical results.
-
----
-
-## 6. Frontend — Pages & Routing
-
-The app uses Next.js App Router with file-based routing under `src/app/`.
-
-### Home Page (`/`)
-
-**File:** `src/app/page.tsx` (Client Component)
-
-The landing page features:
-- **Title Section:** "University of North Texas" subtitle (`text-xl sm:text-2xl`) + "Grade Explorer" main heading (`text-5xl sm:text-7xl`), both with a sparkle shimmer animation
-- **Tagline:** "Explore the jungle of grades" — a muted subtitle below the heading (`text-lg sm:text-xl`, `text-jungle-bark/70` / `dark:text-green-300/50`)
-- **Centered Search Bar:** Full-width (max 672px / `max-w-2xl`) glass-styled search with autofocus, larger input (`py-4 text-lg`)
-- **Hint Text:** "Search by course (e.g., 'ACCT 2010') or professor name (e.g., 'Moore')" (`text-base`)
-
-The page is a client component because the `SearchBar` requires client-side state management.
-
-### Course Detail Page (`/course/[prefix]/[number]`)
-
-**File:** `src/app/course/[prefix]/[number]/page.tsx` (Server Component)
-
-Displays complete grade distribution for a single course:
-
-1. **Cached Database Query:** Uses `unstable_cache` (1-hour TTL, tag `"course-detail"`) wrapping `prisma.course.findUnique()` with the `(prefix, number)` compound unique constraint, with all sections and their instructors eager-loaded. Repeat visits within the TTL skip the database entirely.
-2. **Aggregation:** Calls `aggregateGrades()` to sum all section grades into a combined distribution, then `calculateGPA()` for the overall GPA
-3. **Rendered Content:**
-   - Course title with prefix and number
-   - Share button (copies URL to clipboard) and Add to Cart button
-   - Overall GPA badge
-   - Section count and total enrollment
-   - Aggregate grade distribution bar chart
-   - Individual section cards in a responsive grid
-
-If the course is not found, calls `notFound()` which renders the custom 404 page.
-
-### Instructor Detail Page (`/instructor/[id]`)
-
-**File:** `src/app/instructor/[id]/page.tsx` (Server Component)
-
-Displays all sections taught by a specific instructor, grouped by course:
-
-1. **Cached Database Query:** Uses `unstable_cache` (1-hour TTL, tag `"instructor-detail"`) wrapping `prisma.instructor.findUnique()` by ID, with all sections and their courses eager-loaded, ordered by course prefix and number
-2. **Grouping:** Uses a `Map<courseId, { course, sections[] }>` to group sections by course
-3. **Rendered Content:**
-   - Instructor name
-   - Overall GPA badge, total section count, and unique course count
-   - For each course group: course heading (linked) + section cards grid
-
-### Cart Page (`/cart`)
-
-**File:** `src/app/cart/page.tsx` (Client Component)
-
-Shows all saved courses with their grade distributions:
-
-- **Empty State:** Cart emoji + "Browse Courses" link
-- **Populated State:** Header with count, combined GPA, Download PDF button, and Clear All button
-- **Course Cards:** Grid of cards each showing course name, title, GPA badge, section count, enrollment, and a mini grade chart
-- **PDF Download:** Calls `downloadCartPDF()` to generate and download a landscape PDF table
-
-### Not Found Page (`/not-found`)
-
-**File:** `src/app/not-found.tsx`
-
-Custom 404 page with "Lost in the jungle... page not found 🌴" message and a link back to home.
-
-### Root Layout (`/`)
-
-**File:** `src/app/layout.tsx`
-
-Wraps all pages with:
-1. **Theme Flash Prevention:** Inline `<script>` checks `localStorage.getItem('theme')` and adds `dark` class before paint, preventing a flash of wrong theme on page load
-2. **Font:** Inter via `next/font/google`
-3. **Vines Component:** Fixed SVG vine decorations on both sides
-4. **Dark Mode Gradient Overlay:** A fixed full-screen gradient (transparent in light mode, dark green-to-black in dark mode)
-5. **Providers:** Wraps children in `CartProvider` for cart state
-6. **Navbar:** Sticky navigation bar (`h-16`, `text-2xl` brand)
-7. **Analytics:** `<Analytics />` from `@vercel/analytics/next` — renders after Providers inside `<body>` for page-view and Web Vitals tracking
-8. **Speed Insights:** `<SpeedInsights />` from `@vercel/speed-insights/next` — renders in the root layout for real-user route performance monitoring on the home page, search navigation, and database-backed detail pages
-
-### Performance Monitoring Notes
-
-- **Useful coverage:** Best for spotting slow real-user visits to the landing page, course pages, instructor pages, cart page, and navigation from search results.
-- **What it does not do by itself:** It can indicate that a route feels slow, but it does not directly attribute that slowdown to a specific Prisma query or Supabase operation without extra server-side instrumentation.
-
----
-
-## 7. Search System
-
-The search system has three layers: the **SearchBar component** (UI), the **API route** (server logic), and the **database queries** (Prisma).
-
-### SearchBar Component (`src/components/SearchBar.tsx`)
-
-A client component with the following features:
-
-- **Debounced Input:** Uses `useDebounce(query, 300)` — only fires a network request 300ms after the user stops typing
-- **Abort Control:** Creates an `AbortController` for each fetch. When a new query fires, the previous in-flight request is cancelled via `controller.abort()`
-- **Minimum Length:** Queries shorter than 2 characters return empty results immediately (both client and server)
-- **Two Modes:**
-  - **Default (home page):** Glass-styled with `glass-glossy` class, larger text, autofocused
-  - **Compact (navbar):** Solid background (`bg-jungle-tan-light` / `bg-jungle-canopy`), smaller text
-- **Keyboard Navigation:**
-  - `ArrowDown` / `ArrowUp` — cycle through results
-  - `Enter` — navigate to highlighted result (or first result if none highlighted)
-  - `Escape` — close dropdown and blur input
-- **Click-Outside Detection:** Uses `mousedown` event listener on `document` to close dropdown when clicking outside the container
-- **Dropdown:** Shows categorized results (Courses / Instructors) with hover highlighting
-
-### Search API Route (`src/app/api/search/route.ts`)
-
-A Next.js Route Handler that processes search queries with an in-memory LRU cache:
-
-1. **Input Validation:** Trims query, rejects anything shorter than 2 characters
-2. **LRU Cache Check:** Normalises the query to lowercase and checks the in-memory cache. On a hit, returns the cached JSON immediately — no database call at all.
-   - **Max entries:** 500 (oldest evicted when full)
-   - **TTL:** 5 minutes (stale entries are purged on access)
-   - **LRU reordering:** On hit, the entry is deleted and re-inserted at the end of the `Map` iteration order
-3. **Query Heuristic:** Regex `/^[A-Za-z]{1,4}\s?\d/` detects course-like queries (e.g., "CS 3" or "ACCT2"). This determines result prioritization:
-   - **Course query:** 10 courses + 5 instructors
-   - **Name query:** 5 courses + 10 instructors
-4. **Parallel Queries:** Course and instructor searches run simultaneously via `Promise.all`, cutting latency roughly in half compared to sequential execution.
-5. **Course Search:** Uses Prisma `findMany` with `OR`:
-   - **Pattern match:** `prefix.startsWith` + `number.startsWith` — catches queries like "CS 31" (prefix "CS", number starts with "31")
-   - **Title search:** `title.contains` with case-insensitive mode — catches queries like "accounting"
-6. **Instructor Search:** Uses Prisma `findMany` with `OR`:
-   - `lastName.contains` OR `firstName.contains` — catches partial name matches
-7. **Limits:** Both queries use `take: 10` to cap results
-8. **Cache Store:** After a successful DB query, the result is written to the LRU cache for future requests.
-
-### Database Indexes Used
-
-| Query Pattern | SQL Generated | Index Used |
+| Variable | Type | Purpose |
 |---|---|---|
-| `prefix.startsWith("CS")` | `WHERE prefix ILIKE 'CS%'` | `@@index([prefix])` — B-tree supports prefix matching |
-| `number.startsWith("31")` | `AND number ILIKE '31%'` | No dedicated index (piggybacks on row filtering after prefix match) |
-| `title.contains("accounting")` | `WHERE title ILIKE '%accounting%'` | No index — sequential scan (fine at ~2K rows) |
-| `lastName.contains("moore")` | `WHERE last_name ILIKE '%moore%'` | `@@index([lastName])` cannot be used for `%prefix` — sequential scan |
+| `allCourses` | `Array` | Embedded course data (~7700 sections) |
+| `selected` | `Map<courseKey, section>` | Currently selected sections (key = `"SUBJ 1234"`) |
+| `selectedRecitations` | `Map<courseKey, recitation>` | Paired recitation for each selected lecture |
+| `lockedSections` | `Set<courseKey>` | Sections locked in place (survive auto-generate) |
+| `courseColors` | `Map<courseKey, color>` | Color assignments per course |
+| `sectionsCache` | `Map<courseKey, sections[]>` | Cached section lists per course (avoids re-filtering) |
+| `busyTimes` | `Array` | User-blocked time slots |
+| `savedSchedules` | `Array` | Saved schedule snapshots |
+| `previewSecs` | `Array` | Ghost/preview sections shown on hover |
+| `openCourseKey` | `string \| null` | Currently expanded course dropdown |
+| `dataReady` | `boolean` | Whether allCourses has been parsed |
+| `colorIdx` | `number` | Next color index from PALETTE |
 
-At the current dataset size (~2K courses, ~2K instructors), these sequential scans complete in single-digit milliseconds. For larger datasets, `pg_trgm` GIN indexes can be added:
-
-```sql
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-CREATE INDEX idx_courses_title_trgm ON courses USING GIN (title gin_trgm_ops);
-CREATE INDEX idx_courses_prefix_trgm ON courses USING GIN (prefix gin_trgm_ops);
-CREATE INDEX idx_instructors_last_trgm ON instructors USING GIN (last_name gin_trgm_ops);
-CREATE INDEX idx_instructors_first_trgm ON instructors USING GIN (first_name gin_trgm_ops);
-```
-
-These allow PostgreSQL to use index scans for `ILIKE '%…%'` patterns instead of sequential scans.
-
-Additionally, the **LRU cache** (500 entries, 5-minute TTL) ensures that repeat queries bypass the database entirely, providing sub-millisecond responses for popular searches.
+The `courseKey` format is `"SUBJ 1234"` (e.g., `"CSCE 2100"`), combining subject prefix and course number.
 
 ---
 
-## 8. Shopping Cart & PDF Export
+## 6. Course Search
 
-### Cart Architecture
+### `queryCourses(raw)` — Line 1945
 
-The cart uses React Context with `useReducer` for state management and `localStorage` for persistence.
+Filters `allCourses` by user input:
 
-**State Shape:**
-```typescript
-interface CartState {
-  items: CartItem[];
+1. **Parses input** — splits on spaces, identifies subject prefix (letters) and course number (digits)
+2. **Prefix match** — `subject.startsWith(prefix)` for 1–4 letter prefixes
+3. **Number match** — `course_number.startsWith(number)` for numeric portions
+4. **Keyword match** — falls back to searching `instructor` and `room` fields for text queries
+5. **Deduplicates** by course key — shows each course once with its section count
+
+Results appear in the search sidebar as expandable cards. Each card shows the course prefix/number, title, available sections, and seat availability.
+
+### `doSearch()` — Line 2036
+
+Triggered on input in the search bar. Reads the query value, calls `queryCourses()`, and re-renders the sidebar.
+
+### `buildCard(courseKey, row)` — Line 2054
+
+Constructs the HTML for a single course card in the sidebar with a clickable header and a collapsible dropdown containing section rows.
+
+### `toggleCard(courseKey, row, hdr, dd)` — Line 2074
+
+Expands/collapses a course card. When expanded, builds section rows and caches them in `sectionsCache`.
+
+---
+
+## 7. Calendar Rendering
+
+### `renderCalendar()` — Line 2752
+
+The main render function. Rebuilds the entire weekly calendar grid:
+
+1. **Collects events** — iterates `selected` map and `previewSecs` to gather all time blocks
+2. **Groups by day** — sorts events into Mon–Fri columns
+3. **Computes columns** — `computeColumns(events)` handles overlapping events using a greedy column-packing algorithm
+4. **Renders blocks** — each event becomes a positioned `<div>` with:
+   - Course color background (with tint for ghost/preview sections)
+   - Course code, section, time, room, instructor
+   - Lock icon for locked sections
+5. **Scroll position** — scrolls to 6:00 AM on load
+
+### `collectEvents(sec, color, ghost, hovered)` — Line 2793
+
+Converts a section object into event objects for the calendar. Handles multi-day patterns (e.g., "MWF" → 3 events). Ghost sections get reduced opacity.
+
+### `computeColumns(events)` — Line 2825
+
+Greedy algorithm for placing overlapping events side-by-side:
+1. Sort events by start time, then by duration (longest first)
+2. For each event, find the first available column where it doesn't overlap
+3. Track total columns per time group for width calculation
+
+### `tintColor(hex, amount)` — Line 2766
+
+Lightens a hex color by blending toward white (for ghost/preview sections).
+
+### Time Grid
+
+- **Days:** Monday–Friday (5 columns)
+- **Hours:** 7:00 AM – 9:00 PM (configurable via `START_HOUR` / `END_HOUR`)
+- **Slot height:** `SLOT` constant (pixels per hour)
+- **Scroll:** vertical scroll container, auto-scrolls to 6 AM on load
+
+---
+
+## 8. Section Selection & Conflict Detection
+
+### `toggleSection(courseKey, sec, color)` — Line 2213
+
+Adds or removes a section from `selected`:
+- **Adding:** Sets the section with its color, rebuilds ghosts, re-renders calendar and tray
+- **Removing:** Deletes from `selected` and `selectedRecitations`, clears lock, re-renders
+
+### `toggleLock(e, courseKey)` — Line 2233
+
+Toggles a section's lock state. Locked sections (stored in `lockedSections`) persist through auto-generation — the generator treats them as fixed constraints.
+
+### `checkConflict(sec, skipKey)` — Line 2297
+
+Checks if a section overlaps with any currently selected section (optionally skipping one course key). Returns the conflicting course key or `null`.
+
+### `overlaps(a, b)` — Line 2290
+
+Returns `true` if two time blocks overlap on any shared day. Uses `start_min`/`end_min` for comparison.
+
+### `rebuildGhosts(courseKey)` — Line 2089
+
+When a section is hovered in the sidebar, creates ghost/preview events on the calendar so the user can see where it would land without committing. Clears when the hover ends.
+
+### `highlightSidebarRow(courseKey, secId, on)` — Line 2925
+
+Highlights the corresponding section row in the sidebar dropdown when hovering its calendar block.
+
+---
+
+## 9. Recitation Handling
+
+Some lecture sections have associated recitations (labs/discussions). The app requires users to pick a recitation when they select a lecture that has them.
+
+### Data Structure
+
+Recitations are nested inside their parent lecture in `allCourses`:
+
+```javascript
+{
+  subject: "CHEM", course_number: "1410", section: "001",
+  recitations: [
+    { id: "501_12924", section: "501", days: "R", start_time: "8:00 AM", ... }
+  ]
 }
 ```
 
-**Actions:**
-- `ADD` — adds a `CartItem` (no-ops if `courseId` already exists)
-- `REMOVE` — removes by `courseId`
-- `CLEAR` — empties the cart
-- `HYDRATE` — restores from localStorage on mount
+### Selection Flow
 
-**Persistence Lifecycle:**
-1. On mount: reads `localStorage.getItem("unt-grades-cart")`, parses JSON, dispatches `HYDRATE`
-2. On every state change: writes `localStorage.setItem("unt-grades-cart", JSON.stringify(items))`
+1. User selects a lecture section → `toggleSection()` adds it to `selected`
+2. `renderTray()` checks for `recitations` on the selected section
+3. If recitations exist and none is selected → shows a "Pick a recitation" nudge (yellow)
+4. User expands the section detail → `showSecDetail()` renders recitation sub-rows
+5. User clicks a recitation → `toggleRecitation(courseKey, rec, color)` adds it to `selectedRecitations`
+6. Calendar renders both the lecture and recitation blocks
 
-**CartItem** contains pre-computed data (grade counts, GPA, section count) so the cart page doesn't need to re-query the database.
+### `removeRec(key)` — Line 2922
 
-### Component Chain
-
-1. **Course Detail Page** (Server Component) → computes aggregate grades, GPA, section count
-2. **CourseCartButton** (Client Component) — thin wrapper that receives pre-computed `CartItem` as props
-3. **AddToCartButton** — renders Add/Remove button based on `isInCart(courseId)`
-4. **CartIcon** — navbar link showing badge with `items.length`
-5. **Cart Page** — displays all cart items with charts and download button
-
-### PDF Export (`src/lib/pdf.ts`)
-
-Uses `jsPDF` (landscape orientation) with `jspdf-autotable` for table layout:
-
-- **Header:** "UNT Grade Distribution — My Courses" in UNT green (#1B5E20)
-- **Date:** "Generated {date}" subtitle
-- **Table Columns:** Course, Title, GPA, Sections, Enrolled, %A, %B, %C, %D, %F, %W
-- **Styling:** Green header row, alternating green-50 rows, bold course code column
-- **Output:** Triggers browser download of `unt-grades-my-courses.pdf`
+Removes the recitation for a course key without removing the lecture itself.
 
 ---
 
-## 9. Theming & Visual Design
+## 10. Auto-Generate Schedules
 
-### Color System
+### `openAutoGenModal()` — Line 2379
 
-Defined in `globals.css` using Tailwind CSS v4's `@theme` block:
+Opens a modal with tabbed preference panels:
 
-```css
-@theme {
-  --color-primary: #1B5E20;         /* Deep forest green */
-  --color-primary-light: #2E7D32;
-  --color-primary-dark: #0D3B13;
-  --color-accent: #A5D6A7;          /* Light green */
-  --color-jungle-canopy: #0A2F11;   /* Very dark green (dark mode bg) */
-  --color-jungle-leaf: #388E3C;
-  --color-jungle-moss: #33691E;
-  --color-jungle-vine: #558B2F;
-  --color-jungle-tan: #D4C5A9;      /* Warm tan (light mode bg) */
-  --color-jungle-tan-light: #E8DCC8;/* Card backgrounds */
-  --color-jungle-tan-dark: #BBA882; /* Borders */
-  --color-jungle-gold: #F9A825;     /* Cart badge */
-  --color-jungle-bark: #4E342E;     /* Subtle text */
-}
+### Preference Tabs
+
+| Tab | Options | Implementation |
+|---|---|---|
+| **Days** | No pref / Morning / Afternoon / Evening | `setDayPref(v)` — filters by `start_min` ranges |
+| **Classes** | Range slider (min–max courses per schedule) | `toggleClassRange()` — limits course count |
+| **Professors** | Prefer / Avoid / Neutral per instructor | `populateProfPrefs()` — scans instructors from selected courses, renders preference buttons |
+| **Campus & Delivery** | Main campus / Discovery Park / Online / In-person | `renderCampusDelivPrefs()` — filters by `room` prefix or `days` field |
+
+### `runAutoGenerate()` — Line 2482
+
+Generates all valid schedule combinations:
+
+1. **Collects unlocked sections** — locked sections are treated as fixed constraints
+2. **Builds candidate lists** — for each course, gathers all available sections
+3. **Applies preferences** — filters candidates by day/time, campus, delivery, professor preferences
+4. **Cartesian product with conflict checking** — iterates all combinations, rejecting any with time overlaps or busy-time conflicts
+5. **Limits results** — caps at a maximum count to prevent UI freeze
+6. **Renders results** — `renderGeneratedResults()` shows mini calendar previews
+
+### `buildMiniCalHtml(schedule)` — Line 2577
+
+Renders a compact visual calendar for each generated schedule in the results list. Shows colored blocks for each section on a simplified time grid.
+
+### `applyGenerated(idx, results)` — Line 2612
+
+Replaces the current selections with a generated schedule. Locked sections are preserved.
+
+### `saveGenerated(idx, results)` — Line 2625
+
+Saves a generated schedule to the saved schedules list.
+
+---
+
+## 11. Busy Times
+
+Users can block off time slots when they're unavailable (work, commute, etc.).
+
+### `addBusyTime()` — Line 2339
+
+Adds a blocked time slot from the busy-time modal form (day, start time, end time).
+
+### `removeBusyTime(id)` — Line 2353
+
+Removes a busy time entry by its ID.
+
+### `checkBusyConflict(sec)` — Line 2303
+
+Returns `true` if a section overlaps with any busy time entry. Used by the auto-generator and conflict checker.
+
+### `renderBusyList()` — Line 2357
+
+Renders the list of current busy times in the modal with remove buttons.
+
+### `populateBusyTimeDropdowns()` — Line 2326
+
+Populates the day and time select dropdowns in the busy-time modal on init.
+
+---
+
+## 12. Save & Load Schedules
+
+### `doSaveSchedule()` — Line 2656
+
+Saves the current schedule to `savedSchedules` array with a user-provided name, then persists to localStorage.
+
+### `persistSaved()` — Line 2675
+
+Writes `savedSchedules` to `localStorage.setItem('unt_vsb_saved', JSON.stringify(...))`.
+
+### `loadSavedSchedule(id)` — Line 2687
+
+Replaces current selections with a saved schedule's data. Re-matches sections by `class_nbr` with fallback to subject/number/section matching.
+
+### `deleteSavedSchedule(id)` — Line 2676
+
+Removes a saved schedule and re-renders the saved list.
+
+### `makePrimary(id)` — Line 2683
+
+Moves a saved schedule to the top of the list (primary position).
+
+### `pushToCart(id)` — Line 2698
+
+Generates a cart-compatible format from a saved schedule (for CRN copy/export).
+
+### `renderSavedSchedules()` — Line 2707
+
+Renders the saved schedules panel with schedule names, course lists, and action buttons.
+
+---
+
+## 13. Auto-Save & Resume
+
+### `autoSave()` — Line 2934
+
+Called after every selection change. Writes current selections to `unt_vsb_current` in localStorage with:
+- `saved_at` — ISO timestamp
+- `selections` — array of `{ courseKey, classNbr, section, subject, courseNumber, recitationId }`
+
+### `loadAutoSaved()` — Line 2942
+
+On page load, checks for `unt_vsb_current` in localStorage. If found, shows a resume banner.
+
+### `showResumeBanner(saved, date)` — Line 2949
+
+Displays a fixed banner at the bottom of the screen with:
+- **Resume** — restores all selections from the saved data
+- **Start Fresh** — clears the auto-save and starts empty
+
+### `applyResume(saved)` — Line 2957
+
+Async function that waits for `dataReady`, then matches each saved selection back to `allCourses` entries by `class_nbr` (primary) or subject/number/section (fallback).
+
+---
+
+## 14. Theming
+
+### `toggleTheme()` — Line 2003
+
+Switches between `light` and `dark` themes:
+1. Reads current `data-theme` attribute on `<html>`
+2. Toggles to the opposite
+3. Sets `document.documentElement.setAttribute('data-theme', theme)`
+4. Saves to `localStorage.setItem('unt_vsb_theme', theme)`
+5. Updates the theme toggle icon
+
+### Flash Prevention
+
+An inline `<script>` in `<head>` (before any CSS) runs immediately:
+
+```javascript
+(function () {
+  const savedTheme = localStorage.getItem('unt_vsb_theme');
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = savedTheme || (systemDark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+})();
 ```
 
-### Dark Mode
+This prevents the flash of wrong-theme content on page load.
 
-- **Toggle mechanism:** Class-based (`@variant dark (&:where(.dark, .dark *))`)
-- **Storage:** `localStorage.getItem('theme')` — values `"dark"` or `"light"`
-- **Default:** Light mode (the flash-prevention script only adds `dark` if explicitly saved as `"dark"`)
-- **Detection:** `ThemeToggle` checks localStorage first, then falls back to `prefers-color-scheme: dark`
-- **Chart awareness:** `useTheme` hook watches `document.documentElement.classList` via `MutationObserver` and provides theme-appropriate chart colors
+### `updateThemeIcon(theme)` — Line 2010
 
-**Light Mode Palette:**
-- Background: `#D4C5A9` (warm tan)
-- Cards: `#E8DCC8` (lighter tan)
-- Text: gray-900
-
-**Dark Mode Palette:**
-- Background: black with a fixed gradient overlay (`rgba(10,47,17,0.6)` → `rgba(0,0,0,0.95)`)
-- Cards: `#0A2F11` at 60% opacity (dark canopy)
-- Text: green-100
-
-### Glass Effects
-
-Two CSS classes for frosted glass appearance:
-
-- **`.glass-glossy`:** Used for the home page search bar and its dropdown. Uses `backdrop-filter: blur(24px) saturate(1.8)` with subtle white gradients. Dark mode variant reduces opacity.
-- **`.glass-navbar-search`:** More opaque variant originally designed for the navbar search (currently unused — navbar search uses solid colors instead).
-
-### Sparkle Shimmer Animation
-
-The home page title text has an animated shimmer/sparkle effect:
-
-**How it works:**
-1. Text uses `background-clip: text` with `-webkit-text-fill-color: transparent` to make the text itself a mask over a gradient
-2. A `linear-gradient` (105° angle) transitions from `currentColor` → highlight band → `currentColor`
-3. `background-size: 200% 100%` makes the gradient twice the element width
-4. `@keyframes sparkle-shift` animates `background-position` from `-200%` to `200%`, creating a sweeping sparkle effect
-5. Animation runs on a 3-second `ease-in-out` infinite loop
-
-**Light mode:** White/warm-white highlight band (45%–55% of gradient)  
-**Dark mode:** Dark green band (43%–53%) — creates a subtle dark shimmer against green text
-
-The `.sparkle-text-wide` variant has a slightly wider dark band (41%–55%), used on the "Grade Explorer" heading for a more pronounced effect.
-
-### Vine Decorations
-
-The `Vines` component renders hand-drawn SVG vine patterns fixed to both sides of the viewport:
-
-- **Left vines:** 3 SVG groups (thick main vine, medium secondary, thin background), container width 160px (`w-40`), asymmetrically larger
-- **Right vines:** 3 SVG groups (main with leaves, secondary thinner, short background), container width 80px (`w-20`), narrower
-- **Randomization:** On mount, `pickRandom()` selects 1–3 vine groups per side, maintaining visual variety between page loads
-- **Styling:** `opacity-75 brightness-75 saturate-150` in light mode, `opacity-65 brightness-180 saturate-150` in dark mode (brighter to compensate for dark background)
-- **Positioning:** `position: fixed`, `z-index: 10`, `pointer-events: none` — decorative only, never blocks interaction
+Updates the sun/moon icon in the header to match the current theme.
 
 ---
 
-## 10. Components Reference
+## 15. localStorage Keys
 
-### `SearchBar`
-
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `placeholder` | `string` | `"Search course or professor..."` | Input placeholder text |
-| `autoFocus` | `boolean` | `false` | Auto-focus on mount |
-| `compact` | `boolean` | `false` | Compact mode for navbar (solid bg, smaller text) |
-| `onFocusChange` | `(focused: boolean) => void` | — | Callback when focus state changes |
-
-### `Navbar`
-
-Sticky navigation bar (`h-16`) with:
-- "UNT Grades" brand link (home) — `text-2xl` bold
-- Search bar (hidden on home page, collapses on scroll past 40px)
-- Cart icon with badge and theme toggle (`gap-4`)
-
-The scroll-hide behavior uses `useState` + `scroll` event listener. The search bar transitions with `opacity-0 max-h-0 pointer-events-none` when `scrolled` is true.
-
-### `ThemeToggle`
-
-Renders a sun/moon icon button. Avoids hydration mismatch by rendering a placeholder div until `mounted` state is true. Uses `localStorage` for persistence and `document.documentElement.classList` for applying the dark class.
-
-### `GradeChart`
-
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `data` | `ChartDataPoint[]` | — | Array of `{ grade, count, percentage }` |
-| `mode` | `"count" \| "percentage"` | `"count"` | Which value to plot on the Y axis |
-| `height` | `number` | `300` | Chart height in pixels |
-
-Wraps Recharts `BarChart` with theme-aware colors and a custom tooltip showing grade name, count, and percentage.
-
-### `SectionCard`
-
-Displays a single course section with:
-- Section number and instructor name (linked)
-- Share button (copies instructor page URL)
-- GPA badge
-- **Lazy-loaded** grade distribution chart (200px height) via `LazyChart`
-- Total enrollment count
-
-### `LazyChart`
-
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `data` | `ChartDataPoint[]` | — | Chart data points |
-| `height` | `number` | `200` | Chart height in pixels |
-| `mode` | `"count" \| "percentage"` | `"count"` | Y-axis value |
-
-IntersectionObserver-based wrapper around `GradeChart`. Only renders the actual Recharts chart once the element scrolls within 200px of the viewport. Before that, shows a lightweight spinner placeholder at the specified height. After becoming visible once, the chart stays rendered permanently (`observer.disconnect()` on intersection). This dramatically reduces initial paint time on pages with many sections.
-
-### `GpaBadge`
-
-A small pill badge showing GPA value, color-coded:
-- ≥ 3.5: Green (`bg-green-500`)
-- ≥ 2.5: Yellow (`bg-yellow-400`)
-- ≥ 2.0: Orange (`bg-orange-500`)
-- < 2.0: Red (`bg-red-600`)
-- N/A: Gray (`bg-gray-400`)
-
-### `ShareButton`
-
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `url` | `string` | — | Relative URL path to share |
-| `compact` | `boolean` | `false` | Smaller variant for inline use |
-
-Copies the full URL (origin + path) to clipboard using `navigator.clipboard.writeText()` with a `document.execCommand("copy")` fallback for older browsers. Shows "Copied!" feedback for 2 seconds.
-
-### `Vines`
-
-Client component that renders randomized decorative SVG vines. Uses `useEffect` to pick random vine groups on mount (avoiding SSR/hydration mismatch). Returns `null` during SSR.
+| Key | Format | Purpose |
+|---|---|---|
+| `unt_vsb_theme` | `"dark"` or `"light"` | Theme preference |
+| `unt_vsb_saved` | JSON array of schedule objects | Saved schedule snapshots |
+| `unt_vsb_current` | JSON object with `saved_at` and `selections` array | Auto-saved current state for resume |
 
 ---
 
-## 11. Hooks & Utilities
+## 16. Color System
 
-### `useDebounce<T>(value: T, delay?: number): T`
+### CSS Custom Properties
 
-Generic debounce hook. Returns a value that only updates `delay` milliseconds after the last change to the input value. Default delay: 300ms. Used by `SearchBar` to throttle API calls.
+Defined in `:root` (light) and `[data-theme="dark"]` overrides:
 
-### `useTheme(): { isDark: boolean, chartColors: {...} }`
+| Variable | Light | Dark |
+|---|---|---|
+| `--bg` | `#FFFFFF` | `#0B1026` |
+| `--surface` | `#FFFFFF` | `#1E2644` |
+| `--bg-secondary` | `#F8F9FA` | `#0F1630` |
+| `--text` | `#23282F` | `#E8E0D6` |
+| `--green` | `#27815A` | `#27815A` |
+| `--green-d` | `#1B5E3B` | `#1B5E3B` |
+| `--gold` | `#B8763B` | `#D4975C` |
+| `--border` | `#E2E5E9` | `rgba(255,255,255,0.08)` |
 
-Monitors the `dark` class on `<html>` using a `MutationObserver`. Returns:
-- `isDark` — current theme state
-- `chartColors` — theme-appropriate colors for Recharts (axis stroke, tooltip background/border/text, grid stroke)
+### Course Block Palette
 
-### `calculateGPA(data: GradeData): number | null`
+8 rotating colors for course blocks on the calendar:
 
-Computes weighted GPA from letter grades only (A=4, B=3, C=2, D=1, F=0). Excludes P, NP, W, I from the calculation. Returns `null` if no letter grades exist (e.g., a pure P/NP section).
+| Index | Color | Background |
+|---|---|---|
+| 1 | `#4F6AE8` (blue) | `#EEF1FD` |
+| 2 | `#E05280` (pink) | `#FDEEF2` |
+| 3 | `#2DA563` (green) | `#EEFAF3` |
+| 4 | `#E8A84F` (amber) | `#FDF5EB` |
+| 5 | `#8B5CF6` (purple) | `#F3EFFE` |
+| 6 | `#06B6D4` (cyan) | `#ECFEFF` |
+| 7 | `#F97316` (orange) | `#FFF7ED` |
+| 8 | `#EC4899` (rose) | `#FDF2F8` |
 
-### `toChartData(data: GradeData): ChartDataPoint[]`
-
-Converts grade data into Recharts-ready format: `[{ grade: "A", count: 42, percentage: 34.5 }, ...]`. Follows the `GRADE_ORDER` constant for consistent display.
-
-### `aggregateGrades(sections: GradeData[]): GradeData`
-
-Sums multiple sections into a single combined distribution. Used on course pages (sum all sections) and instructor pages (sum all sections for a course group or overall).
-
-### `gpaColor(gpa: number | null): string`
-
-Returns a Tailwind class string for a color-coded GPA badge background.
-
-### `downloadCartPDF(items: CartItem[]): void`
-
-Generates a landscape PDF with a styled table of all cart items showing course code, title, GPA, section count, enrollment, and grade percentages. Triggers a browser download.
-
-### Prisma Client (`src/lib/prisma.ts`)
-
-Singleton pattern with PgBouncer awareness:
-- **Production:** Uses `DATABASE_URL` (pooler connection, port 6543)
-- **Development:** Prefers `DIRECT_URL` (direct connection, port 5432) for speed, falls back to `DATABASE_URL`
-- **Global cache:** Stores client on `globalThis` to survive Next.js dev hot-reloads without leaking connections
+In dark mode, backgrounds use 12% opacity variants. Colors are assigned in order via `colorIdx` and stored in `courseColors` map.
 
 ---
 
-## 12. Configuration Files
+## 17. Deployment
 
-### `next.config.ts`
+### GitHub Pages
 
-```typescript
-const nextConfig: NextConfig = {
-  reactCompiler: true,  // Enables React Compiler for automatic memoization
-};
-```
+The site is deployed via GitHub Pages with a `CNAME` file containing `vsb.untgrades.app`.
 
-### `postcss.config.mjs`
-
-Uses `@tailwindcss/postcss` plugin (Tailwind CSS v4's PostCSS integration). No separate `tailwind.config.ts` — Tailwind v4 reads configuration from the CSS file's `@theme` block.
-
-### `prisma.config.ts`
-
-Prisma 7's `defineConfig` format:
-- Schema path: `prisma/schema.prisma`
-- Migrations path: `prisma/migrations`
-- Seed command: `tsx prisma/seed.ts`
-- Datasource URL: from `DATABASE_URL` environment variable
-
-### `tsconfig.json`
-
-- **Target:** ES2017
-- **Module:** ESNext with bundler resolution
-- **Strict mode:** Enabled
-- **Path alias:** `@/*` → `./src/*`
-- **Plugins:** Next.js TypeScript plugin
-- **JSX:** `react-jsx` (automatic runtime)
-
-### `.env` Variables
-
-```
-DATABASE_URL=postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true
-DIRECT_URL=postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
-```
-
-- `DATABASE_URL` — Connection through Supabase's PgBouncer pooler (required for serverless/Vercel)
-- `DIRECT_URL` — Direct connection bypassing pooler (used for seeding and development)
+- **Build step:** None — `index.html` is served as-is
+- **Custom domain:** Configured via `CNAME` file in repo root
+- **HTTPS:** Enforced by GitHub Pages
+- **No server-side logic** — fully static
 
 ---
 
-## 13. Deployment
+## 18. Data Update Workflow
 
-### Vercel
+To update course data for a new semester:
 
-The project auto-deploys on every push to the `main` branch:
+1. **Replace `unt_sections.sql`** with the new semester's data (same INSERT format)
+2. **Optionally replace `unt_sections.json`** (for reference; not used at runtime)
+3. **Run the pipeline:**
+   ```bash
+   python3 sql_to_html.py
+   ```
+4. **Verify** — open `index.html` in a browser and confirm courses appear
+5. **Commit and push** — GitHub Pages will auto-deploy
 
-1. **Build command** (`package.json`): `prisma generate && next build`
-   - `prisma generate` creates the Prisma Client from the schema
-   - `next build` compiles the Next.js application
-2. **Postinstall hook:** `prisma generate` — ensures Prisma Client is generated after `npm install` in Vercel's build environment
-3. **Environment variables:** `DATABASE_URL` and `DIRECT_URL` are configured in the Vercel dashboard (not committed to the repo)
-
-### Supabase Database
-
-- **Project:** Hosted PostgreSQL instance
-- **Pooler:** PgBouncer on port 6543 — handles connection pooling for serverless functions
-- **Direct:** Port 5432 — used for migrations and seeding
-- **Schema management:** Tables are created via Prisma migrations or manual SQL execution via Supabase SQL Editor
+The script reads from `unt_sections.sql`, flattens the data, and replaces the `const allCourses = [...]` line in `index.html`. The rest of the file is untouched.
 
 ---
 
-## 14. Development Guide
-
-### Prerequisites
-
-- Node.js (LTS recommended)
-- npm
-- A Supabase account with a PostgreSQL database
-
-### Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/dyl-joseph/grades-unt.git
-cd grades-unt/unt-grade-distribution
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your Supabase connection strings
-
-# Generate Prisma Client
-npx prisma generate
-
-# Seed the database (requires grades.csv in prisma/data/)
-npx prisma db seed
-# Or use the SQL generator for manual import:
-# npx tsx prisma/generate-sql.ts
-
-# Start the dev server
-npm run dev
-```
-
-### Available Scripts
-
-| Command | Description |
-|---|---|
-| `npm run dev` | Starts Next.js development server on port 3000 |
-| `npm run build` | Generates Prisma Client and builds for production |
-| `npm run start` | Starts production server |
-| `npm run lint` | Runs ESLint |
-| `npx prisma generate` | Regenerates Prisma Client after schema changes |
-| `npx prisma db seed` | Seeds the database from CSV |
-| `npx tsx prisma/generate-sql.ts` | Generates SQL files for manual import |
-
-### Common Dev Issues
-
-- **Port 3000 in use:** Kill existing processes with `lsof -ti:3000 | xargs kill -9`
-- **Dev server lock file:** Delete `.next/dev/lock` if the dev server won't start
-- **Prisma Client outdated:** Run `npx prisma generate` after schema changes
-- **Connection pool exhaustion:** If queries hang, check that `DATABASE_URL` uses the pooler connection string (port 6543)
-
----
-
-*Last updated: March 2026*
+*Last updated: May 2026*
