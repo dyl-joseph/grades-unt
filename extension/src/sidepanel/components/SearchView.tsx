@@ -13,6 +13,7 @@ export default function SearchView({ onCourseSelect, onInstructorSelect }: Searc
   const { query, setQuery, results, loading, error } = useSearch();
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [highlightIdx, setHighlightIdx] = useState(-1);
+  const [navigatingId, setNavigatingId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,6 +34,8 @@ export default function SearchView({ onCourseSelect, onInstructorSelect }: Searc
   }, [results]);
 
   const navigate = (type: "course" | "instructor", id: string) => {
+    const navId = `${type}-${id}`;
+    setNavigatingId(navId);
     addSearchHistory(query.trim());
     setQuery("");
     if (type === "course") {
@@ -124,20 +127,27 @@ export default function SearchView({ onCourseSelect, onInstructorSelect }: Searc
               <div style={{ padding: "6px 12px", fontSize: "11px", fontWeight: 600, color: "#558B2F", textTransform: "uppercase", letterSpacing: "0.05em", background: "#f5f5f5" }}>
                 Courses
               </div>
-              {results!.courses.map((c: CourseResult, i: number) => (
-                <button
-                  key={`c-${c.id}`}
-                  onClick={() => navigate("course", `${c.prefix}/${c.number}`)}
-                  style={{
-                    display: "block", width: "100%", textAlign: "left", padding: "8px 12px",
-                    fontSize: "13px", border: "none", cursor: "pointer",
-                    background: highlightIdx === i ? "#e8f5e9" : "white",
-                    borderBottom: "1px solid #f0f0f0",
-                  }}
-                >
-                  <strong>{c.prefix} {c.number}</strong>
-                  <span style={{ color: "#777", marginLeft: "6px" }}>— {c.title}</span>
-                </button>
+        {results!.courses.map((c: CourseResult, i: number) => (
+          <button
+            key={`c-${c.id}`}
+            onClick={() => navigate("course", `${c.prefix}/${c.number}`)}
+            disabled={navigatingId !== null}
+            style={{
+              display: "flex", width: "100%", textAlign: "left", padding: "8px 12px",
+              fontSize: "13px", border: "none", cursor: navigatingId ? "default" : "pointer",
+              background: highlightIdx === i ? "#e8f5e9" : "white",
+              borderBottom: "1px solid #f0f0f0", alignItems: "center",
+            }}
+          >
+            <strong>{c.prefix} {c.number}</strong>
+            <span style={{ color: "#777", marginLeft: "6px" }}>— {c.title}</span>
+            {navigatingId === `course-${c.prefix}/${c.number}` && (
+              <svg style={{ marginLeft: "auto", animation: "ext-spin 0.6s linear infinite", display: "block" }} width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="#999" strokeWidth="4" />
+                <path style={{ opacity: 0.75 }} fill="#1B5E20" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            )}
+          </button>
               ))}
             </div>
           )}
@@ -146,21 +156,28 @@ export default function SearchView({ onCourseSelect, onInstructorSelect }: Searc
               <div style={{ padding: "6px 12px", fontSize: "11px", fontWeight: 600, color: "#558B2F", textTransform: "uppercase", letterSpacing: "0.05em", background: "#f5f5f5" }}>
                 Instructors
               </div>
-              {results!.instructors.map((inst: InstructorResult, i: number) => {
-                const idx = results!.courses.length + i;
-                return (
-                  <button
-                    key={`i-${inst.id}`}
-                    onClick={() => navigate("instructor", String(inst.id))}
-                    style={{
-                      display: "block", width: "100%", textAlign: "left", padding: "8px 12px",
-                      fontSize: "13px", border: "none", cursor: "pointer",
-                      background: highlightIdx === idx ? "#e8f5e9" : "white",
-                      borderBottom: "1px solid #f0f0f0",
-                    }}
-                  >
-                    <strong>{inst.lastName}, {inst.firstName}</strong>
-                  </button>
+        {results!.instructors.map((inst: InstructorResult, i: number) => {
+          const idx = results!.courses.length + i;
+          return (
+            <button
+              key={`i-${inst.id}`}
+              onClick={() => navigate("instructor", String(inst.id))}
+              disabled={navigatingId !== null}
+              style={{
+                display: "flex", width: "100%", textAlign: "left", padding: "8px 12px",
+                fontSize: "13px", border: "none", cursor: navigatingId ? "default" : "pointer",
+                background: highlightIdx === idx ? "#e8f5e9" : "white",
+                borderBottom: "1px solid #f0f0f0", alignItems: "center",
+              }}
+            >
+              <strong>{inst.lastName}, {inst.firstName}</strong>
+              {navigatingId === `instructor-${inst.id}` && (
+                <svg style={{ marginLeft: "auto", animation: "ext-spin 0.6s linear infinite", display: "block" }} width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="#999" strokeWidth="4" />
+                  <path style={{ opacity: 0.75 }} fill="#1B5E20" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              )}
+            </button>
                 );
               })}
             </div>
