@@ -152,9 +152,11 @@ export default function SearchBar({
   }, [results]);
 
   const navigate = (type: "course" | "instructor", id: string) => {
+    if (navigatingId !== null) return;
     const navId = `${type}-${id}`;
     setNavigatingId(navId);
     setQuery("");
+    setIsOpen(false);
     if (type === "course") {
       router.push(`/course/${id}`);
     } else {
@@ -240,7 +242,7 @@ export default function SearchBar({
       </div>
 
       {isOpen && items.length > 0 && (
-        <div className={`absolute z-50 mt-2 w-full rounded-2xl border shadow-xl ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
+        <div className={`absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border shadow-xl ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
           {results!.courses.length > 0 && (
             <div>
               <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-accent">
@@ -254,11 +256,10 @@ export default function SearchBar({
                       ? "bg-green-50 dark:bg-green-900/30"
                       : ""
                   }`}
-                  onClick={() =>
-                    navigate("course", `${course.prefix}/${course.number}`)
-                  }
-                  disabled={navigatingId !== null}
-                >
+          onClick={() =>
+            navigate("course", `${course.prefix}/${course.number}`)
+          }
+        >
                   <span className="font-medium text-gray-900 dark:text-green-100">
                     {course.prefix} {course.number}
                   </span>
@@ -291,11 +292,10 @@ export default function SearchBar({
                         ? "bg-green-50 dark:bg-green-900/30"
                         : ""
                     }`}
-                    onClick={() =>
-                      navigate("instructor", String(instructor.id))
-                    }
-                    disabled={navigatingId !== null}
-                  >
+          onClick={() =>
+            navigate("instructor", String(instructor.id))
+          }
+        >
                     <span className="font-medium text-gray-900 dark:text-gray-100">
                       {instructor.lastName}, {instructor.firstName}
                     </span>
