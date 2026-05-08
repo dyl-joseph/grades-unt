@@ -96,17 +96,26 @@ export default function SearchView({ onCourseSelect, onInstructorSelect }: Searc
             boxSizing: "border-box",
           }}
         />
-        {loading && hasQuery && (
-          <div style={{
-            position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)",
-            width: "16px", height: "16px", border: "2px solid #ccc",
-            borderTopColor: "#1B5E20", borderRadius: "50%", animation: "spin 0.6s linear infinite",
-          }}
-          />
-        )}
-      </div>
-
-      <style>{`@keyframes spin { to { transform: translateY(-50%) rotate(360deg) } }`}</style>
+      {loading && hasQuery && (
+        <span style={{
+          position: "absolute",
+          right: "10px",
+          top: "50%",
+          transform: "translateY(-50%)",
+        }}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            style={{ animation: "ext-spin 0.6s linear infinite", display: "block" }}
+          >
+            <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="#ccc" strokeWidth="4" />
+            <path style={{ opacity: 0.75 }} fill="#1B5E20" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        </span>
+      )}
+    </div>
 
       {hasQuery && items.length > 0 && (
         <div style={{ marginTop: "4px", borderRadius: "8px", border: "1px solid #e0e0e0", overflow: "hidden" }}>
