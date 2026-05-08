@@ -43,13 +43,13 @@
 │  │  <body>   ─ all HTML structure                    │  │
 │  │  <script> ─ all JS logic + embedded course data   │  │
 │  │                                                   │  │
-│  │  const allCourses = [{...}, {...}, ...]            │  │
+│  │  const allCourses = [{...}, {...}, ...]           │  │
 │  └───────────────────────────────────────────────────┘  │
 │                                                         │
 │  localStorage                                           │
-│  ├── unt_vsb_theme    ─ "dark" | "light"               │
-│  ├── unt_vsb_saved    ─ JSON array of saved schedules  │
-│  └── unt_vsb_current  ─ auto-saved current selections  │
+│  ├── unt_vsb_theme    ─ "dark" | "light"                │
+│  ├── unt_vsb_saved    ─ JSON array of saved schedules   │
+│  └── unt_vsb_current  ─ auto-saved current selections   │
 └─────────────────────────────────────────────────────────┘
 ```
 
