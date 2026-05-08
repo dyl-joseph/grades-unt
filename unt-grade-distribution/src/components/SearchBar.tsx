@@ -155,7 +155,7 @@ export default function SearchBar({
     const navId = `${type}-${id}`;
     setNavigatingId(navId);
     setQuery("");
-    resetResults();
+    setIsOpen(false);
     if (type === "course") {
       router.push(`/course/${id}`);
     } else {
