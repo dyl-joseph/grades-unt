@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { SearchResult } from "@/lib/types";
 
@@ -23,6 +23,7 @@ export default function SearchBar({
   onFocusChange,
 }: SearchBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -117,6 +118,14 @@ export default function SearchBar({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset stale navbar SearchBar state on route change
+    setNavigatingId(null);
+    setResults(null);
+    setIsOpen(false);
+    setHighlightIdx(-1);
+  }, [pathname]);
+
   // Build flat list of all items for keyboard nav
   const allItems = useCallback(() => {
     if (!results) return [];
@@ -146,6 +155,7 @@ export default function SearchBar({
     const navId = `${type}-${id}`;
     setNavigatingId(navId);
     setQuery("");
+    resetResults();
     if (type === "course") {
       router.push(`/course/${id}`);
     } else {

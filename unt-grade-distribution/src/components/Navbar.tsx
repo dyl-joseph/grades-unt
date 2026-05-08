@@ -29,7 +29,7 @@ export default function Navbar() {
           UNT Grades
         </Link>
         {!isHome && (
-          <div className={`hidden max-w-md flex-1 transition-all duration-300 sm:block ${scrolled ? "pointer-events-none max-h-0 opacity-0" : "max-h-12 opacity-100"}`}>
+          <div className={`hidden max-w-md flex-1 transition-all duration-300 sm:block ${scrolled ? "max-h-0 opacity-0" : "max-h-12 opacity-100"}`}>
             <SearchBar compact />
           </div>
         )}
@@ -39,7 +39,7 @@ export default function Navbar() {
         </div>
       </div>
       {!isHome && (
-        <div className={`border-t border-green-100 px-4 py-2 transition-all duration-300 sm:hidden dark:border-green-900 ${scrolled ? "pointer-events-none max-h-0 overflow-hidden border-t-0 py-0 opacity-0" : "max-h-20 opacity-100"}`}>
+        <div className={`border-t border-green-100 px-4 py-2 transition-all duration-300 sm:hidden dark:border-green-900 ${scrolled ? "max-h-0 overflow-hidden border-t-0 py-0 opacity-0" : "max-h-20 opacity-100"}`}>
           <SearchBar compact />
         </div>
       )}
