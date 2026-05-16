@@ -1,100 +1,112 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { unstable_cache } from "next/cache";
-import { prisma } from "@/lib/prisma";
+import { useParams } from "next/navigation";
 import { aggregateGrades, calculateGPA, toChartData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
+import { fromInstructorSlug, loadInstructorSections } from "@/lib/encryptedData";
 
-export const dynamic = "force-static";
-export const fetchCache = "default-cache";
-export const dynamicParams = true;
-export const revalidate = 3600; // ISR: regenerate every hour
+type SectionWithCourse = {
+  sectionNumber: string;
+  instructor: { firstName: string; lastName: string };
+  grades: { A: number; B: number; C: number; D: number; F: number; P: number; NP: number; W: number; I: number };
+  course: { prefix: string; number: string; title: string };
+};
 
-const getInstructorDetail = unstable_cache(
-  async (instructorId: number) => {
-    const instructor = await prisma.instructor.findUnique({
-      where: { id: instructorId },
-      include: {
-        sections: {
-          include: { course: true },
-          orderBy: [{ course: { prefix: "asc" } }, { course: { number: "asc" } }],
-        },
-      },
-    });
+export default function InstructorPage() {
+  const params = useParams<{ id: string }>();
+  const slug = params?.id || "";
+  const { firstName, lastName } = useMemo(() => fromInstructorSlug(slug), [slug]);
 
-    if (!instructor) {
-      return null;
-    }
+  const [sections, setSections] = useState<SectionWithCourse[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const overallAggregate = aggregateGrades(instructor.sections);
-    const overallGPA = calculateGPA(overallAggregate);
+  useEffect(() => {
+    if (!firstName || !lastName) return;
+    let mounted = true;
+    setLoading(true);
+    setError(null);
 
-    const courseMap = new Map<
-      number,
-      {
-        course: { id: number; prefix: string; number: string; title: string };
-        sections: typeof instructor.sections;
-      }
-    >();
+    loadInstructorSections(firstName, lastName)
+      .then((data) => {
+        if (!mounted) return;
+        setSections(data as SectionWithCourse[]);
+      })
+      .catch((e: unknown) => {
+        if (!mounted) return;
+        setError(e instanceof Error ? e.message : "Failed to decrypt instructor data");
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
 
-    for (const section of instructor.sections) {
-      const existing = courseMap.get(section.courseId);
+    return () => {
+      mounted = false;
+    };
+  }, [firstName, lastName]);
+
+  const normalizedSections = useMemo(
+    () =>
+      sections.map((s, idx) => ({
+        id: `${s.course.prefix}-${s.course.number}-${s.sectionNumber}-${idx}`,
+        sectionNumber: s.sectionNumber,
+        instructor: s.instructor,
+        course: s.course,
+        gradeA: s.grades.A,
+        gradeB: s.grades.B,
+        gradeC: s.grades.C,
+        gradeD: s.grades.D,
+        gradeF: s.grades.F,
+        gradeP: s.grades.P,
+        gradeNP: s.grades.NP,
+        gradeW: s.grades.W,
+        gradeI: s.grades.I,
+        totalEnroll:
+          s.grades.A + s.grades.B + s.grades.C + s.grades.D + s.grades.F + s.grades.P + s.grades.NP + s.grades.W + s.grades.I,
+      })),
+    [sections]
+  );
+
+  const overallAggregate = useMemo(() => aggregateGrades(normalizedSections), [normalizedSections]);
+  const overallGPA = useMemo(() => calculateGPA(overallAggregate), [overallAggregate]);
+
+  const courseGroups = useMemo(() => {
+    const map = new Map<string, { course: { prefix: string; number: string; title: string }; sections: typeof normalizedSections }>();
+    for (const section of normalizedSections) {
+      const key = `${section.course.prefix}:${section.course.number}`;
+      const existing = map.get(key);
       if (existing) {
         existing.sections.push(section);
       } else {
-        courseMap.set(section.courseId, {
+        map.set(key, {
           course: section.course,
           sections: [section],
         });
       }
     }
+    return Array.from(map.values());
+  }, [normalizedSections]);
 
-    return {
-      instructor,
-      overallAggregate,
-      overallGPA,
-      courseGroups: Array.from(courseMap.values()),
-    };
-  },
-  ["instructor-detail"],
-  { revalidate: 3600, tags: ["instructor-detail"] } // 1 hour
-);
-
-type InstructorDetail = NonNullable<Awaited<ReturnType<typeof getInstructorDetail>>>;
-
-interface InstructorPageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default async function InstructorPage({ params }: InstructorPageProps) {
-  const { id } = await params;
-  const instructorId = parseInt(id);
-
-  if (isNaN(instructorId)) {
-    notFound();
+  if (loading) {
+    return <div className="mx-auto max-w-6xl px-4 py-8">Loading encrypted instructor data...</div>;
   }
 
-  const detail = await getInstructorDetail(instructorId);
-
-  if (!detail) {
-    notFound();
+  if (error) {
+    return <div className="mx-auto max-w-6xl px-4 py-8 text-red-600 dark:text-red-300">{error}</div>;
   }
-
-  const { instructor, overallAggregate, overallGPA, courseGroups } = detail as InstructorDetail;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
-            {instructor.firstName} {instructor.lastName}
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">{firstName} {lastName}</h1>
           <div className="flex items-start gap-2">
             <a
-              href={`/compare?type=instructor&a=${instructor.id}`}
+              href={`/compare?type=instructor&a=${encodeURIComponent(`${lastName},${firstName}`)}`}
               className="inline-block rounded bg-blue-600 px-3 py-1 font-semibold text-white transition hover:bg-blue-700"
               title="Compare with another instructor"
             >
@@ -103,40 +115,28 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
           </div>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
-          <span className="flex items-center gap-1.5">
-            Overall GPA: <GpaBadge gpa={overallGPA} />
-          </span>
-          <span>{instructor.sections.length} sections</span>
-          <span>
-            {courseGroups.length} course{courseGroups.length !== 1 ? "s" : ""}{" "}
-            taught
-          </span>
+          <span className="flex items-center gap-1.5">Overall GPA: <GpaBadge gpa={overallGPA} /></span>
+          <span>{normalizedSections.length} sections</span>
+          <span>{courseGroups.length} course{courseGroups.length !== 1 ? "s" : ""} taught</span>
         </div>
       </div>
+
       <div className="mb-10 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-6 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">
-          Aggregate Grade Distribution
-        </h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Aggregate Grade Distribution</h2>
         <GradeChart data={toChartData(overallAggregate)} />
       </div>
 
-      {/* Course groups */}
       {courseGroups.map(({ course, sections }) => (
-        <div key={course.id} className="mb-10">
+        <div key={`${course.prefix}-${course.number}`} className="mb-10">
           <h2 className="mb-4 text-lg font-semibold">
-            <Link
-              href={`/course/${course.prefix}/${course.number}`}
-              className="text-primary hover:underline dark:text-jungle-leaf"
-            >
+            <Link href={`/course/${course.prefix}/${course.number}`} className="text-primary hover:underline dark:text-jungle-leaf">
               {course.prefix} {course.number}
             </Link>
-            <span className="ml-2 text-gray-500 dark:text-green-300/60">
-              — {course.title}
-            </span>
+            <span className="ml-2 text-gray-500 dark:text-green-300/60">— {course.title}</span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {sections.map((section) => (
-              <SectionCard key={section.id} section={{ ...section, instructor }} />
+              <SectionCard key={section.id} section={section} />
             ))}
           </div>
         </div>

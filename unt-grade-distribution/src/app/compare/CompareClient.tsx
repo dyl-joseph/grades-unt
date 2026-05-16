@@ -5,15 +5,12 @@ import { aggregateGrades, toChartData, type ChartDataPoint, type GradeData } fro
 import GradeChart from "@/components/GradeChart";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { SearchResult } from "@/lib/types";
+import { fromInstructorSlug, loadCourseByCode, loadInstructorSections, searchManifest } from "@/lib/encryptedData";
 
 type CompareType = "course" | "instructor";
 type CourseSuggestion = SearchResult["courses"][number];
 type InstructorSuggestion = SearchResult["instructors"][number];
 type Suggestion = CourseSuggestion | InstructorSuggestion;
-
-type SectionsResponse =
-  | { sections: GradeData[]; course?: { prefix: string; number: string; title: string } }
-  | { sections: GradeData[]; instructor?: { id: number; firstName: string; lastName: string } };
 
 function isCourseSuggestion(item: Suggestion): item is CourseSuggestion {
   return "prefix" in item && "number" in item;
@@ -45,26 +42,8 @@ export default function CompareClient() {
   const leftDebounced = useDebounce(leftSearch, 250);
   const rightDebounced = useDebounce(search, 250);
 
-  const apiForEntity = useCallback(
-    (entityType: CompareType, entity: Suggestion | string) => {
-      if (entityType === "course") {
-        if (typeof entity === "string") {
-          const [prefix, number] = entity.split(":");
-          return `/api/course/${prefix}/${number}`;
-        }
-        if (!isCourseSuggestion(entity)) return null;
-        return `/api/course/${entity.prefix}/${entity.number}`;
-      }
-      // instructor
-      if (typeof entity === "string") return `/api/instructor/${entity}`;
-      if (isCourseSuggestion(entity)) return null;
-      return `/api/instructor/${entity.id}`;
-    },
-    []
-  );
-
   const labelForEntity = useCallback(
-    (entityType: CompareType, entity: Suggestion | string, data?: SectionsResponse | null) => {
+    (entityType: CompareType, entity: Suggestion | string, data?: { course?: { prefix: string; number: string; title: string }; instructor?: { firstName: string; lastName: string } } | null) => {
       if (entityType === "course") {
         if (data && "course" in data && data.course) {
           return `${data.course.prefix} ${data.course.number} — ${data.course.title}`;
@@ -89,11 +68,54 @@ export default function CompareClient() {
     []
   );
 
-  // Fetch helper
-  const fetchEntity = useCallback(async (url: string, signal?: AbortSignal) => {
-    const res = await fetch(url, { signal });
-    if (!res.ok) return null;
-    return (await res.json()) as SectionsResponse;
+  const loadEntitySections = useCallback(async (entityType: CompareType, entity: Suggestion | string) => {
+    const empty = {
+      sections: [] as GradeData[],
+      meta: null as null | { course?: { prefix: string; number: string; title: string }; instructor?: { firstName: string; lastName: string } },
+    };
+
+    if (entityType === "course") {
+      let prefix = "";
+      let number = "";
+      if (typeof entity === "string") {
+        [prefix, number] = entity.split(":");
+      } else if (isCourseSuggestion(entity)) {
+        prefix = entity.prefix;
+        number = entity.number;
+      }
+      const course = await loadCourseByCode(prefix, number);
+      if (!course) return empty;
+      const sections = course.sections.map((s) => ({
+        gradeA: s.grades.A,
+        gradeB: s.grades.B,
+        gradeC: s.grades.C,
+        gradeD: s.grades.D,
+        gradeF: s.grades.F,
+        gradeP: s.grades.P,
+        gradeNP: s.grades.NP,
+        gradeW: s.grades.W,
+        gradeI: s.grades.I,
+        totalEnroll: s.grades.A + s.grades.B + s.grades.C + s.grades.D + s.grades.F + s.grades.P + s.grades.NP + s.grades.W + s.grades.I,
+      }));
+      return { sections, meta: { course: { prefix: course.prefix, number: course.number, title: course.title } } };
+    }
+
+    const slug = typeof entity === "string" ? entity : String((entity as InstructorSuggestion).id);
+    const { firstName, lastName } = fromInstructorSlug(slug);
+    const rows = await loadInstructorSections(firstName, lastName);
+    const sections = rows.map((s) => ({
+      gradeA: s.grades.A,
+      gradeB: s.grades.B,
+      gradeC: s.grades.C,
+      gradeD: s.grades.D,
+      gradeF: s.grades.F,
+      gradeP: s.grades.P,
+      gradeNP: s.grades.NP,
+      gradeW: s.grades.W,
+      gradeI: s.grades.I,
+      totalEnroll: s.grades.A + s.grades.B + s.grades.C + s.grades.D + s.grades.F + s.grades.P + s.grades.NP + s.grades.W + s.grades.I,
+    }));
+    return { sections, meta: { instructor: { firstName, lastName } } };
   }, []);
 
   // Left data effect
@@ -103,20 +125,17 @@ export default function CompareClient() {
       if (!type || !a) return;
 
       const entity = leftSelected ?? a;
-      const url = apiForEntity(type, entity);
-      if (!url) return;
-
-      const data = await fetchEntity(url);
-      const sections = data?.sections ?? [];
+      const data = await loadEntitySections(type, entity);
+      const sections = data.sections ?? [];
       const aggregate = aggregateGrades(sections);
       const chartData = toChartData(aggregate);
-      const label = labelForEntity(type, entity, data);
+      const label = labelForEntity(type, entity, data.meta ?? undefined);
 
       if (mounted) setLeftData({ chartData, label });
     }
     load();
     return () => { mounted = false; };
-  }, [a, apiForEntity, fetchEntity, labelForEntity, leftSelected, type]);
+  }, [a, labelForEntity, leftSelected, loadEntitySections, type]);
 
   // Right data effect
   useEffect(() => {
@@ -128,27 +147,23 @@ export default function CompareClient() {
         return;
       }
 
-      const url = apiForEntity(type, selected);
-      if (!url) return;
-
-      const data = await fetchEntity(url);
-      const sections = data?.sections ?? [];
+      const data = await loadEntitySections(type, selected);
+      const sections = data.sections ?? [];
       const aggregate = aggregateGrades(sections);
       const chartData = toChartData(aggregate);
-      const label = labelForEntity(type, selected, data);
+      const label = labelForEntity(type, selected, data.meta ?? undefined);
       if (mounted) setRightData({ chartData, label });
     }
     load();
     return () => { mounted = false; };
-  }, [apiForEntity, fetchEntity, labelForEntity, selected, type]);
+  }, [labelForEntity, loadEntitySections, selected, type]);
 
   const fetchSuggestions = useCallback(
     async (q: string, signal?: AbortSignal) => {
       if (!type) return [];
       if (q.trim().length < 2) return [];
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q.trim())}`, { signal });
-      if (!res.ok) return [];
-      const data = (await res.json()) as SearchResult;
+      if (signal?.aborted) return [];
+      const data = (await searchManifest(q.trim())) as SearchResult;
       return (type === "course" ? data.courses : data.instructors) as Suggestion[];
     },
     [type]

@@ -1,79 +1,121 @@
-import { notFound } from "next/navigation";
-import { unstable_cache } from "next/cache";
-import { prisma } from "@/lib/prisma";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { aggregateGrades, calculateGPA, toChartData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
 import CourseSaveButton from "@/components/CourseSaveButton";
 import ShareButton from "@/components/ShareButton";
+import { loadCourseByCode } from "@/lib/encryptedData";
 
-export const dynamic = "force-static";
-export const fetchCache = "default-cache";
-export const dynamicParams = true;
-export const revalidate = 3600; // ISR: regenerate every hour
+type CourseData = {
+  prefix: string;
+  number: string;
+  title: string;
+  sections: Array<{
+    sectionNumber: string;
+    instructor: { firstName: string; lastName: string };
+    year: string | null;
+    term: string | null;
+    grades: { A: number; B: number; C: number; D: number; F: number; P: number; NP: number; W: number; I: number };
+  }>;
+};
 
-const getCourseDetail = unstable_cache(
-  async (prefix: string, number: string) => {
-    const course = await prisma.course.findUnique({
-      where: {
-        prefix_number: { prefix, number },
-      },
-      include: {
-        sections: {
-          include: { instructor: true },
-          orderBy: { instructor: { lastName: "asc" } },
-        },
-      },
-    });
-
-    if (!course) {
-      return null;
-    }
-
-    const aggregate = aggregateGrades(course.sections);
-
-    return {
-      course,
-      aggregate,
-      overallGPA: calculateGPA(aggregate),
-      aggregateChartData: toChartData(aggregate),
-    };
-  },
-  ["course-detail"],
-  { revalidate: 3600, tags: ["course-detail"] } // 1 hour
-);
-
-interface CoursePageProps {
-  params: Promise<{ prefix: string; number: string }>;
+function toSectionModel(course: CourseData) {
+  return course.sections.map((s, idx) => ({
+    id: `${course.prefix}-${course.number}-${s.sectionNumber}-${idx}`,
+    sectionNumber: s.sectionNumber,
+    instructor: s.instructor,
+    course: { prefix: course.prefix, number: course.number, title: course.title },
+    gradeA: s.grades.A,
+    gradeB: s.grades.B,
+    gradeC: s.grades.C,
+    gradeD: s.grades.D,
+    gradeF: s.grades.F,
+    gradeP: s.grades.P,
+    gradeNP: s.grades.NP,
+    gradeW: s.grades.W,
+    gradeI: s.grades.I,
+    totalEnroll:
+      s.grades.A + s.grades.B + s.grades.C + s.grades.D + s.grades.F + s.grades.P + s.grades.NP + s.grades.W + s.grades.I,
+  }));
 }
 
-export default async function CoursePage({ params }: CoursePageProps) {
-  const { prefix, number } = await params;
+function stableCourseId(prefix: string, number: string) {
+  let hash = 0;
+  const text = `${prefix}:${number}`;
+  for (let i = 0; i < text.length; i++) {
+    hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
 
-  const detail = await getCourseDetail(prefix.toUpperCase(), number);
+export default function CoursePage() {
+  const params = useParams<{ prefix: string; number: string }>();
+  const router = useRouter();
+  const prefix = (params?.prefix || "").toUpperCase();
+  const number = params?.number || "";
 
-  if (!detail) {
-    notFound();
+  const [course, setCourse] = useState<CourseData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!prefix || !number) return;
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+
+    loadCourseByCode(prefix, number)
+      .then((data) => {
+        if (!mounted) return;
+        setCourse(data as CourseData | null);
+      })
+      .catch((e: unknown) => {
+        if (!mounted) return;
+        setError(e instanceof Error ? e.message : "Failed to decrypt course data");
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [prefix, number]);
+
+  const sections = useMemo(() => (course ? toSectionModel(course) : []), [course]);
+  const aggregate = useMemo(() => aggregateGrades(sections), [sections]);
+  const overallGPA = useMemo(() => calculateGPA(aggregate), [aggregate]);
+  const aggregateChartData = useMemo(() => toChartData(aggregate), [aggregate]);
+
+  if (loading) {
+    return <div className="mx-auto max-w-6xl px-4 py-8">Loading encrypted course data...</div>;
   }
 
-  const { course, aggregate, overallGPA, aggregateChartData } = detail;
+  if (error || !course) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <p className="mb-4 text-red-600 dark:text-red-300">{error || "Course not found"}</p>
+        <button onClick={() => router.push("/")} className="rounded bg-blue-600 px-4 py-2 text-white">Go Home</button>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
-            {course.prefix} {course.number}{" "}
-            <span className="text-gray-500 dark:text-green-300/60">—</span>{" "}
-            {course.title}
+            {course.prefix} {course.number} <span className="text-gray-500 dark:text-green-300/60">—</span> {course.title}
           </h1>
           <div className="flex items-start gap-2">
             <ShareButton url={`/course/${course.prefix}/${course.number}`} />
             <CourseSaveButton
               item={{
-                courseId: course.id,
+                courseId: stableCourseId(course.prefix, course.number),
                 prefix: course.prefix,
                 number: course.number,
                 title: course.title,
@@ -88,7 +130,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 gradeW: aggregate.gradeW,
                 gradeI: aggregate.gradeI,
                 totalEnroll: aggregate.totalEnroll,
-                sectionCount: course.sections.length,
+                sectionCount: sections.length,
               }}
             />
             <a
@@ -101,29 +143,21 @@ export default async function CoursePage({ params }: CoursePageProps) {
           </div>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
-          <span className="flex items-center gap-1.5">
-            Overall GPA: <GpaBadge gpa={overallGPA} />
-          </span>
-          <span>{course.sections.length} sections</span>
+          <span className="flex items-center gap-1.5">Overall GPA: <GpaBadge gpa={overallGPA} /></span>
+          <span>{sections.length} sections</span>
           <span>{aggregate.totalEnroll.toLocaleString()} total students</span>
         </div>
       </div>
 
-      {/* Aggregate chart */}
       <div className="mb-10 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-6 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">
-          Aggregate Grade Distribution
-        </h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Aggregate Grade Distribution</h2>
         <GradeChart data={aggregateChartData} />
       </div>
 
-      {/* Sections grid */}
-      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">
-        Sections
-      </h2>
+      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Sections</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {course.sections.map((section) => (
-          <SectionCard key={section.id} section={{ ...section, course }} />
+        {sections.map((section) => (
+          <SectionCard key={section.id} section={section} />
         ))}
       </div>
     </div>

@@ -4,11 +4,29 @@ import Link from "next/link";
 import GpaBadge from "./GpaBadge";
 import LazyChart from "./LazyChart";
 import { calculateGPA, toChartData } from "@/lib/grades";
-import type { SectionWithRelations } from "@/lib/types";
 import ShareButton from "./ShareButton";
+import { toInstructorSlug } from "@/lib/encryptedData";
+
+type SectionCardData = {
+  id: number | string;
+  sectionNumber: string;
+  instructorId?: number | string;
+  instructor: { firstName: string; lastName: string };
+  course: { prefix: string; number: string; title?: string };
+  gradeA: number;
+  gradeB: number;
+  gradeC: number;
+  gradeD: number;
+  gradeF: number;
+  gradeP: number;
+  gradeNP: number;
+  gradeW: number;
+  gradeI: number;
+  totalEnroll: number;
+};
 
 interface SectionCardProps {
-  section: SectionWithRelations;
+  section: SectionCardData;
   showCourse?: boolean;
 }
 
@@ -18,6 +36,10 @@ export default function SectionCard({
 }: SectionCardProps) {
   const gpa = calculateGPA(section);
   const chartData = toChartData(section);
+  const instructorSlug = toInstructorSlug(
+    section.instructor.firstName,
+    section.instructor.lastName
+  );
 
   return (
     <div className="rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm transition-shadow hover:shadow-md dark:border-green-900 dark:bg-jungle-canopy/60">
@@ -37,7 +59,7 @@ export default function SectionCard({
             </span>
             <span className="text-gray-300 dark:text-gray-600">·</span>
             <Link
-              href={`/instructor/${section.instructorId}`}
+              href={`/instructor/${instructorSlug}`}
               className="text-sm font-medium text-gray-900 hover:text-primary dark:text-green-100 dark:hover:text-jungle-leaf"
             >
               {section.instructor.lastName}, {section.instructor.firstName}
@@ -45,7 +67,7 @@ export default function SectionCard({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <ShareButton url={`/instructor/${section.instructorId}`} compact />
+          <ShareButton url={`/instructor/${instructorSlug}`} compact />
           <GpaBadge gpa={gpa} />
         </div>
       </div>

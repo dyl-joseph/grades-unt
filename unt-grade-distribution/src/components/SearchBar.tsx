@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { SearchResult } from "@/lib/types";
+import { searchManifest } from "@/lib/encryptedData";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -56,9 +57,13 @@ export default function SearchBar({
     setError(null);
   }, []);
 
+  const normalizedDebouncedQuery = normalizeQuery(debouncedQuery);
+  const hasQuery = debouncedQuery.length >= MIN_QUERY_LENGTH;
+  const showCoursesFirst = /\d/.test(normalizedDebouncedQuery) || /\b[a-z]{1,4}\s*\d/i.test(normalizedDebouncedQuery);
+
   // Fetch results when debounced query changes
   useEffect(() => {
-    const normalized = normalizeQuery(debouncedQuery);
+    const normalized = normalizedDebouncedQuery;
     if (normalized.length < MIN_QUERY_LENGTH) return;
 
     const cached = clientCache.current.get(normalized);
@@ -71,19 +76,11 @@ export default function SearchBar({
       return;
     }
 
-    const controller = new AbortController();
     let active = true;
     setError(null);
 
-    fetch(`/api/search?q=${encodeURIComponent(normalized)}`, {
-      signal: controller.signal,
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`Search request failed (${res.status})`);
-        }
-        return (await res.json()) as SearchResult;
-      })
+    searchManifest(normalized)
+      .then((data) => data as SearchResult)
       .then((data) => {
         if (!active) return;
         rememberResult(normalized, data);
@@ -100,7 +97,6 @@ export default function SearchBar({
 
     return () => {
       active = false;
-      controller.abort();
     };
   }, [debouncedQuery, normalizeQuery, rememberResult]);
 
@@ -134,22 +130,33 @@ export default function SearchBar({
       id: string;
       label: string;
     }> = [];
-    results.courses.forEach((c) =>
-      items.push({
-        type: "course",
-        id: `${c.prefix}/${c.number}`,
-        label: `${c.prefix} ${c.number} — ${c.title}`,
-      })
-    );
-    results.instructors.forEach((i) =>
-      items.push({
-        type: "instructor",
-        id: String(i.id),
-        label: `${i.lastName}, ${i.firstName}`,
-      })
-    );
+    const pushCourses = () => {
+      results.courses.forEach((c) =>
+        items.push({
+          type: "course",
+          id: `${c.prefix}/${c.number}`,
+          label: `${c.prefix} ${c.number} — ${c.title}`,
+        })
+      );
+    };
+    const pushInstructors = () => {
+      results.instructors.forEach((i) =>
+        items.push({
+          type: "instructor",
+          id: String(i.id),
+          label: `${i.lastName}, ${i.firstName}`,
+        })
+      );
+    };
+    if (showCoursesFirst) {
+      pushCourses();
+      pushInstructors();
+    } else {
+      pushInstructors();
+      pushCourses();
+    }
     return items;
-  }, [results]);
+  }, [results, showCoursesFirst]);
 
   const navigate = (type: "course" | "instructor", id: string) => {
     const navId = `${type}-${id}`;
@@ -184,7 +191,6 @@ export default function SearchBar({
   };
 
   const items = allItems();
-  const hasQuery = debouncedQuery.length >= MIN_QUERY_LENGTH;
 
   return (
     <div ref={containerRef} className={`relative w-full ${compact ? "" : "max-w-3xl mx-auto"}`}>
@@ -240,7 +246,42 @@ export default function SearchBar({
       </div>
 
       {isOpen && items.length > 0 && (
-        <div className={`absolute z-50 mt-2 w-full rounded-2xl border shadow-xl ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
+        <div className={`absolute z-50 mt-2 w-full max-h-[70vh] overflow-y-auto rounded-2xl border shadow-xl ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-green-800/50 dark:bg-jungle-canopy" : "glass-glossy border-white/40 dark:border-white/15"}`}>
+          {(!showCoursesFirst && results!.instructors.length > 0) && (
+            <div>
+              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-accent">
+                Instructors
+              </div>
+              {results!.instructors.map((instructor, i) => {
+                const idx = i;
+                return (
+                  <button
+                    key={`i-${instructor.id}`}
+                    className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
+                      highlightIdx === idx
+                        ? "bg-green-50 dark:bg-green-900/30"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      navigate("instructor", String(instructor.id))
+                    }
+                    disabled={navigatingId !== null}
+                  >
+                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                      {instructor.lastName}, {instructor.firstName}
+                    </span>
+                    {navigatingId === `instructor-${instructor.id}` && (
+                      <svg className="ml-auto h-4 w-4 animate-spin text-gray-400 dark:text-green-300/60" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {results!.courses.length > 0 && (
             <div>
               <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-accent">
@@ -250,7 +291,7 @@ export default function SearchBar({
                 <button
                   key={`c-${course.id}`}
                   className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
-                    highlightIdx === i
+                    highlightIdx === (showCoursesFirst ? i : i + results!.instructors.length)
                       ? "bg-green-50 dark:bg-green-900/30"
                       : ""
                   }`}
@@ -276,7 +317,7 @@ export default function SearchBar({
             </div>
           )}
 
-          {results!.instructors.length > 0 && (
+          {showCoursesFirst && results!.instructors.length > 0 && (
             <div>
               <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-accent">
                 Instructors
