@@ -8,8 +8,8 @@ export type SectionWithRelations = Section & {
 
 /** Search API response */
 export interface SearchResult {
-  courses: Array<{ id: number; prefix: string; number: string; title: string }>;
-  instructors: Array<{ id: number | string; firstName: string; lastName: string }>;
+  courses: Pick<Course, "id" | "prefix" | "number" | "title">[];
+  instructors: Pick<Instructor, "id" | "firstName" | "lastName">[];
 }
 
 /** Saved course item — stored in localStorage */
