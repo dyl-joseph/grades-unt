@@ -171,7 +171,7 @@ export default function CoursePage() {
             />
             <a
               href={`/compare?type=course&a=${course.prefix}:${course.number}`}
-              className="inline-block rounded bg-blue-600 px-3 py-1 font-semibold text-white transition hover:bg-blue-700"
+              className="inline-flex items-center rounded-lg border border-green-400/50 bg-green-50 px-3 py-1.5 font-medium text-green-700 transition-all hover:border-green-500/70 hover:bg-green-100 dark:border-green-600/50 dark:bg-green-900/20 dark:text-green-200 dark:hover:border-green-500 dark:hover:bg-green-900/40"
               title="Compare with another course"
             >
               Compare
