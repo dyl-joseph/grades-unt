@@ -19,20 +19,25 @@ We got data from UNT about all the grade distributions from Fall 2025. With this
 - jsPDF + jspdf-autotable (4.2.0, 5.0.7) - PDF exporter
 - Vercel Analytics + Vercel Speed Insights - real-user page views, Web Vitals, and route performance monitoring
 
-### Backend:
-- postgress-sql
-- Next.js API (16.1.6) - routes data 
-- Prisma ORM (7.4.2) - fetches data from Supabase and gives it to the website
-- PostgreSQL - database manager in Supabase
-- pg [node-postgress] (8.19.0) - allow the website to use postgress and process postrgress data
+### Data Delivery:
+- Static encrypted blobs generated at build time from CSV exports
+- Client-side WebCrypto decryption for course and professor pages
+- Manifest-driven search that avoids live database calls
+- No Supabase/Prisma runtime dependency for user-facing reads
 
 ### Hosting: 
-- Supabase (database)
-- Vercel (hosting the website itself)
+- Vercel (hosting the website itself and serving static encrypted assets)
+- Optional environment key for encrypt/decrypt parity across builds
 
 ### Observability:
-- Vercel Speed Insights helps monitor real-user loading performance across the home page, search-driven navigation, and the database-backed course and instructor pages.
-- Speed Insights is useful for finding slow routes and poor Web Vitals, but it does not replace direct database query profiling by itself.
+- Vercel Speed Insights helps monitor real-user loading performance across the home page, search-driven navigation, and the encrypted course and instructor pages.
+- Speed Insights is useful for finding slow routes and poor Web Vitals, but it does not replace direct load benchmarking or client-side profiling.
+
+### Estimated Speedup vs Supabase:
+- This is a rough estimate, not a benchmark.
+- Search suggestions: about 3x to 10x faster perceived response time once the manifest is cached, because the browser filters static JSON instead of waiting on a database query.
+- Course and instructor pages: about 2x to 6x faster perceived navigation time, because the browser fetches one encrypted blob from the CDN and decrypts locally instead of going through Prisma + Supabase.
+- Cold starts, DB connection failures, and query latency spikes are removed from the user-facing path, so speed is more consistent even when the raw gain varies by network and device.
 
 ## File Structure: 
 /unt-grade-distribution: contains all the code. put it all into a folder for "modulization".
@@ -57,8 +62,4 @@ documentation files (any .md files): in the repo's root file. makes it easier to
 
 - **SPOT Evaluations** — Integrate Student Perceptions of Teaching data for instructors
 - **More Semesters** — Expand grade distribution data to cover additional semesters
-- **Add API endpoints** — Aggregate course and instructor data:
-  - `/api/course?aggregate=<prefix>:<number>`: Returns aggregate grade data for a course by summing all its sections.
-  - `/api/instructor?aggregate=<id>`: Returns aggregate grade data for an instructor by summing all their sections.
-  - For now, aggregation is performed manually by summing all section grade counts and enrollment.
-  - Integrate these endpoints with the compare page for efficient aggregate graph rendering.
+- **Smarter client aggregates** — Keep compare-page aggregation fast by precomputing or indexing more summary data in the encrypted manifest layer, without reintroducing a live database dependency.

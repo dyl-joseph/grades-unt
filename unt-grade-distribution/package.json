@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build --webpack",
+    "encrypt": "node ./tools/encrypt-data.js",
+    "convert:supabase": "node ./tools/convert-supabase-to-encrypt-csv.js",
     "start": "next start",
     "test": "node --import tsx --test 'src/**/*.test.ts'",
     "lint": "eslint",
