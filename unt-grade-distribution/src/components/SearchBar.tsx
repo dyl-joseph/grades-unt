@@ -160,12 +160,26 @@ export default function SearchBar({
 
   const navigate = (type: "course" | "instructor", id: string) => {
     const navId = `${type}-${id}`;
+    const targetPath = type === "course" ? `/course/${id}` : `/instructor/${id}`;
+
     setNavigatingId(navId);
     setQuery("");
+    setLoading(false);
+    setError(null);
+    setResults(null);
+    setIsOpen(false);
+    setHighlightIdx(-1);
+
+    if (pathname === targetPath) {
+      setNavigatingId(null);
+      inputRef.current?.blur();
+      return;
+    }
+
     if (type === "course") {
-      router.push(`/course/${id}`);
+      router.push(targetPath);
     } else {
-      router.push(`/instructor/${id}`);
+      router.push(targetPath);
     }
   };
 
