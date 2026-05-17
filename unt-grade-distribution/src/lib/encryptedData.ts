@@ -123,8 +123,8 @@ export async function searchManifest(q: string) {
     let courseScore = -1;
     if (courseCode.includes(query)) {
       courseScore = courseCode.startsWith(query) ? 100 : 80;
-    } else if (hasCourseSignal && title.includes(query)) {
-      courseScore = title.startsWith(query) ? 60 : 40;
+    } else if (title.includes(query)) {
+      courseScore = title.startsWith(query) ? 70 : 50;
     }
 
     if (courseScore >= 0) {
@@ -168,10 +168,10 @@ export async function searchManifest(q: string) {
   courseHits.sort((a, b) => b.score - a.score || a.prefix.localeCompare(b.prefix) || a.number.localeCompare(b.number));
   const instructors = Array.from(instructorMap.values())
     .sort((a, b) => b.score - a.score || a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName))
-    .slice(0, hasCourseSignal ? 6 : 12)
+    .slice(0, 8)
     .map(({ score, ...rest }) => rest);
 
-  const courses = courseHits.slice(0, hasCourseSignal ? 8 : 4).map((course, idx) => ({
+  const courses = courseHits.slice(0, 8).map((course, idx) => ({
     id: idx + 1,
     prefix: course.prefix,
     number: course.number,
