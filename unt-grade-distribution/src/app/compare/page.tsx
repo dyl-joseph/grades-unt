@@ -1,11 +1,18 @@
-import React, { Suspense } from "react";
 import CompareClient from "./CompareClient";
 
-export default function ComparePage() {
-  return (
-    <Suspense fallback={<div className="p-6">Loading compare...</div>}>
-      {/* Client-side compare UI */}
-      <CompareClient />
-    </Suspense>
-  );
+type CompareSearchParams = {
+  type?: string | string[];
+  a?: string | string[];
+};
+
+export default async function ComparePage({
+  searchParams,
+}: {
+  searchParams: Promise<CompareSearchParams>;
+}) {
+  const resolved = await searchParams;
+  const type = Array.isArray(resolved.type) ? resolved.type[0] : resolved.type;
+  const a = Array.isArray(resolved.a) ? resolved.a[0] : resolved.a;
+
+  return <CompareClient initialType={type} initialA={a} />;
 }

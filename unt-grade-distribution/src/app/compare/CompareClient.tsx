@@ -1,312 +1,592 @@
 "use client";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { aggregateGrades, toChartData, type ChartDataPoint, type GradeData } from "@/lib/grades";
+
+import React, { useCallback, useEffect, useState } from "react";
+import { aggregateGrades, calculateGPA, toChartData, type ChartDataPoint } from "@/lib/grades";
 import GradeChart from "@/components/GradeChart";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { SearchResult } from "@/lib/types";
+import { fromInstructorSlug, loadCourseByCode, loadInstructorSections, searchManifest } from "@/lib/encryptedData";
 
 type CompareType = "course" | "instructor";
 type CourseSuggestion = SearchResult["courses"][number];
 type InstructorSuggestion = SearchResult["instructors"][number];
 type Suggestion = CourseSuggestion | InstructorSuggestion;
+type Selection = Suggestion | string | null;
 
-type SectionsResponse =
-  | { sections: GradeData[]; course?: { prefix: string; number: string; title: string } }
-  | { sections: GradeData[]; instructor?: { id: number; firstName: string; lastName: string } };
+type CompareData = {
+  label: string;
+  chartData: ChartDataPoint[];
+  summary: {
+    sections: number;
+    students: number;
+    gpa: number | null;
+  };
+};
+
+type CompareClientProps = {
+  initialType?: string;
+  initialA?: string;
+};
 
 function isCourseSuggestion(item: Suggestion): item is CourseSuggestion {
   return "prefix" in item && "number" in item;
 }
 
-export default function CompareClient() {
-  const sp = useSearchParams();
-  const typeParam = sp?.get("type") ?? undefined;
-  const a = sp?.get("a") ?? undefined;
-  const paramsAvailable = sp !== null;
-  const type = (typeParam === "course" || typeParam === "instructor" ? typeParam : undefined) as
-    | CompareType
-    | undefined;
+function isInstructorSuggestion(item: Suggestion): item is InstructorSuggestion {
+  return !isCourseSuggestion(item);
+}
 
-  const invalidParams = paramsAvailable && (!type || !a);
+function initialCompareType(value?: string): CompareType {
+  return value === "instructor" ? "instructor" : "course";
+}
 
-  const [leftSearch, setLeftSearch] = useState("");
-  const [leftResults, setLeftResults] = useState<Suggestion[]>([]);
-  const [leftSelected, setLeftSelected] = useState<Suggestion | null>(null);
-  const [leftData, setLeftData] = useState<{ chartData: ChartDataPoint[]; label: string } | null>(null);
-  const [leftFocused, setLeftFocused] = useState(false);
+function oppositeType(value: CompareType): CompareType {
+  return value === "course" ? "instructor" : "course";
+}
 
-  const [search, setSearch] = useState("");
-  const [results, setResults] = useState<Suggestion[]>([]);
-  const [selected, setSelected] = useState<Suggestion | null>(null);
-  const [rightData, setRightData] = useState<{ chartData: ChartDataPoint[]; label: string } | null>(null);
-  const [rightFocused, setRightFocused] = useState(false);
+function toSectionModels(course: {
+  prefix: string;
+  number: string;
+  title: string;
+  sections: Array<{
+    sectionNumber: string;
+    instructor: { firstName: string; lastName: string };
+    grades: { A: number; B: number; C: number; D: number; F: number; P: number; NP: number; W: number; I: number };
+  }>;
+}) {
+  return course.sections.map((section, index) => ({
+    id: `${course.prefix}-${course.number}-${section.sectionNumber}-${index}`,
+    sectionNumber: section.sectionNumber,
+    instructor: section.instructor,
+    course: { prefix: course.prefix, number: course.number, title: course.title },
+    gradeA: section.grades.A,
+    gradeB: section.grades.B,
+    gradeC: section.grades.C,
+    gradeD: section.grades.D,
+    gradeF: section.grades.F,
+    gradeP: section.grades.P,
+    gradeNP: section.grades.NP,
+    gradeW: section.grades.W,
+    gradeI: section.grades.I,
+    totalEnroll:
+      section.grades.A +
+      section.grades.B +
+      section.grades.C +
+      section.grades.D +
+      section.grades.F +
+      section.grades.P +
+      section.grades.NP +
+      section.grades.W +
+      section.grades.I,
+  }));
+}
 
-  const leftDebounced = useDebounce(leftSearch, 250);
-  const rightDebounced = useDebounce(search, 250);
+function selectionLabel(type: CompareType, selection: Selection, dataLabel?: string) {
+  if (dataLabel) return dataLabel;
+  if (!selection) return "";
 
-  const apiForEntity = useCallback(
-    (entityType: CompareType, entity: Suggestion | string) => {
-      if (entityType === "course") {
-        if (typeof entity === "string") {
-          const [prefix, number] = entity.split(":");
-          return `/api/course/${prefix}/${number}`;
-        }
-        if (!isCourseSuggestion(entity)) return null;
-        return `/api/course/${entity.prefix}/${entity.number}`;
-      }
-      // instructor
-      if (typeof entity === "string") return `/api/instructor/${entity}`;
-      if (isCourseSuggestion(entity)) return null;
-      return `/api/instructor/${entity.id}`;
-    },
-    []
-  );
-
-  const labelForEntity = useCallback(
-    (entityType: CompareType, entity: Suggestion | string, data?: SectionsResponse | null) => {
-      if (entityType === "course") {
-        if (data && "course" in data && data.course) {
-          return `${data.course.prefix} ${data.course.number} — ${data.course.title}`;
-        }
-        if (typeof entity === "string") {
-          const [prefix, number] = entity.split(":");
-          return `${prefix} ${number}`;
-        }
-        if (isCourseSuggestion(entity)) {
-          return `${entity.prefix} ${entity.number} — ${entity.title}`;
-        }
-        return "Course";
-      }
-
-      if (data && "instructor" in data && data.instructor) {
-        return `${data.instructor.firstName} ${data.instructor.lastName}`;
-      }
-      if (typeof entity === "string") return `Instructor #${entity}`;
-      if (!isCourseSuggestion(entity)) return `${entity.firstName} ${entity.lastName}`;
-      return "Instructor";
-    },
-    []
-  );
-
-  // Fetch helper
-  const fetchEntity = useCallback(async (url: string, signal?: AbortSignal) => {
-    const res = await fetch(url, { signal });
-    if (!res.ok) return null;
-    return (await res.json()) as SectionsResponse;
-  }, []);
-
-  // Left data effect
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      if (!type || !a) return;
-
-      const entity = leftSelected ?? a;
-      const url = apiForEntity(type, entity);
-      if (!url) return;
-
-      const data = await fetchEntity(url);
-      const sections = data?.sections ?? [];
-      const aggregate = aggregateGrades(sections);
-      const chartData = toChartData(aggregate);
-      const label = labelForEntity(type, entity, data);
-
-      if (mounted) setLeftData({ chartData, label });
+  if (typeof selection === "string") {
+    if (type === "course") {
+      const [prefix, number] = selection.split(":");
+      return prefix && number ? `${prefix} ${number}` : selection;
     }
-    load();
-    return () => { mounted = false; };
-  }, [a, apiForEntity, fetchEntity, labelForEntity, leftSelected, type]);
 
-  // Right data effect
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      if (!type) return;
-      if (!selected) {
-        if (mounted) setRightData(null);
-        return;
-      }
+    const parsed = fromInstructorSlug(selection);
+    return parsed.firstName && parsed.lastName ? `${parsed.firstName} ${parsed.lastName}` : selection;
+  }
 
-      const url = apiForEntity(type, selected);
-      if (!url) return;
+  if (type === "course" && isCourseSuggestion(selection)) {
+    return `${selection.prefix} ${selection.number} — ${selection.title}`;
+  }
 
-      const data = await fetchEntity(url);
-      const sections = data?.sections ?? [];
-      const aggregate = aggregateGrades(sections);
-      const chartData = toChartData(aggregate);
-      const label = labelForEntity(type, selected, data);
-      if (mounted) setRightData({ chartData, label });
+  if (type === "instructor" && isInstructorSuggestion(selection)) {
+    return `${selection.firstName} ${selection.lastName}`;
+  }
+
+  return "";
+}
+
+async function loadSelectionData(type: CompareType, selection: Selection): Promise<CompareData | null> {
+  if (!selection) return null;
+
+  if (type === "course") {
+    let prefix = "";
+    let number = "";
+
+    if (typeof selection === "string") {
+      [prefix, number] = selection.split(":");
+    } else if (isCourseSuggestion(selection)) {
+      prefix = selection.prefix;
+      number = selection.number;
     }
-    load();
-    return () => { mounted = false; };
-  }, [apiForEntity, fetchEntity, labelForEntity, selected, type]);
 
-  const fetchSuggestions = useCallback(
-    async (q: string, signal?: AbortSignal) => {
-      if (!type) return [];
-      if (q.trim().length < 2) return [];
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q.trim())}`, { signal });
-      if (!res.ok) return [];
-      const data = (await res.json()) as SearchResult;
-      return (type === "course" ? data.courses : data.instructors) as Suggestion[];
+    if (!prefix || !number) return null;
+    const course = await loadCourseByCode(prefix, number);
+    if (!course) return null;
+
+    const sections = toSectionModels(course);
+    const aggregate = aggregateGrades(sections);
+    return {
+      label: `${course.prefix} ${course.number} — ${course.title}`,
+      chartData: toChartData(aggregate),
+      summary: {
+        sections: sections.length,
+        students: aggregate.totalEnroll,
+        gpa: calculateGPA(aggregate),
+      },
+    };
+  }
+
+  let firstName = "";
+  let lastName = "";
+
+  if (typeof selection === "string") {
+    const parsed = fromInstructorSlug(selection);
+    firstName = parsed.firstName;
+    lastName = parsed.lastName;
+  } else if (isInstructorSuggestion(selection)) {
+    firstName = selection.firstName;
+    lastName = selection.lastName;
+  }
+
+  if (!firstName || !lastName) return null;
+
+  const rows = await loadInstructorSections(firstName, lastName);
+  if (!rows.length) return null;
+
+  const sections = rows.map((row, index) => ({
+    id: `${row.course.prefix}-${row.course.number}-${row.sectionNumber}-${index}`,
+    sectionNumber: row.sectionNumber,
+    instructor: row.instructor,
+    course: row.course,
+    gradeA: row.grades.A,
+    gradeB: row.grades.B,
+    gradeC: row.grades.C,
+    gradeD: row.grades.D,
+    gradeF: row.grades.F,
+    gradeP: row.grades.P,
+    gradeNP: row.grades.NP,
+    gradeW: row.grades.W,
+    gradeI: row.grades.I,
+    totalEnroll:
+      row.grades.A +
+      row.grades.B +
+      row.grades.C +
+      row.grades.D +
+      row.grades.F +
+      row.grades.P +
+      row.grades.NP +
+      row.grades.W +
+      row.grades.I,
+  }));
+
+  const aggregate = aggregateGrades(sections);
+  return {
+    label: `${firstName} ${lastName}`,
+    chartData: toChartData(aggregate),
+    summary: {
+      sections: sections.length,
+      students: aggregate.totalEnroll,
+      gpa: calculateGPA(aggregate),
     },
-    [type]
-  );
+  };
+}
 
-  useEffect(() => {
-    if (!type) return;
-    const controller = new AbortController();
-    fetchSuggestions(leftDebounced.trim(), controller.signal)
-      .then((items) => setLeftResults(items))
-      .catch(() => setLeftResults([]));
-    return () => controller.abort();
-  }, [fetchSuggestions, leftDebounced, type]);
-
-  useEffect(() => {
-    if (!type) return;
-    const controller = new AbortController();
-    fetchSuggestions(rightDebounced.trim(), controller.signal)
-      .then((items) => setResults(items))
-      .catch(() => setResults([]));
-    return () => controller.abort();
-  }, [fetchSuggestions, rightDebounced, type]);
-
-  const clearLeft = () => { setLeftSelected(null); setLeftData(null); setLeftSearch(""); setLeftResults([]); };
-  const clearRight = () => { setSelected(null); setRightData(null); setSearch(""); setResults([]); };
-
-  const leftOpen = leftFocused && leftResults.length > 0;
-  const rightOpen = rightFocused && results.length > 0;
-  const rightOpenList = useMemo(() => (rightOpen ? results : []), [results, rightOpen]);
-  const leftOpenList = useMemo(() => (leftOpen ? leftResults : []), [leftOpen, leftResults]);
-
-  if (!paramsAvailable) return (
-    <main className="flex flex-col items-center p-4">
-      <h1 className="text-2xl font-bold mb-4">Compare</h1>
-      <div className="text-gray-600">Loading compare parameters...</div>
-    </main>
-  );
-
-  if (invalidParams) return (
-    <main className="flex flex-col items-center p-4">
-      <h1 className="text-2xl font-bold mb-4">Compare</h1>
-      <div className="text-red-600">Invalid compare parameters</div>
-    </main>
-  );
+function ComparePanel({
+  title,
+  kind,
+  onKindChange,
+  query,
+  onQueryChange,
+  loadingResults,
+  results,
+  focused,
+  onFocusChange,
+  selected,
+  data,
+  loadingData,
+  error,
+  onSelect,
+  onClear,
+}: {
+  title: string;
+  kind: CompareType;
+  onKindChange: (kind: CompareType) => void;
+  query: string;
+  onQueryChange: (query: string) => void;
+  loadingResults: boolean;
+  results: Suggestion[];
+  focused: boolean;
+  onFocusChange: (focused: boolean) => void;
+  selected: Selection;
+  data: CompareData | null;
+  loadingData: boolean;
+  error: string | null;
+  onSelect: (item: Suggestion) => void;
+  onClear: () => void;
+}) {
+  const hasQuery = query.trim().length >= 2;
+  const open = focused && hasQuery && (loadingResults || results.length > 0 || !!error);
 
   return (
-    <main className="flex flex-col p-4 md:h-screen md:overflow-hidden">
-      <header className="w-full sticky top-0 z-10 flex justify-center bg-transparent py-4">
-        <h1 className="text-4xl md:text-5xl font-bold">Compare {type === "course" ? "Courses" : "Instructors"}</h1>
-      </header>
+    <section className="rounded-[28px] border border-jungle-tan-dark/30 bg-jungle-tan-light/90 p-5 shadow-[0_20px_60px_rgba(27,94,32,0.08)] backdrop-blur dark:border-green-900/50 dark:bg-jungle-canopy/70 md:p-6">
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-jungle-vine/80 dark:text-green-300/70">{title}</p>
+          <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-green-100">
+            Compare {kind === "course" ? "courses" : "professors"}
+          </h2>
+        </div>
+        <button
+          type="button"
+          onClick={onClear}
+          className="rounded-full border border-jungle-tan-dark/30 px-3 py-1.5 text-sm font-semibold text-jungle-bark transition hover:border-primary/40 hover:bg-white/60 hover:text-primary dark:border-green-800/60 dark:text-green-100 dark:hover:bg-green-950/40"
+        >
+          Clear
+        </button>
+      </div>
 
-      <div className="flex-1 flex items-center justify-center">
-        <div className="flex flex-col md:flex-row gap-8 w-full max-w-5xl mt-2 md:-mt-20">
+      <div className="mb-4">
+        <div className="relative grid h-12 grid-cols-2 rounded-full border border-jungle-tan-dark/30 bg-white/60 p-1 text-sm shadow-sm dark:border-green-800/60 dark:bg-green-950/30">
+          <span
+            className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-md transition-transform duration-300 ease-out dark:bg-green-400 ${
+              kind === "instructor" ? "translate-x-full" : "translate-x-0"
+            }`}
+            aria-hidden="true"
+          />
+          {(["course", "instructor"] as CompareType[]).map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => onKindChange(value)}
+              className={`relative z-10 flex items-center justify-center rounded-full px-4 font-semibold transition-colors duration-300 ${
+                kind === value
+                  ? "text-white dark:text-jungle-canopy"
+                  : "text-jungle-bark hover:text-primary dark:text-green-100 dark:hover:text-green-50"
+              }`}
+            >
+              {value === "course" ? "Courses" : "Professors"}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        <div className="flex-1 border rounded-xl bg-[#F5F2EE] dark:bg-jungle-canopy/60 p-6 shadow-sm min-h-[300px] mb-8 md:mb-0">
-          <div className="w-full mb-4 relative">
-            <div className="relative">
-              <input
-                type="text"
-                value={leftSearch}
-                onChange={(e) => setLeftSearch(e.target.value)}
-                onFocus={() => { setLeftFocused(true); setRightFocused(false); }}
-                onBlur={() => setLeftFocused(false)}
-                placeholder={leftSelected ? "Change left selection..." : `Search left ${type === "course" ? "course" : "instructor"}...`}
-                className="w-full px-4 pr-10 py-2 rounded-2xl border border-gray-300 focus:border-blue-500 focus:outline-none text-gray-900 placeholder:text-gray-500 dark:text-green-100"
-              />
-              <button type="button" onClick={() => { clearLeft(); setLeftFocused(false); }} className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 dark:text-green-100 dark:hover:bg-gray-700" aria-label="Clear left input">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-
-            {leftOpen && (
-              <ul className="absolute left-0 right-0 z-50 top-full mt-2 bg-[#EFEAE6] dark:bg-jungle-canopy/90 border border-gray-200 rounded shadow max-h-60 overflow-y-auto text-gray-900 dark:text-green-100 custom-scrollbar">
-                {leftOpenList.map((item) => (
-                  <li key={item.id} className="px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-green-800" onMouseDown={(e) => {
-                    e.preventDefault();
-                    setLeftSelected(item);
-                    setLeftSearch("");
-                    setLeftResults([]);
-                    setLeftFocused(false);
-                  }}>
-                    {type === "course" && isCourseSuggestion(item)
-                      ? `${item.prefix} ${item.number} — ${item.title}`
-                      : !isCourseSuggestion(item)
-                        ? `${item.lastName}, ${item.firstName}`
-                        : ""}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {leftData ? (
-            <>
-              {leftData.label && <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-green-100">{leftData.label}</h3>}
-              <div className="bg-[#FBFAF8] dark:bg-jungle-canopy/70 rounded p-2">
-                <GradeChart data={leftData.chartData} height={280} mode="percentage" />
-              </div>
-            </>
+      <div className="relative mb-4">
+        <input
+          type="text"
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          onFocus={() => onFocusChange(true)}
+          onBlur={() => onFocusChange(false)}
+          placeholder={`Search ${kind === "course" ? "course code or title" : "professor name"}`}
+          className="w-full rounded-2xl border border-jungle-tan-dark/30 bg-white/85 px-4 py-3 pr-11 text-gray-900 shadow-inner outline-none ring-0 transition placeholder:text-gray-500 focus:border-primary/40 focus:ring-2 focus:ring-primary/20 dark:border-green-800/60 dark:bg-jungle-canopy/80 dark:text-green-100 dark:placeholder:text-green-200/40 dark:focus:border-green-400/50 dark:focus:ring-green-500/20"
+        />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
+          {loadingResults ? (
+            <svg className="h-4 w-4 animate-spin text-jungle-vine dark:text-green-300/70" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
           ) : (
-            <div className="text-center text-gray-500">Loading aggregate graph...</div>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-jungle-vine/70 dark:text-green-300/60">
+              {kind === "course" ? "CRS" : "PROF"}
+            </span>
           )}
         </div>
 
-        <div className="flex-1 flex flex-col items-center border rounded-xl bg-[#F5F2EE] dark:bg-jungle-canopy/60 p-6 min-h-[300px]">
-          <div className="w-full mb-4 relative">
-            <div className="relative">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onFocus={() => { setRightFocused(true); setLeftFocused(false); }}
-                onBlur={() => setRightFocused(false)}
-                placeholder={`Search for another ${type === "course" ? "course" : "instructor"}...`}
-                className="w-full px-4 pr-10 py-2 rounded-2xl border border-gray-300 focus:border-blue-500 focus:outline-none text-gray-900 placeholder:text-gray-500 dark:text-green-100"
-              />
-              <button type="button" onClick={() => { clearRight(); setRightFocused(false); }} className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 dark:text-green-100 dark:hover:bg-gray-700" aria-label="Clear right input">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-
-            {rightOpen && (
-              <ul className="absolute left-0 right-0 z-50 top-full mt-2 bg-[#EFEAE6] dark:bg-jungle-canopy/90 border border-gray-200 rounded shadow max-h-60 overflow-y-auto text-gray-900 dark:text-green-100 w-full custom-scrollbar">
-                {rightOpenList.map((item) => (
-                  <li key={item.id} className="px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-green-800" onMouseDown={(e) => {
-                    e.preventDefault();
-                    setSelected(item);
-                    setSearch("");
-                    setResults([]);
-                    setRightFocused(false);
-                  }}>
-                    {type === "course" && isCourseSuggestion(item)
-                      ? `${item.prefix} ${item.number} — ${item.title}`
-                      : !isCourseSuggestion(item)
-                        ? `${item.lastName}, ${item.firstName}`
-                        : ""}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="flex-1 flex items-center justify-center w-full">
-            {selected && rightData ? (
-              <div className="w-full">
-                {rightData.label && <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-green-100">{rightData.label}</h3>}
-                <div className="bg-[#FBFAF8] dark:bg-jungle-canopy/70 rounded p-2">
-                  <GradeChart data={rightData.chartData} height={280} mode="percentage" />
-                </div>
-              </div>
+        {open && (
+          <div className="absolute z-20 mt-2 max-h-72 w-full overflow-auto rounded-2xl border border-jungle-tan-dark/30 bg-[#F8F4EE] shadow-2xl dark:border-green-800/60 dark:bg-jungle-canopy/95">
+            {error ? (
+              <div className="px-4 py-3 text-sm text-red-600 dark:text-red-300">{error}</div>
+            ) : results.length === 0 ? (
+              <div className="px-4 py-3 text-sm text-gray-500 dark:text-green-200/70">No results found.</div>
             ) : (
-              <span className="text-gray-400 text-lg">No selection yet</span>
+              results.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => onSelect(item)}
+                  className="flex w-full items-center gap-3 border-b border-jungle-tan-dark/10 px-4 py-3 text-left transition last:border-b-0 hover:bg-green-50 dark:border-green-900/40 dark:hover:bg-green-950/50"
+                >
+                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary dark:bg-green-400/15 dark:text-green-300">
+                    {kind === "course"
+                      ? isCourseSuggestion(item)
+                        ? item.prefix
+                        : "CR"
+                      : isInstructorSuggestion(item)
+                        ? item.lastName.slice(0, 1)
+                        : "PR"}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold text-gray-900 dark:text-green-100">
+                      {kind === "course" && isCourseSuggestion(item)
+                        ? `${item.prefix} ${item.number}`
+                        : kind === "instructor" && isInstructorSuggestion(item)
+                          ? `${item.lastName}, ${item.firstName}`
+                          : "Result"}
+                    </span>
+                    <span className="block truncate text-sm text-gray-500 dark:text-green-200/70">
+                      {kind === "course" && isCourseSuggestion(item)
+                        ? item.title
+                        : kind === "instructor" && isInstructorSuggestion(item)
+                          ? "Professor"
+                          : ""}
+                    </span>
+                  </span>
+                </button>
+              ))
             )}
           </div>
+        )}
+      </div>
+
+      <div className="mb-4 min-h-12 rounded-2xl border border-dashed border-jungle-tan-dark/35 bg-white/40 px-4 py-3 dark:border-green-800/60 dark:bg-green-950/20">
+        {selected ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white dark:bg-green-400 dark:text-jungle-canopy">
+              Selected
+            </span>
+            <span className="font-semibold text-gray-900 dark:text-green-100">
+              {selectionLabel(kind, selected, data?.label)}
+            </span>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 dark:text-green-200/60">
+            Pick a {kind === "course" ? "course" : "professor"} to load the distribution.
+          </p>
+        )}
+      </div>
+
+      <div className="rounded-3xl border border-jungle-tan-dark/25 bg-[#FBF8F3] p-4 dark:border-green-900/50 dark:bg-jungle-canopy/60">
+        {loadingData ? (
+          <div className="animate-pulse space-y-4">
+            <div className="h-5 w-44 rounded-full bg-jungle-tan-dark/30 dark:bg-green-950/50" />
+            <div className="h-[260px] rounded-2xl bg-jungle-tan-dark/15 dark:bg-green-950/30" />
+          </div>
+        ) : data ? (
+          <>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-green-100">{data.label}</h3>
+                <p className="text-sm text-gray-500 dark:text-green-200/70">
+                  {data.summary.sections} sections · {data.summary.students.toLocaleString()} students · GPA {data.summary.gpa === null ? "N/A" : data.summary.gpa.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <GradeChart data={data.chartData} height={280} mode="percentage" />
+          </>
+        ) : (
+          <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-jungle-tan-dark/30 bg-white/40 text-center dark:border-green-800/50 dark:bg-green-950/15">
+            <div>
+              <p className="text-lg font-semibold text-gray-800 dark:text-green-100">No comparison loaded</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-green-200/60">
+                Search and select a {kind === "course" ? "course" : "professor"} above.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function useCompareSide(initialKind: CompareType, initialSelection: Selection) {
+  const [kind, setKind] = useState<CompareType>(initialKind);
+  const [query, setQuery] = useState("");
+  const [focused, setFocused] = useState(false);
+  const [selected, setSelected] = useState<Selection>(initialSelection);
+  const [results, setResults] = useState<Suggestion[]>([]);
+  const [loadingResults, setLoadingResults] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
+  const [data, setData] = useState<CompareData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const debouncedQuery = useDebounce(query, 200);
+
+  const clear = useCallback(() => {
+    setQuery("");
+    setFocused(false);
+    setSelected(null);
+    setResults([]);
+    setLoadingResults(false);
+    setLoadingData(false);
+    setData(null);
+    setError(null);
+  }, []);
+
+  const onKindChange = useCallback(
+    (nextKind: CompareType) => {
+      if (nextKind === kind) return;
+      setKind(nextKind);
+      clear();
+    },
+    [clear, kind]
+  );
+
+  const onSelect = useCallback((item: Suggestion) => {
+    setSelected(item);
+    setQuery("");
+    setFocused(false);
+    setResults([]);
+    setError(null);
+  }, []);
+
+  useEffect(() => {
+    const trimmed = debouncedQuery.trim();
+    if (trimmed.length < 2) {
+      setResults([]);
+      setLoadingResults(false);
+      setError(null);
+      return;
+    }
+
+    let active = true;
+    setLoadingResults(true);
+    setError(null);
+
+    searchManifest(trimmed)
+      .then((result) => {
+        if (!active) return;
+        setResults(kind === "course" ? result.courses : result.instructors);
+      })
+      .catch((cause: unknown) => {
+        if (!active) return;
+        setResults([]);
+        setError(cause instanceof Error ? cause.message : "Failed to search compare options");
+      })
+      .finally(() => {
+        if (active) setLoadingResults(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [debouncedQuery, kind]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function run() {
+      if (!selected) {
+        setData(null);
+        setLoadingData(false);
+        return;
+      }
+
+      setLoadingData(true);
+      setError(null);
+      try {
+        const nextData = await loadSelectionData(kind, selected);
+        if (!active) return;
+        setData(nextData);
+        if (!nextData) setError("That selection could not be loaded.");
+      } catch (cause: unknown) {
+        if (!active) return;
+        setData(null);
+        setError(cause instanceof Error ? cause.message : "Failed to load comparison data");
+      } finally {
+        if (active) setLoadingData(false);
+      }
+    }
+
+    run();
+    return () => {
+      active = false;
+    };
+  }, [kind, selected]);
+
+  return {
+    kind,
+    onKindChange,
+    query,
+    setQuery,
+    focused,
+    setFocused,
+    selected,
+    data,
+    loadingResults,
+    loadingData,
+    results,
+    error,
+    onSelect,
+    clear,
+  };
+}
+
+export default function CompareClient({ initialType, initialA }: CompareClientProps) {
+  const leftType = initialCompareType(initialType);
+  const rightType = oppositeType(leftType);
+  const initialSelection = initialA?.trim() ? initialA.trim() : null;
+
+  const left = useCompareSide(leftType, initialSelection);
+  const right = useCompareSide(rightType, null);
+
+  return (
+    <main className="relative min-h-[calc(100dvh-4rem-1px)] overflow-hidden px-4 py-8 md:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 opacity-60 dark:opacity-80">
+        <div className="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-green-400/15 blur-3xl" />
+        <div className="absolute right-[-8%] top-[18%] h-80 w-80 rounded-full bg-jungle-gold/10 blur-3xl" />
+        <div className="absolute bottom-[-12%] left-[20%] h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8">
+        <header className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <h1 className="text-4xl font-black tracking-tight text-gray-900 dark:text-green-100 sm:text-5xl lg:text-6xl">
+            Compare anything in one place.
+          </h1>
+          <p className="mt-4 max-w-2xl text-base text-gray-600 dark:text-green-200/75 sm:text-lg">
+            Put courses and professors side by side with a single interface. Switch either panel independently to what you want to inspect.
+          </p>
+        </header>
+
+        <div className="grid items-start gap-6 lg:grid-cols-[1fr_auto_1fr]">
+          <ComparePanel
+            title="Left side"
+            kind={left.kind}
+            onKindChange={left.onKindChange}
+            query={left.query}
+            onQueryChange={left.setQuery}
+            loadingResults={left.loadingResults}
+            results={left.results}
+            focused={left.focused}
+            onFocusChange={left.setFocused}
+            selected={left.selected}
+            data={left.data}
+            loadingData={left.loadingData}
+            error={left.error}
+            onSelect={left.onSelect}
+            onClear={left.clear}
+          />
+
+          <div className="flex items-center justify-center lg:min-h-full">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-jungle-tan-dark/25 bg-white/80 text-lg font-black text-primary shadow-lg dark:border-green-800/60 dark:bg-jungle-canopy/90 dark:text-green-300">
+              VS
+            </div>
+          </div>
+
+          <ComparePanel
+            title="Right side"
+            kind={right.kind}
+            onKindChange={right.onKindChange}
+            query={right.query}
+            onQueryChange={right.setQuery}
+            loadingResults={right.loadingResults}
+            results={right.results}
+            focused={right.focused}
+            onFocusChange={right.setFocused}
+            selected={right.selected}
+            data={right.data}
+            loadingData={right.loadingData}
+            error={right.error}
+            onSelect={right.onSelect}
+            onClear={right.clear}
+          />
         </div>
 
+        <div className="mx-auto max-w-4xl rounded-3xl border border-jungle-tan-dark/25 bg-white/70 px-5 py-4 text-sm text-gray-600 shadow-sm backdrop-blur dark:border-green-900/40 dark:bg-jungle-canopy/60 dark:text-green-200/75">
+          Start with a course or professor on either side, then switch panels independently if you want a mixed comparison.
+        </div>
       </div>
-    </div>
     </main>
   );
 }
