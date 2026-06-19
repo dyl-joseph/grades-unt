@@ -30,14 +30,13 @@ export type EncryptedCourse = {
 };
 
 let manifestCache: ManifestEntry[] | null = null;
+const COURSE_DATA_KEY_ERROR = "Course data key is missing or invalid for this deployment";
 
 export function getClientDataKey() {
   const configured = process.env.NEXT_PUBLIC_DATA_KEY?.trim();
   if (configured) return configured;
 
-  // Fallback key keeps UX zero-friction, but is only obfuscation-grade.
-  const host = typeof window !== "undefined" ? window.location.hostname : "localhost";
-  return `grade-explorer:${host}:v1`;
+  throw new Error(COURSE_DATA_KEY_ERROR);
 }
 
 function b64ToArrayBuffer(b64: string) {
@@ -187,7 +186,20 @@ export async function loadCourseByCode(prefix: string, number: string, passphras
     (m) => m.preview.prefix.toLowerCase() === prefix.toLowerCase() && m.preview.number.toLowerCase() === number.toLowerCase()
   );
   if (!entry) return null;
-  return (await decryptBlob(entry.id, passphrase)) as EncryptedCourse;
+
+  try {
+    return (await decryptBlob(entry.id, passphrase)) as EncryptedCourse;
+  } catch (error) {
+    if (isCourseDataKeyError(error)) {
+      throw new Error(COURSE_DATA_KEY_ERROR);
+    }
+    throw error;
+  }
+}
+
+function isCourseDataKeyError(error: unknown) {
+  if (error instanceof Error && error.message === COURSE_DATA_KEY_ERROR) return true;
+  return error instanceof DOMException && error.name === "OperationError";
 }
 
 export async function loadInstructorSections(firstName: string, lastName: string, passphrase?: string) {
