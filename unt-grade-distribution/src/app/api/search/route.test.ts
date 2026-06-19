@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { NextRequest } from "next/server";
 import { buildSearchHeaders, getSearchPlan, normalizeSearchQuery } from "@/lib/search";
 
 test("normalizeSearchQuery collapses whitespace and lowercases", () => {
@@ -33,4 +34,25 @@ test("buildSearchHeaders emits cache and timing metadata", () => {
   assert.equal(headers["x-search-instructors"], "6");
   assert.match(headers["Server-Timing"], /search;desc="miss";dur=12\.3/);
   assert.match(headers["Server-Timing"], /db;dur=7\.9/);
+});
+
+test("search route consumes one install rate-limit slot per short query", async () => {
+  process.env.DATABASE_URL ??= "postgresql://ci:ci@localhost:5432/ci";
+  process.env.DIRECT_URL ??= process.env.DATABASE_URL;
+
+  const { GET } = await import("./route");
+  const installId = `route-test-${Date.now()}-${Math.random()}`;
+  const request = () =>
+    new NextRequest("https://example.test/api/search?q=a", {
+      headers: { "x-install-id": installId },
+    });
+
+  for (let i = 0; i < 100; i++) {
+    const response = await GET(request());
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("x-ratelimit-remaining"), String(99 - i));
+  }
+
+  const limited = await GET(request());
+  assert.equal(limited.status, 429);
 });
