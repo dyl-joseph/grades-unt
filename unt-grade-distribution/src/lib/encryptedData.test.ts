@@ -2,39 +2,73 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { loadCourseByCode } from "./encryptedData";
 
-test("loadCourseByCode falls back to the course API when manifest data is unavailable", async (t) => {
-  const originalFetch = globalThis.fetch;
-  const calls: string[] = [];
+const DATA_KEY_ERROR = "Course data key is missing or invalid for this deployment";
 
+async function encryptCourse(course: unknown, passphrase: string) {
+  const salt = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+  const iv = new Uint8Array([17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]);
+  const iterations = 1;
+  const encoder = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey("raw", encoder.encode(passphrase), { name: "PBKDF2" }, false, [
+    "deriveKey",
+  ]);
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+    baseKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt"]
+  );
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoder.encode(JSON.stringify(course)));
+
+  return {
+    encrypted,
+    meta: {
+      iv: Buffer.from(iv).toString("base64"),
+      salt: Buffer.from(salt).toString("base64"),
+      iterations,
+    },
+  };
+}
+
+test("loadCourseByCode decrypts static course data and never falls back to the course API", async (t) => {
+  const originalFetch = globalThis.fetch;
+  const originalKey = process.env.NEXT_PUBLIC_DATA_KEY;
+  const passphrase = "test-data-key";
+  const course = {
+    prefix: "MATH",
+    number: "1650",
+    title: "PRE-CALCULUS",
+    sections: [
+      {
+        sectionNumber: "001",
+        instructor: { firstName: "Ada", lastName: "Lovelace" },
+        year: "2025",
+        term: "Fall",
+        grades: { A: 10, B: 8, C: 4, D: 1, F: 0, P: 0, NP: 0, W: 2, I: 0 },
+      },
+    ],
+  };
+  const blobId = "math-1650.bin";
+  const { encrypted, meta } = await encryptCourse(course, passphrase);
+  const calls: string[] = [];
+  let missingBlob = false;
+
+  process.env.NEXT_PUBLIC_DATA_KEY = passphrase;
   globalThis.fetch = async (input) => {
     const url = String(input);
     calls.push(url);
 
     if (url === "/encrypted/manifest.json") {
-      return Response.json([]);
+      return Response.json([{ id: blobId, tokens: ["MATH 1650"], preview: { prefix: "MATH", number: "1650", title: "PRE-CALCULUS" } }]);
     }
 
-    if (url === "/api/course/MATH/1650") {
-      return Response.json({
-        course: { prefix: "MATH", number: "1650", title: "PRE-CALCULUS" },
-        sections: [
-          {
-            sectionNumber: "001",
-            year: 2025,
-            term: "Fall",
-            gradeA: 10,
-            gradeB: 8,
-            gradeC: 4,
-            gradeD: 1,
-            gradeF: 0,
-            gradeP: null,
-            gradeNP: null,
-            gradeW: 2,
-            gradeI: null,
-            instructor: { firstName: "Ada", lastName: "Lovelace" },
-          },
-        ],
-      });
+    if (url === `/encrypted/blobs/${blobId}` && !missingBlob) {
+      return new Response(encrypted);
+    }
+
+    if (url === "/encrypted/blobs/math-1650.meta.json") {
+      return Response.json(meta);
     }
 
     return new Response(null, { status: 404 });
@@ -42,23 +76,28 @@ test("loadCourseByCode falls back to the course API when manifest data is unavai
 
   t.after(() => {
     globalThis.fetch = originalFetch;
+    if (originalKey === undefined) {
+      delete process.env.NEXT_PUBLIC_DATA_KEY;
+    } else {
+      process.env.NEXT_PUBLIC_DATA_KEY = originalKey;
+    }
   });
 
-  const course = await loadCourseByCode("MATH", "1650");
+  const loaded = await loadCourseByCode("MATH", "1650");
 
-  assert.deepEqual(calls, ["/encrypted/manifest.json", "/api/course/MATH/1650"]);
-  assert.equal(course?.title, "PRE-CALCULUS");
-  assert.equal(course?.sections[0].year, "2025");
-  assert.deepEqual(course?.sections[0].instructor, { firstName: "Ada", lastName: "Lovelace" });
-  assert.deepEqual(course?.sections[0].grades, {
-    A: 10,
-    B: 8,
-    C: 4,
-    D: 1,
-    F: 0,
-    P: 0,
-    NP: 0,
-    W: 2,
-    I: 0,
+  assert.deepEqual(loaded, course);
+  assert.ok(!calls.some((url) => url.startsWith("/api/course/")));
+
+  delete process.env.NEXT_PUBLIC_DATA_KEY;
+  await assert.rejects(() => loadCourseByCode("MATH", "1650"), {
+    message: DATA_KEY_ERROR,
   });
+  assert.ok(!calls.some((url) => url.startsWith("/api/course/")));
+
+  process.env.NEXT_PUBLIC_DATA_KEY = passphrase;
+  missingBlob = true;
+  await assert.rejects(() => loadCourseByCode("MATH", "1650"), {
+    message: "Failed to fetch blob or metadata",
+  });
+  assert.ok(!calls.some((url) => url.startsWith("/api/course/")));
 });

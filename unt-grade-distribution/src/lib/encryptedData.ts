@@ -29,34 +29,14 @@ export type EncryptedCourse = {
   sections: EncryptedSection[];
 };
 
-type ApiCourseResponse = {
-  course: { prefix: string; number: string; title: string };
-  sections: Array<{
-    sectionNumber: string | null;
-    year: string | number | null;
-    term: string | null;
-    gradeA: number | null;
-    gradeB: number | null;
-    gradeC: number | null;
-    gradeD: number | null;
-    gradeF: number | null;
-    gradeP: number | null;
-    gradeNP: number | null;
-    gradeW: number | null;
-    gradeI: number | null;
-    instructor?: { firstName: string | null; lastName: string | null } | null;
-  }>;
-};
-
 let manifestCache: ManifestEntry[] | null = null;
+const COURSE_DATA_KEY_ERROR = "Course data key is missing or invalid for this deployment";
 
 export function getClientDataKey() {
   const configured = process.env.NEXT_PUBLIC_DATA_KEY?.trim();
   if (configured) return configured;
 
-  // Fallback key keeps UX zero-friction, but is only obfuscation-grade.
-  const host = typeof window !== "undefined" ? window.location.hostname : "localhost";
-  return `grade-explorer:${host}:v1`;
+  throw new Error(COURSE_DATA_KEY_ERROR);
 }
 
 function b64ToArrayBuffer(b64: string) {
@@ -201,58 +181,25 @@ export async function searchManifest(q: string) {
 }
 
 export async function loadCourseByCode(prefix: string, number: string, passphrase?: string): Promise<EncryptedCourse | null> {
-  const entry = await findCourseManifestEntry(prefix, number);
-  if (!entry) return fetchCourseFromApi(prefix, number);
+  const manifest = await fetchManifest();
+  const entry = manifest.find(
+    (m) => m.preview.prefix.toLowerCase() === prefix.toLowerCase() && m.preview.number.toLowerCase() === number.toLowerCase()
+  );
+  if (!entry) return null;
 
   try {
     return (await decryptBlob(entry.id, passphrase)) as EncryptedCourse;
-  } catch {
-    return fetchCourseFromApi(prefix, number);
+  } catch (error) {
+    if (isCourseDataKeyError(error)) {
+      throw new Error(COURSE_DATA_KEY_ERROR);
+    }
+    throw error;
   }
 }
 
-async function findCourseManifestEntry(prefix: string, number: string) {
-  try {
-    const manifest = await fetchManifest();
-    return manifest.find(
-      (m) => m.preview.prefix.toLowerCase() === prefix.toLowerCase() && m.preview.number.toLowerCase() === number.toLowerCase()
-    );
-  } catch {
-    return undefined;
-  }
-}
-
-async function fetchCourseFromApi(prefix: string, number: string): Promise<EncryptedCourse | null> {
-  const res = await fetch(`/api/course/${encodeURIComponent(prefix)}/${encodeURIComponent(number)}`);
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error("Failed to load course data");
-
-  const data = (await res.json()) as ApiCourseResponse;
-  return {
-    prefix: data.course.prefix,
-    number: data.course.number,
-    title: data.course.title,
-    sections: data.sections.map((section) => ({
-      sectionNumber: String(section.sectionNumber ?? ""),
-      instructor: {
-        firstName: section.instructor?.firstName ?? "",
-        lastName: section.instructor?.lastName ?? "Staff",
-      },
-      year: section.year == null ? null : String(section.year),
-      term: section.term,
-      grades: {
-        A: section.gradeA ?? 0,
-        B: section.gradeB ?? 0,
-        C: section.gradeC ?? 0,
-        D: section.gradeD ?? 0,
-        F: section.gradeF ?? 0,
-        P: section.gradeP ?? 0,
-        NP: section.gradeNP ?? 0,
-        W: section.gradeW ?? 0,
-        I: section.gradeI ?? 0,
-      },
-    })),
-  };
+function isCourseDataKeyError(error: unknown) {
+  if (error instanceof Error && error.message === COURSE_DATA_KEY_ERROR) return true;
+  return error instanceof DOMException && error.name === "OperationError";
 }
 
 export async function loadInstructorSections(firstName: string, lastName: string, passphrase?: string) {
