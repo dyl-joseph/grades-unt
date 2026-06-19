@@ -8,7 +8,7 @@ const repoRoot = path.resolve(__dirname, "..");
 const script = path.join(repoRoot, "scripts", "ci-local.sh");
 
 const expectedDryRun = [
-  "+ node --test scripts/ci-local.test.js",
+  "+ node --test scripts/ci-local.test.js scripts/github-ci.test.js",
   "+ npm --prefix unt-grade-distribution test",
   "+ npm --prefix unt-grade-distribution run build",
   "+ npm --prefix extension run build",
