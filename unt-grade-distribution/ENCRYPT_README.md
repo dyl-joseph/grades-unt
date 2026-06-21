@@ -1,82 +1,107 @@
-Encrypted static-data workflow
-=============================
+# Encrypted static-data workflow
 
-Overview
---------
-This project supports a static, encrypted data workflow: CSVs are processed at build-time into many small encrypted blobs and a small manifest. The app fetches only the blobs it needs and decrypts them in the browser with a passphrase.
+## Overview
 
-How to prepare encrypted data (offline)
---------------------------------------
-1. Place your CSV files into `prisma/data/` (same format used by the existing `prisma/seed.ts`).
-2. Run the encryptor locally (you must provide a passphrase):
+The public UNT Grades website uses a static encrypted data workflow. CSV exports are processed offline into many small encrypted course blobs plus a manifest. The deployed app fetches only the manifest and the blobs it needs, then decrypts them in the browser.
+
+This means normal user-facing course and instructor reads come from files stored with the website under `public/encrypted/`, not live Supabase queries.
+
+## Prepare encrypted data
+
+1. Put source CSV files in `prisma/data/`.
+2. Use the same CSV shape as `prisma/seed.ts`, or convert Supabase-style table exports first.
+3. Run the encryptor with a passphrase:
 
 ```bash
 cd unt-grade-distribution
-npm install # ensure csv-parse is available
+npm install
 MASTER_PASSPHRASE="your-strong-passphrase" node ./tools/encrypt-data.js
 ```
 
-3. The script writes `public/encrypted/manifest.json` and `public/encrypted/blobs/*.bin` and `*.meta.json`.
-4. Commit only the resulting `public/encrypted/` directory (it contains encrypted blobs). Do NOT commit plaintext CSVs.
+4. Commit the generated `public/encrypted/` files.
+5. Do **not** commit plaintext CSV files or passphrases.
 
-CSV Format
-----------
-The encryptor expects CSV files with a header row. There are two ways to provide input:
+Generated files:
 
-Option A — single combined CSV (direct): place one or more CSVs in `prisma/data/` using the encryptor's target headers. Required columns (case-sensitive):
+```text
+public/encrypted/
+├── manifest.json
+└── blobs/
+    ├── <id>.bin
+    └── <id>.meta.json
+```
 
-- `COURSE NAME` — string, e.g. `ACCT 2010 - PRINCIPLES OF ACCOUNTING` (split on ` - ` to get title)
-- `SECTION NUMBER` — string, e.g. `001`, `A01`
-- `TEACHER NAME` — string, preferably `Last,First` (comma separates last and first)
-- `YEAR` — integer or string representing the academic year (e.g. `2023`)
-- `TERM` — string representing the term/session (e.g. `Fall`, `Spring`, `Summer`)
-- `A`, `B`, `C`, `D`, `F`, `P`, `NP`, `W`, `I` — numeric grade counts (missing treated as 0)
+## CSV format
 
-Option B — Supabase-style relational CSVs (converter): if you exported separate tables from Supabase, place these files in `prisma/data/`:
+### Option A: direct combined CSV
 
-- `courses_rows.csv`  — header: `id,prefix,number,title`
-- `instructors_rows.csv` — header: `id,first_name,last_name`
-- `sections_rows.csv` — header: `id,course_id,section_number,instructor_id,year,term`
-- `grades_rows.csv` — header: `section_id,grade_a,grade_b,grade_c,grade_d,grade_f,grade_p,grade_np,grade_w,grade_i`
+Required headers:
 
-Then run the converter script to produce a combined CSV the encryptor accepts:
+- `COURSE NAME` — for example `ACCT 2010 - PRINCIPLES OF ACCOUNTING`
+- `SECTION NUMBER` — for example `001` or `A01`
+- `TEACHER NAME` — preferably `Last,First`
+- `YEAR`
+- `TERM`
+- `A`, `B`, `C`, `D`, `F`, `P`, `NP`, `W`, `I`
+
+Example:
+
+```csv
+COURSE NAME,SECTION NUMBER,TEACHER NAME,YEAR,TERM,A,B,C,D,F,P,NP,W,I
+ACCT 2010 - PRINCIPLES OF ACCOUNTING,001,"Smith,John",2023,Fall,25,30,10,0,0,0,0,0,0
+ACCT 2010 - PRINCIPLES OF ACCOUNTING,002,"Doe,Jane",2024,Spring,20,22,15,1,0,0,0,0,0
+CS 311 - DATA STRUCTURES,001,"Moore,Ami R",2025,Fall,15,18,10,2,1,0,0,0,0
+```
+
+### Option B: Supabase-style relational exports
+
+If you export separate tables from Supabase, place these in `prisma/data/`:
+
+- `courses_rows.csv` — `id,prefix,number,title`
+- `instructors_rows.csv` — `id,first_name,last_name`
+- `sections_rows.csv` — `id,course_id,section_number,instructor_id,year,term`
+- `grades_rows.csv` — `section_id,grade_a,grade_b,grade_c,grade_d,grade_f,grade_p,grade_np,grade_w,grade_i`
+
+Then convert them:
 
 ```bash
 npm run convert:supabase
 ```
 
-Multiple CSVs may still be present; the encryptor reads `*.csv` in `prisma/data/` and merges rows by course (grouping sections under courses). `YEAR` and `TERM` are recorded per-section in the encrypted output.
+After conversion, run the encryptor.
 
-Minimal example CSV (direct input)
-```csv
-COURSE NAME,SECTION NUMBER,TEACHER NAME,YEAR,TERM,A,B,C,D,F,P,NP,W,I
-ACCT 2010 - PRINCIPLES OF ACCOUNTING,001,Smith,John,2023,Fall,25,30,10,0,0,0,0,0,0
-ACCT 2010 - PRINCIPLES OF ACCOUNTING,002,Doe,Jane,2024,Spring,20,22,15,1,0,0,0,0,0
-CS 311 - DATA STRUCTURES,001,Moore,Ami R,2025,Fall,15,18,10,2,1,0,0,0,0
-```
+## Client usage
 
-Client usage
-------------
-- The browser fetches `/encrypted/manifest.json` and matches the user query to a blob id.
-- The browser fetches `/encrypted/blobs/<id>.bin` and `/encrypted/blobs/<id>.meta.json`, derives a key from the passphrase and salt, decrypts AES-GCM ciphertext, and displays the JSON.
+- `fetchManifest()` loads `/encrypted/manifest.json`.
+- `searchManifest(q)` searches the manifest locally.
+- `loadCourseByCode(prefix, number)` finds and decrypts one course blob.
+- `loadInstructorSections(firstName, lastName)` finds matching course blobs and returns sections taught by that instructor.
+- `decryptBlob(blobId)` fetches `.bin` and `.meta.json`, derives a key with PBKDF2, and decrypts AES-GCM ciphertext.
 
-No prompt mode (automatic client key)
--------------------------------------
-If you do not want users to type a passphrase, set this in `.env`:
+## Automatic client key
+
+Set this in `.env` when the app should decrypt without asking the user for a passphrase:
 
 ```bash
 NEXT_PUBLIC_DATA_KEY="same-value-as-MASTER_PASSPHRASE-used-for-encrypt"
 ```
 
-This removes the unlock prompt UX and decrypts automatically in the browser. It is still client-side, so treat this as scrape-resistance (not strict secrecy).
+Because this key is public to the browser, treat the design as scrape resistance, not strict secrecy.
 
-Security notes
---------------
-- Keep the passphrase secret and distribute it out-of-band to authorized users.
-- This design prevents bulk plaintext leaks from the repo/CDN, but any user who obtains the passphrase (or who can scrape every blob and brute-force the passphrase) can decrypt data.
-- To make scraping more expensive, increase `PBKDF2_ITERATIONS` (environment variable) when encrypting.
+## Security notes
 
-Next integration steps
-----------------------
-1. Replace server-side API routes that query Prisma with client-side lookups to the manifest + decrypt flow, or keep them for admin-only server usage.
-2. Consider rotating passphrases by re-encrypting blobs and updating the manifest.
+- Keep `MASTER_PASSPHRASE` out of git.
+- Do not commit plaintext CSV exports.
+- Rotate by re-running encryption with a new passphrase and replacing `public/encrypted/`.
+- Increasing `PBKDF2_ITERATIONS` makes brute force and mass scraping more expensive, but also increases browser decrypt cost.
+
+## Contribution workflow for data updates
+
+Use the same branch/PR/review process as code changes:
+
+1. Branch from `main`.
+2. Generate or update encrypted blobs locally.
+3. Run tests/build validation.
+4. Commit generated encrypted assets and any code changes.
+5. Open a PR into `main`.
+6. Wait for checks and review before merge.
