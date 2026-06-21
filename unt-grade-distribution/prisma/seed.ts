@@ -6,7 +6,7 @@ import path from "path";
 
 /**
  * Seed script using raw pg client (no Prisma transactions needed).
- * Works reliably through PgBouncer / Supabase pooler.
+ * Works reliably through PgBouncer / pooled Postgres.
  */
 async function main() {
   const client = new pg.Client({

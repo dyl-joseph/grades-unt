@@ -11,7 +11,7 @@ The public app uses encrypted static files served from `public/encrypted/`:
 - `blobs/*.meta.json` contains the IV, salt, and PBKDF2 settings for each blob.
 - `src/lib/encryptedData.ts` loads the manifest, fetches the selected blob, derives a key with WebCrypto, decrypts the payload, and returns typed course/section data.
 
-Supabase/Prisma is still supported for data import, migrations, validation, and backend/API compatibility routes, but normal user-facing course and instructor page reads should stay on the encrypted static-data path.
+Prisma/Postgres is still supported for data import, migrations, validation, and backend/API compatibility routes, but normal user-facing course and instructor page reads should stay on the encrypted static-data path.
 
 ## Getting started
 

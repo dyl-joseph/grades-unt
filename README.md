@@ -8,13 +8,13 @@ You do not always know what you are signing up for until it is too late. `grades
 
 ## What the app uses today
 
-The public website reads from **encrypted static data stored with the deployed site**, not live Supabase queries.
+The public website reads from **encrypted static data stored with the deployed site**, not live Postgres queries.
 
 - Course and instructor data is generated from CSV exports during the data-prep workflow.
 - The generated files live under `unt-grade-distribution/public/encrypted/`.
 - The browser downloads `manifest.json` and only the encrypted blob needed for the selected course or instructor.
 - Client-side WebCrypto decrypts the blob with `NEXT_PUBLIC_DATA_KEY`.
-- Supabase/Prisma still exists for import, validation, migrations, and backend/API compatibility work, but it is not the primary user-facing read path.
+- Prisma/Postgres still exists for import, validation, migrations, and backend/API compatibility work, but it is not the primary user-facing read path.
 
 ## Technical implementation
 
@@ -34,14 +34,14 @@ The public website reads from **encrypted static data stored with the deployed s
 - Manifest-driven search in the browser
 - Client-side WebCrypto decryption for course and instructor pages
 - CDN-backed reads through Vercel static assets
-- No Supabase/Prisma runtime dependency for normal website browsing
+- No Prisma/Postgres runtime dependency for normal website browsing
 
 ### Backend and database
 
-- Prisma 7.4.2 with PostgreSQL/Supabase remains in the repo for seeding, migrations, validation, and backend API routes.
+- Prisma 7.4.2 with PostgreSQL/Postgres remains in the repo for seeding, migrations, validation, and backend API routes.
 - Backend API routes use explicit Prisma `select` clauses and indexes for faster query paths when those routes are used.
-- `DATABASE_URL` should point at the Supabase pooler in production-like serverless environments.
-- `DIRECT_URL` should point at the direct Supabase host for local development and bulk operations.
+- `DATABASE_URL` should point at the pooled Postgres in production-like serverless environments.
+- `DIRECT_URL` should point at the direct Postgres host for local development and bulk operations.
 
 ## Repository layout
 
