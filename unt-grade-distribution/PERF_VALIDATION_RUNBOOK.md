@@ -77,11 +77,11 @@ Use this split for Prisma-backed tools/routes:
 
 - `DATABASE_URL`
   - production/serverless runtime
-  - should use the Supabase pooler connection string
+  - should use the pooled Postgres connection string
   - used by `src/lib/prisma.ts` in production
 - `DIRECT_URL`
   - local development and bulk operations
-  - should use the direct Supabase Postgres host
+  - should use the direct direct Postgres host
 
 The public encrypted-data path should work without a live database query as long as the encrypted assets and `NEXT_PUBLIC_DATA_KEY` are present.
 
@@ -107,8 +107,8 @@ The public encrypted-data path should work without a live database query as long
 ## 6. Pass/fail checklist
 
 - PASS: public search works from the encrypted manifest.
-- PASS: course pages decrypt static blobs and do not require Supabase for normal browsing.
-- PASS: instructor pages decrypt the needed static blobs and do not require Supabase for normal browsing.
+- PASS: course pages decrypt static blobs and do not require Postgres for normal browsing.
+- PASS: instructor pages decrypt the needed static blobs and do not require Postgres for normal browsing.
 - PASS: `/api/search` still returns expected results if the compatibility API is exercised.
 - PASS: course-code API searches use indexed prefix/number lookup.
 - PASS: tests and TypeScript pass.

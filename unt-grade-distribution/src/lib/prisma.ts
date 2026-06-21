@@ -13,7 +13,7 @@ function createPrismaClient() {
 
   const adapter = new PrismaPg({
     connectionString: normalizePostgresConnectionString(connectionString ?? ""),
-    // Supabase's managed Postgres connection presents a certificate chain
+    // Postgres's managed Postgres connection presents a certificate chain
     // that Node rejects by default in local/prod-preview runs. Keep TLS on
     // but disable strict certificate validation so Prisma can connect.
     ssl: { rejectUnauthorized: false },
