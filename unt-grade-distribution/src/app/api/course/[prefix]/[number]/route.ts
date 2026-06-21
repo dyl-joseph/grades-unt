@@ -34,9 +34,35 @@ export async function GET(
   }
 
   const course = await prisma.course.findUnique({
-    where: { prefix_number: { prefix, number } },
-    include: {
-      sections: { include: { instructor: true } },
+    where: { prefix_number: { prefix: prefix.toUpperCase(), number } },
+    select: {
+      prefix: true,
+      number: true,
+      title: true,
+      sections: {
+        orderBy: { sectionNumber: "asc" },
+        select: {
+          id: true,
+          sectionNumber: true,
+          gradeA: true,
+          gradeB: true,
+          gradeC: true,
+          gradeD: true,
+          gradeF: true,
+          gradeP: true,
+          gradeNP: true,
+          gradeW: true,
+          gradeI: true,
+          totalEnroll: true,
+          instructor: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
     },
   });
   if (!course) {

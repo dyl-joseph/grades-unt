@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { NextRequest } from "next/server";
-import { buildSearchHeaders, getSearchPlan, normalizeSearchQuery } from "@/lib/search";
+import { buildSearchHeaders, getCourseSearchWhere, getInstructorSearchWhere, getSearchPlan, normalizeSearchQuery } from "@/lib/search";
 
 test("normalizeSearchQuery collapses whitespace and lowercases", () => {
   assert.equal(normalizeSearchQuery("  ACCT   2010  "), "acct 2010");
@@ -12,10 +12,40 @@ test("getSearchPlan identifies course-style queries and preserves title search",
 
   assert.equal(plan.cacheKey, "acct 2010");
   assert.equal(plan.courseTake, 10);
-  assert.equal(plan.instructorTake, 5);
+  assert.equal(plan.instructorTake, 0);
   assert.equal(plan.prefix, "ACCT");
   assert.equal(plan.number, "2010");
   assert.equal(plan.queryKind, "course");
+});
+
+test("getSearchPlan uses normalized whitespace for course detection", () => {
+  const canonical = getSearchPlan("ACCT 2010");
+  const spaced = getSearchPlan("  acct   2010  ");
+  const compact = getSearchPlan("acct2010");
+
+  assert.deepEqual(
+    { prefix: spaced.prefix, number: spaced.number, queryKind: spaced.queryKind, courseTake: spaced.courseTake, instructorTake: spaced.instructorTake },
+    { prefix: canonical.prefix, number: canonical.number, queryKind: canonical.queryKind, courseTake: canonical.courseTake, instructorTake: canonical.instructorTake }
+  );
+  assert.deepEqual(
+    { prefix: compact.prefix, number: compact.number, queryKind: compact.queryKind, courseTake: compact.courseTake, instructorTake: compact.instructorTake },
+    { prefix: canonical.prefix, number: canonical.number, queryKind: canonical.queryKind, courseTake: canonical.courseTake, instructorTake: canonical.instructorTake }
+  );
+});
+
+test("search where helpers keep course-code lookups on the indexed path", () => {
+  const plan = getSearchPlan("cs 1010");
+
+  assert.deepEqual(getCourseSearchWhere(plan, "cs 1010"), {
+    prefix: { startsWith: "CS" },
+    number: { startsWith: "1010" },
+  });
+  assert.deepEqual(getInstructorSearchWhere("smith"), {
+    OR: [
+      { lastName: { contains: "smith", mode: "insensitive" } },
+      { firstName: { contains: "smith", mode: "insensitive" } },
+    ],
+  });
 });
 
 test("buildSearchHeaders emits cache and timing metadata", () => {

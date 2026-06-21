@@ -3,6 +3,7 @@ import { formatServerTiming } from "@/lib/metrics";
 export type SearchQueryKind = "skip" | "course" | "name";
 export type SearchResultKind = Exclude<SearchQueryKind, "skip">;
 export type SearchCacheState = "skip" | "hit" | "miss" | "error";
+export type SearchPlan = ReturnType<typeof getSearchPlan>;
 
 export function normalizeSearchQuery(query: string) {
   return query.trim().replace(/\s+/g, " ").toLowerCase();
@@ -10,17 +11,18 @@ export function normalizeSearchQuery(query: string) {
 
 export function getSearchPlan(query: string) {
   const cacheKey = normalizeSearchQuery(query);
-  const isCourseQuery = /^[A-Za-z]{1,4}\s?\d/.test(query);
+  const compactCourseQuery = cacheKey.replace(/\s+(?=\d)/, "");
+  const isCourseQuery = /^[a-z]{1,4}\d/.test(compactCourseQuery);
   const courseTake = isCourseQuery ? 10 : 5;
-  const instructorTake = isCourseQuery ? 5 : 10;
+  const instructorTake = isCourseQuery ? 0 : 10;
 
   let prefix = "";
   let number = "";
 
   if (isCourseQuery) {
-    const match = query.match(/^([A-Za-z]{1,4})\s?(\d.*)?$/);
+    const match = compactCourseQuery.match(/^([a-z]{1,4})(\d.*)?$/);
     prefix = match?.[1]?.toUpperCase() ?? "";
-    number = match?.[2]?.replace(/^\s+/, "") ?? "";
+    number = match?.[2] ?? "";
   }
 
   return {
@@ -56,4 +58,26 @@ export function buildSearchHeaders(args: {
   }
 
   return headers;
+}
+
+export function getCourseSearchWhere(plan: SearchPlan, rawQuery: string) {
+  if (plan.queryKind === "course" && plan.prefix && plan.number) {
+    return {
+      prefix: { startsWith: plan.prefix },
+      number: { startsWith: plan.number },
+    };
+  }
+
+  return { title: { contains: rawQuery.trim(), mode: "insensitive" as const } };
+}
+
+export function getInstructorSearchWhere(rawQuery: string) {
+  const query = rawQuery.trim();
+
+  return {
+    OR: [
+      { lastName: { contains: query, mode: "insensitive" as const } },
+      { firstName: { contains: query, mode: "insensitive" as const } },
+    ],
+  };
 }
