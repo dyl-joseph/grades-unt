@@ -1,106 +1,126 @@
 # Performance validation runbook
 
-This runbook covers the checks needed to validate the load/performance goals for:
+This runbook validates the performance goals for the current encrypted static-data path and the remaining DB-backed backend API routes.
 
-- `/api/search` suggestion latency
-- course page TTFB
-- instructor page TTFB
-- Supabase pooled connection correctness
+## 1. What to measure
 
-## 1) What to measure
+### Public encrypted-data path
 
-Capture the following for each test run:
+Measure these user-facing flows first:
 
-- **Search endpoint**
-  - Request path: `/api/search?q=<query>`
-  - Response header: `Server-Timing`
-  - Response header: `Cache-Control`
-  - Success criteria: p95 response latency ≤ 2s under representative load
-- **Course and instructor pages**
-  - Measure server response / TTFB for:
-    - `/course/[prefix]/[number]`
-    - `/instructor/[id]`
-  - Check the page response in Vercel logs or an HTTP timing tool
-  - Success criteria: p95 TTFB ≤ 2s under representative load
+- Home search suggestions using `/encrypted/manifest.json`
+- Course page load and blob decrypt for `/course/[prefix]/[number]`
+- Instructor page load and any required blob decrypts for `/instructor/[id]`
+- Compare page aggregation and chart rendering
 
-Because the app already emits `Server-Timing` on `/api/search`, the header is the fastest way to separate:
+Suggested success signals:
 
-- `search` total time
-- `db` time
-- `cache-hit`, `cache-miss`, `cache-skip`, or `error`
+- Manifest is cached after the first fetch.
+- Course page p95 perceived load is under 2 seconds on representative devices/networks.
+- Instructor page p95 perceived load is under 2 seconds for typical instructors.
+- Browser decrypt time is not a major contributor in performance profiles.
 
-## 2) Recommended validation flow on Vercel
+### Backend/API compatibility path
 
-1. Run the app on Vercel preview or production.
-2. Generate a representative mix of queries:
-   - title-contains searches
-   - instructor name searches
-   - course prefix/number searches
-3. Load test with ~50 concurrent users.
-4. Collect:
-   - response times
-   - `Server-Timing`
-   - Vercel function logs
-   - Vercel Analytics / Speed Insights route timings
-5. Confirm the p95 values stay under 2 seconds.
+The repo still contains DB-backed routes that should remain fast when used:
 
-If search is slow, use `Server-Timing` to determine whether the bottleneck is:
+- `/api/search?q=<query>`
+- `/api/course/[prefix]/[number]`
+- `/api/instructor/[id]`
 
-- total handler time
-- database time
-- cold starts / platform overhead
-
-## 3) Headers and signals to capture
-
-For search requests, inspect:
+For `/api/search`, capture:
 
 - `Server-Timing`
 - `Cache-Control`
+- `x-search-cache`
+- `x-search-kind`
 - status code
 
-For page requests, inspect:
+Suggested API success criteria:
 
-- response timing / TTFB from the load tool
-- Vercel function logs for slow requests
-- Speed Insights route metrics
+- p95 response latency under 2 seconds under representative load.
+- Course-code searches use the indexed prefix/number path.
+- Name searches do not trigger unnecessary course-code predicates.
+- Repeated searches hit cache where expected.
 
-## 4) Supabase env var expectations
+## 2. Recommended validation flow on Vercel
 
-Use the following split:
+1. Open a Vercel preview or production deployment.
+2. Test the encrypted static-data path:
+   - search for a course code
+   - search for an instructor
+   - open course pages
+   - open instructor pages
+   - compare multiple items
+3. Record browser timings, Speed Insights, and console/network errors.
+4. If validating backend API routes, run a representative query mix:
+   - course prefix/number queries, for example `CS 10`
+   - instructor names, for example `smith`
+   - title searches, for example `accounting`
+5. Capture Vercel function logs and `Server-Timing` headers.
+6. Confirm p95 values stay within the target budget.
+
+## 3. Local checks before performance testing
+
+```bash
+cd unt-grade-distribution
+npm test
+npx tsc --noEmit
+DATABASE_URL="postgresql://user:***@localhost:5432/db" DIRECT_URL="postgresql://user:***@localhost:5432/db" npm run build
+```
+
+If lint is run, report existing unrelated lint failures separately from the performance change.
+
+## 4. Database environment expectations
+
+Use this split for Prisma-backed tools/routes:
 
 - `DATABASE_URL`
-  - production / Vercel serverless
-  - should point at the **Supabase pooler** connection string
-  - current repo expectation matches `src/lib/prisma.ts`, which prefers `DATABASE_URL` in production
+  - production/serverless runtime
+  - should use the Supabase pooler connection string
+  - used by `src/lib/prisma.ts` in production
 - `DIRECT_URL`
   - local development and bulk operations
-  - should point at the direct Supabase Postgres host (`db.<project-ref>.supabase.co:5432`)
+  - should use the direct Supabase Postgres host
 
-The repo already documents this in `.env.example`:
+The public encrypted-data path should work without a live database query as long as the encrypted assets and `NEXT_PUBLIC_DATA_KEY` are present.
 
-- `DATABASE_URL="...pooler.supabase.com:6543/postgres?pgbouncer=true"`
-- `DIRECT_URL="...db.<project-ref>.supabase.co:5432/postgres"`
+## 5. Signals to inspect
 
-## 5) Vercel runtime settings to consider
+### Browser/static path
 
-Keep runtime tuning minimal and compatible with the current Next.js setup:
+- Network waterfall for `/encrypted/manifest.json`
+- Network waterfall for `/encrypted/blobs/*.bin`
+- Network waterfall for `/encrypted/blobs/*.meta.json`
+- WebCrypto decrypt timing from browser profiles when needed
+- Vercel Speed Insights route metrics
 
-- Prefer the default Node.js runtime for Prisma-backed routes unless a route has been explicitly moved elsewhere.
-- Avoid changing semantics for search caching:
-  - keep title-contains search
-  - keep existing API cache headers unless a later task changes them deliberately
-- If a route is slow under load, verify whether the issue is:
-  - function cold starts
-  - DB connection setup
-  - page data fetching
+### Backend/API path
 
-## 6) Suggested pass/fail checklist
+- `Server-Timing`
+- Vercel function duration
+- cache hit/miss headers
+- database query time
+- cold starts
+- connection errors
 
-- PASS: `/api/search` p95 ≤ 2s at ~50 concurrent users
-- PASS: course page p95 TTFB ≤ 2s
-- PASS: instructor page p95 TTFB ≤ 2s
-- PASS: title-contains search still returns expected matches
-- PASS: instructor name search still returns expected matches
-- PASS: production uses pooled `DATABASE_URL`
-- PASS: local/dev bulk ops use `DIRECT_URL`
+## 6. Pass/fail checklist
 
+- PASS: public search works from the encrypted manifest.
+- PASS: course pages decrypt static blobs and do not require Supabase for normal browsing.
+- PASS: instructor pages decrypt the needed static blobs and do not require Supabase for normal browsing.
+- PASS: `/api/search` still returns expected results if the compatibility API is exercised.
+- PASS: course-code API searches use indexed prefix/number lookup.
+- PASS: tests and TypeScript pass.
+- PASS: PR checks are reviewed before merge.
+
+## 7. Branch, PR, and review expectations
+
+Performance changes should use the same workflow as other changes:
+
+1. Create a non-`main` branch, usually `perf/...`.
+2. Make focused commits.
+3. Push the branch and open a PR into `main`.
+4. Include measured validation results or explain why measurement was not possible.
+5. Review automated checks and Vercel output before merge.
+6. Fix any failures on the same branch and re-review checks.

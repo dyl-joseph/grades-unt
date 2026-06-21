@@ -1,65 +1,100 @@
 # grades-unt
 
 ## Choosing classes is a gamble. It shouldn't be.
-You don't always know what you're signing up for (easy or hard!) until it's too late. We created a website to view all the grades of every class AND professor at UNT.
 
-## View (almost) any class at UNT from last semester: 
-We got data from UNT about all the grade distributions from Fall 2025. With this data, we made an app to easily view all the data. 
+You do not always know what you are signing up for until it is too late. `grades-unt` makes UNT grade distributions easier to browse by course and instructor.
 
-### **Links:** 
-- [untgrades.app](https://untgrades.app)
+**Live site:** [untgrades.app](https://untgrades.app)
 
-## Technical Implementation
-### Frontend: 
-- React v19.2.3
-- Next.js 16.1.6
-- Typescript 
-- Tailwind CSS (v4) 
-- Recharts (v3.7.0) - draws grade distribution charts
-- jsPDF + jspdf-autotable (4.2.0, 5.0.7) - PDF exporter
-- Vercel Analytics + Vercel Speed Insights - real-user page views, Web Vitals, and route performance monitoring
+## What the app uses today
 
-### Data Delivery:
-- Static encrypted blobs generated at build time from CSV exports
-- Client-side WebCrypto decryption for course and professor pages
-- Manifest-driven search that avoids live database calls
-- No Supabase/Prisma runtime dependency for user-facing reads
+The public website reads from **encrypted static data stored with the deployed site**, not live Supabase queries.
 
-### Hosting: 
-- Vercel (hosting the website itself and serving static encrypted assets)
-- Optional environment key for encrypt/decrypt parity across builds
+- Course and instructor data is generated from CSV exports during the data-prep workflow.
+- The generated files live under `unt-grade-distribution/public/encrypted/`.
+- The browser downloads `manifest.json` and only the encrypted blob needed for the selected course or instructor.
+- Client-side WebCrypto decrypts the blob with `NEXT_PUBLIC_DATA_KEY`.
+- Supabase/Prisma still exists for import, validation, migrations, and backend/API compatibility work, but it is not the primary user-facing read path.
 
-### Observability:
-- Vercel Speed Insights helps monitor real-user loading performance across the home page, search-driven navigation, and the encrypted course and instructor pages.
-- Speed Insights is useful for finding slow routes and poor Web Vitals, but it does not replace direct load benchmarking or client-side profiling.
+## Technical implementation
 
-### Estimated Speedup vs Supabase:
-- This is a rough estimate, not a benchmark.
-- Search suggestions: about 3x to 10x faster perceived response time once the manifest is cached, because the browser filters static JSON instead of waiting on a database query.
-- Course and instructor pages: about 2x to 6x faster perceived navigation time, because the browser fetches one encrypted blob from the CDN and decrypts locally instead of going through Prisma + Supabase.
-- Cold starts, DB connection failures, and query latency spikes are removed from the user-facing path, so speed is more consistent even when the raw gain varies by network and device.
+### Frontend
 
-## File Structure: 
-/unt-grade-distribution: contains all the code. put it all into a folder for "modulization".
+- React 19.2.3
+- Next.js 16.1.6 App Router
+- TypeScript
+- Tailwind CSS v4
+- Recharts 3.7.0 for grade distribution charts
+- jsPDF + jspdf-autotable for PDF export
+- Vercel Analytics + Vercel Speed Insights for real-user monitoring
 
-documentation files (any .md files): in the repo's root file. makes it easier to see and read all the documentation docs that have been made (e.g. look at [DOCUMENTATION.md](https://github.com/dyl-joseph/grades-unt/blob/main/DOCUMENTATION.md)). 
+### Data delivery
 
-## Contributions: 
+- Static encrypted blobs generated at build/data-prep time from CSV exports
+- Manifest-driven search in the browser
+- Client-side WebCrypto decryption for course and instructor pages
+- CDN-backed reads through Vercel static assets
+- No Supabase/Prisma runtime dependency for normal website browsing
 
-### Maintainers:
+### Backend and database
 
-[Dylan Joseph](https://github.com/dyl-joseph)
+- Prisma 7.4.2 with PostgreSQL/Supabase remains in the repo for seeding, migrations, validation, and backend API routes.
+- Backend API routes use explicit Prisma `select` clauses and indexes for faster query paths when those routes are used.
+- `DATABASE_URL` should point at the Supabase pooler in production-like serverless environments.
+- `DIRECT_URL` should point at the direct Supabase host for local development and bulk operations.
 
-[Gautham Nair](https://github.com/GauthamRNair)
+## Repository layout
 
-[Akhil Tumati](https://github.com/YouSoMoose)
+```text
+.
+├── README.md
+├── DOCUMENTATION.md
+└── unt-grade-distribution/
+    ├── README.md
+    ├── DOCUMENTATION.md
+    ├── ENCRYPT_README.md
+    ├── PERF_VALIDATION_RUNBOOK.md
+    ├── prisma/
+    ├── public/encrypted/
+    ├── src/
+    └── tools/
+```
 
-### Initial Contributors:
+The Next.js app lives in `unt-grade-distribution/`. Root-level docs provide repo-wide context; app-level docs provide implementation details.
 
-[Sai Are](https://github.com/FrostNinja397)
+## Development workflow
 
-## Planned Features
+Keep the existing branch/PR/review model:
 
-- **SPOT Evaluations** — Integrate Student Perceptions of Teaching data for instructors
-- **More Semesters** — Expand grade distribution data to cover additional semesters
-- **Smarter client aggregates** — Keep compare-page aggregation fast by precomputing or indexing more summary data in the encrypted manifest layer, without reintroducing a live database dependency.
+1. Start from an up-to-date `main`.
+2. Create a separate branch for each change, for example `feat/...`, `fix/...`, `perf/...`, or `docs/...`.
+3. Commit with a conventional message.
+4. Push the branch and open a PR into `main`.
+5. Wait for automated checks and review before merging.
+6. Do not push directly to `main` unless the maintainers intentionally choose to bypass the normal review path.
+
+## Useful commands
+
+```bash
+cd unt-grade-distribution
+npm install
+npm test
+npx tsc --noEmit
+DATABASE_URL="postgresql://user:***@host:5432/db" DIRECT_URL="postgresql://user:***@host:5432/db" npm run build
+```
+
+## Maintainers
+
+- [Dylan Joseph](https://github.com/dyl-joseph)
+- [Gautham Nair](https://github.com/GauthamRNair)
+- [Akhil Tumati](https://github.com/YouSoMoose)
+
+## Initial contributors
+
+- [Sai Are](https://github.com/FrostNinja397)
+
+## Planned features
+
+- **SPOT Evaluations** — integrate Student Perceptions of Teaching data for instructors.
+- **More semesters** — expand grade distribution data beyond the current export.
+- **Smarter client aggregates** — keep compare-page aggregation fast by precomputing or indexing more summary data in the encrypted manifest layer without reintroducing a live database dependency for public reads.
