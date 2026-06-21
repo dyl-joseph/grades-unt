@@ -37,12 +37,12 @@ Browser
 Vercel / CDN
   └─ serves Next.js app and public/encrypted static assets
 
-Supabase / Prisma
+Prisma / Postgres
   ├─ used for imports, migrations, data validation, and backend API compatibility
   └─ not the normal public read path for course/instructor browsing
 ```
 
-Important distinction: the public site should continue reading encrypted static assets stored with the website. Supabase is still useful for preparing and validating data, but public browsing should not depend on a live database connection.
+Important distinction: the public site should continue reading encrypted static assets stored with the website. Postgres is still useful for preparing and validating data, but public browsing should not depend on a live database connection.
 
 ---
 
@@ -58,7 +58,7 @@ Important distinction: the public site should continue reading encrypted static 
 | PDFs | jsPDF + jspdf-autotable | Client-side export |
 | Analytics | Vercel Analytics | Page views and Web Vitals |
 | Performance | Vercel Speed Insights | Real-user route timing |
-| Database tooling | Prisma 7.4.2 + pg | Supabase/Postgres access for tooling and backend routes |
+| Database tooling | Prisma 7.4.2 + pg | Postgres access for tooling and backend routes |
 | CSV tooling | csv-parse | Import/encryption workflows |
 
 ---
@@ -97,7 +97,7 @@ unt-grade-distribution/
 │       ├── search.ts
 │       └── types.ts
 └── tools/
-    ├── convert-supabase-to-encrypt-csv.js
+    ├── convert-relational-to-encrypt-csv.js
     └── encrypt-data.js
 ```
 
@@ -123,7 +123,7 @@ At runtime:
 
 ### Why this path matters
 
-- Public reads are served by Vercel/CDN instead of Supabase.
+- Public reads are served by Vercel/CDN instead of Postgres.
 - Search and navigation avoid database cold starts, connection limits, and query spikes.
 - The encrypted blobs prevent plaintext grade data from being committed or served directly.
 - Anyone with the client data key can decrypt the data, so this is scrape resistance and access friction, not a substitute for server-side authorization.
@@ -206,7 +206,7 @@ The DB-backed `/api/search` route remains in the codebase for compatibility and 
 | `NEXT_PUBLIC_DATA_KEY` | Client-visible passphrase used to decrypt static encrypted blobs automatically. Must match the encryption passphrase. |
 | `MASTER_PASSPHRASE` | Local/offline passphrase used by `tools/encrypt-data.js` when generating encrypted blobs. Do not commit it. |
 | `PBKDF2_ITERATIONS` | Optional encryption cost tuning for generated blobs. |
-| `DATABASE_URL` | Production/serverless Prisma connection string, usually the Supabase pooler. |
+| `DATABASE_URL` | Production/serverless Prisma connection string, usually the pooled Postgres. |
 | `DIRECT_URL` | Direct Postgres connection for local development and bulk operations. |
 
 Never commit `.env` files or plaintext CSVs containing raw data.

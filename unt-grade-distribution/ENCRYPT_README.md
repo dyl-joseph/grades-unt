@@ -4,12 +4,12 @@
 
 The public UNT Grades website uses a static encrypted data workflow. CSV exports are processed offline into many small encrypted course blobs plus a manifest. The deployed app fetches only the manifest and the blobs it needs, then decrypts them in the browser.
 
-This means normal user-facing course and instructor reads come from files stored with the website under `public/encrypted/`, not live Supabase queries.
+This means normal user-facing course and instructor reads come from files stored with the website under `public/encrypted/`, not live Postgres queries.
 
 ## Prepare encrypted data
 
 1. Put source CSV files in `prisma/data/`.
-2. Use the same CSV shape as `prisma/seed.ts`, or convert Supabase-style table exports first.
+2. Use the same CSV shape as `prisma/seed.ts`, or convert relational table exports first.
 3. Run the encryptor with a passphrase:
 
 ```bash
@@ -53,9 +53,9 @@ ACCT 2010 - PRINCIPLES OF ACCOUNTING,002,"Doe,Jane",2024,Spring,20,22,15,1,0,0,0
 CS 311 - DATA STRUCTURES,001,"Moore,Ami R",2025,Fall,15,18,10,2,1,0,0,0,0
 ```
 
-### Option B: Supabase-style relational exports
+### Option B: relational relational exports
 
-If you export separate tables from Supabase, place these in `prisma/data/`:
+If you export separate tables from Postgres, place these in `prisma/data/`:
 
 - `courses_rows.csv` — `id,prefix,number,title`
 - `instructors_rows.csv` — `id,first_name,last_name`
@@ -65,7 +65,7 @@ If you export separate tables from Supabase, place these in `prisma/data/`:
 Then convert them:
 
 ```bash
-npm run convert:supabase
+npm run convert:relational
 ```
 
 After conversion, run the encryptor.
