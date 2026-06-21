@@ -56,5 +56,6 @@ model Section {
   @@unique([courseId, sectionNumber])
   @@index([courseId])
   @@index([instructorId])
+  @@index([instructorId, courseId, sectionNumber])
   @@map("sections")
 }

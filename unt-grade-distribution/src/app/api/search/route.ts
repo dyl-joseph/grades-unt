@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { buildSearchHeaders, getSearchPlan } from "@/lib/search";
+import { buildSearchHeaders, getCourseSearchWhere, getInstructorSearchWhere, getSearchPlan } from "@/lib/search";
 import {
   recordSearchCacheHit,
   recordSearchCacheMiss,
@@ -89,37 +89,24 @@ export async function GET(request: NextRequest) {
 
   try {
     const dbStart = performance.now();
-    const [courses, instructors] = await Promise.all([
-      prisma.course.findMany({
-        where: {
-          OR: [
-            ...(prefix && number
-              ? [
-                  {
-                    prefix: { startsWith: prefix, mode: "insensitive" as const },
-                    number: { startsWith: number, mode: "insensitive" as const },
-                  },
-                ]
-              : []),
-            { title: { contains: q, mode: "insensitive" as const } },
-          ],
-        },
-        select: { id: true, prefix: true, number: true, title: true },
-        take: courseTake,
-        orderBy: [{ prefix: "asc" }, { number: "asc" }],
-      }),
-      prisma.instructor.findMany({
-        where: {
-          OR: [
-            { lastName: { contains: q, mode: "insensitive" as const } },
-            { firstName: { contains: q, mode: "insensitive" as const } },
-          ],
-        },
-        select: { id: true, firstName: true, lastName: true },
-        take: instructorTake,
-        orderBy: { lastName: "asc" },
-      }),
-    ]);
+    const coursesPromise = prisma.course.findMany({
+      where: getCourseSearchWhere({ cacheKey, courseTake, instructorTake, prefix, number, queryKind }, q),
+      select: { id: true, prefix: true, number: true, title: true },
+      take: courseTake,
+      orderBy: [{ prefix: "asc" }, { number: "asc" }],
+    });
+
+    const instructorsPromise =
+      queryKind === "course"
+        ? Promise.resolve([])
+        : prisma.instructor.findMany({
+            where: getInstructorSearchWhere(q),
+            select: { id: true, firstName: true, lastName: true },
+            take: instructorTake,
+            orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+          });
+
+    const [courses, instructors] = await Promise.all([coursesPromise, instructorsPromise]);
 
     const result = { courses, instructors };
     const dbDurationMs = performance.now() - dbStart;
