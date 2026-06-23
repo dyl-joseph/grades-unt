@@ -18,6 +18,9 @@ if (!process.env.MASTER_PASSPHRASE) {
 }
 const PASSPHRASE = process.env.MASTER_PASSPHRASE;
 
+const DEFAULT_YEAR = process.env.DEFAULT_DATA_YEAR || '2025';
+const DEFAULT_TERM = process.env.DEFAULT_DATA_TERM || 'Fall';
+
 function ensureDir(d) {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 }
@@ -78,8 +81,8 @@ async function main() {
       const section = {
         sectionNumber: String(row['SECTION NUMBER'] || ''),
         instructor: { firstName, lastName },
-        year: row['YEAR'] ? String(row['YEAR']).trim() : null,
-        term: row['TERM'] ? String(row['TERM']).trim() : null,
+        year: row['YEAR'] ? String(row['YEAR']).trim() : DEFAULT_YEAR,
+        term: row['TERM'] ? String(row['TERM']).trim() : DEFAULT_TERM,
         grades: {
           A: Math.round(parseFloat(row['A']) || 0),
           B: Math.round(parseFloat(row['B']) || 0),

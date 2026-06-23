@@ -48,6 +48,7 @@ function usage() {
   console.log(`Usage:
   node tools/pivot-grade-sheet.js --input sheet.csv --out prisma/data/grades.csv
   node tools/pivot-grade-sheet.js --sheet-url "https://docs.google.com/spreadsheets/d/<id>/edit" --out prisma/data/grades.csv
+  node tools/pivot-grade-sheet.js --input sheet.csv --out prisma/data/grades.csv --semester-label test_semester
   node tools/pivot-grade-sheet.js --input sheet.csv --out prisma/data/grades.csv --split-by-term prisma/data/by-term
 
 Description:
@@ -60,12 +61,13 @@ Input columns:
 Notes:
   - Blank grades are ignored because the target UNT Grades format has no blank-grade column.
   - PR is folded into P and NPR is folded into NP.
+  - --semester-label overrides all output YEAR/TERM values; use test_semester for the shared test sheet.
   - Unsupported grade labels are reported in a JSON sidecar file next to --out.
 `);
 }
 
 function parseArgs(argv) {
-  const args = { input: '', sheetUrl: '', out: '', splitByTerm: '' };
+  const args = { input: '', sheetUrl: '', out: '', splitByTerm: '', semesterLabel: '' };
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--help' || arg === '-h') {
@@ -78,6 +80,8 @@ function parseArgs(argv) {
       args.out = argv[++i] || '';
     } else if (arg === '--split-by-term') {
       args.splitByTerm = argv[++i] || '';
+    } else if (arg === '--semester-label') {
+      args.semesterLabel = argv[++i] || '';
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
@@ -139,7 +143,7 @@ function groupKey(parts) {
   return JSON.stringify(parts);
 }
 
-function pivotRows(rows) {
+function pivotRows(rows, options = {}) {
   assertColumns(rows);
 
   const sections = new Map();
@@ -153,7 +157,9 @@ function pivotRows(rows) {
     const title = clean(row['Title']).replace(/\s+/g, ' ');
     const instructor = clean(row['Instructor']).replace(/\s+/g, ' ');
     const semesterTerm = clean(row['Semester/Term']);
-    const { year, term } = parseTerm(semesterTerm);
+    const parsedSemester = parseTerm(semesterTerm);
+    const year = options.semesterLabel ? '' : parsedSemester.year;
+    const term = options.semesterLabel || parsedSemester.term;
     const count = parseGradeCount(row['Grade Count']);
     const grade = normalizeGrade(row['Grade']);
 
@@ -283,7 +289,7 @@ async function main() {
 
   const csvText = await readInputCsv(args);
   const rows = parse(csvText, { columns: true, skip_empty_lines: true, trim: true, bom: true });
-  const { outputRows, summary } = pivotRows(rows);
+  const { outputRows, summary } = pivotRows(rows, { semesterLabel: args.semesterLabel });
   writeOutputs(outputRows, args.out, args.splitByTerm);
 
   const summaryPath = `${args.out}.summary.json`;

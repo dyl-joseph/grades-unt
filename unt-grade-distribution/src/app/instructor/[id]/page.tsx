@@ -8,9 +8,12 @@ import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
 import { fromInstructorSlug, loadInstructorSections } from "@/lib/encryptedData";
+import { groupBySemester } from "@/lib/semester";
 
 type SectionWithCourse = {
   sectionNumber: string;
+  year: string | null;
+  term: string | null;
   instructor: { firstName: string; lastName: string };
   grades: { A: number; B: number; C: number; D: number; F: number; P: number; NP: number; W: number; I: number };
   course: { prefix: string; number: string; title: string };
@@ -54,6 +57,8 @@ export default function InstructorPage() {
       sections.map((s, idx) => ({
         id: `${s.course.prefix}-${s.course.number}-${s.sectionNumber}-${idx}`,
         sectionNumber: s.sectionNumber,
+        year: s.year,
+        term: s.term,
         instructor: s.instructor,
         course: s.course,
         gradeA: s.grades.A,
@@ -73,6 +78,7 @@ export default function InstructorPage() {
 
   const overallAggregate = useMemo(() => aggregateGrades(normalizedSections), [normalizedSections]);
   const overallGPA = useMemo(() => calculateGPA(overallAggregate), [overallAggregate]);
+  const semesterGroups = useMemo(() => groupBySemester(normalizedSections), [normalizedSections]);
 
   const courseGroups = useMemo(() => {
     const map = new Map<string, { course: { prefix: string; number: string; title: string }; sections: typeof normalizedSections }>();
@@ -151,6 +157,7 @@ export default function InstructorPage() {
         <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
           <span className="flex items-center gap-1.5">Overall GPA: <GpaBadge gpa={overallGPA} /></span>
           <span>{normalizedSections.length} sections</span>
+          <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
           <span>{courseGroups.length} course{courseGroups.length !== 1 ? "s" : ""} taught</span>
         </div>
       </div>
@@ -158,6 +165,25 @@ export default function InstructorPage() {
       <div className="mb-10 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-6 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
         <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Aggregate Grade Distribution</h2>
         <GradeChart data={toChartData(overallAggregate)} />
+      </div>
+
+      <div className="mb-10 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-5 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Semester Summary</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {semesterGroups.map(({ label, items }) => {
+            const semesterAggregate = aggregateGrades(items);
+            return (
+              <div key={label} className="rounded-2xl border border-jungle-tan-dark/20 bg-white/50 p-3 dark:border-green-900/60 dark:bg-green-950/20">
+                <div className="font-semibold text-gray-900 dark:text-green-100">{label}</div>
+                <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-green-200/70">
+                  <span>{items.length} section{items.length !== 1 ? "s" : ""}</span>
+                  <span>{semesterAggregate.totalEnroll.toLocaleString()} students</span>
+                  <span className="flex items-center gap-1.5">GPA: <GpaBadge gpa={calculateGPA(semesterAggregate)} /></span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {courseGroups.map(({ course, sections }) => (

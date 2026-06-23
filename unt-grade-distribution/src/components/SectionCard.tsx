@@ -6,6 +6,7 @@ import LazyChart from "./LazyChart";
 import { calculateGPA, toChartData } from "@/lib/grades";
 import ShareButton from "./ShareButton";
 import { toInstructorSlug } from "@/lib/encryptedData";
+import { semesterLabel } from "@/lib/semester";
 
 type SectionCardData = {
   id: number | string;
@@ -13,6 +14,8 @@ type SectionCardData = {
   instructorId?: number | string;
   instructor: { firstName: string; lastName: string };
   course: { prefix: string; number: string; title?: string };
+  year?: string | null;
+  term?: string | null;
   gradeA: number;
   gradeB: number;
   gradeC: number;
@@ -36,6 +39,7 @@ export default function SectionCard({
 }: SectionCardProps) {
   const gpa = calculateGPA(section);
   const chartData = toChartData(section);
+  const semester = semesterLabel(section);
   const instructorSlug = toInstructorSlug(
     section.instructor.firstName,
     section.instructor.lastName
@@ -54,6 +58,10 @@ export default function SectionCard({
             </Link>
           )}
           <div className="flex items-center gap-2">
+            <span className="rounded-full bg-jungle-tan-dark/20 px-2 py-0.5 text-xs font-semibold text-jungle-bark dark:bg-green-950/60 dark:text-green-200">
+              {semester}
+            </span>
+            <span className="text-gray-300 dark:text-gray-600">·</span>
             <span className="text-sm text-gray-500 dark:text-gray-400">
               Section {section.sectionNumber}
             </span>

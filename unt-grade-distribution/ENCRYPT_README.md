@@ -78,6 +78,7 @@ If the source file has one row per grade bucket with columns like `Semester/Term
 npm run pivot:grades -- \
   --sheet-url "https://docs.google.com/spreadsheets/d/<spreadsheet-id>/edit" \
   --out prisma/data/grades.csv \
+  --semester-label test_semester \
   --split-by-term prisma/data/by-term
 ```
 
