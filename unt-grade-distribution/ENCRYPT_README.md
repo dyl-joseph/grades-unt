@@ -70,6 +70,19 @@ npm run convert:relational
 
 After conversion, run the encryptor.
 
+### Option C: long-form grade export
+
+If the source file has one row per grade bucket with columns like `Semester/Term`, `Subject`, `Catalog Number`, `Class Section`, `Title`, `Grade`, `Grade Count`, and `Instructor`, pivot it into the encryptor CSV format first:
+
+```bash
+npm run pivot:grades -- \
+  --sheet-url "https://docs.google.com/spreadsheets/d/<spreadsheet-id>/edit" \
+  --out prisma/data/grades.csv \
+  --split-by-term prisma/data/by-term
+```
+
+Use `--input path/to/export.csv` instead of `--sheet-url` when you already downloaded the sheet as CSV. The script writes the combined UNT Grades CSV and, when `--split-by-term` is provided, individual per-term CSV tables.
+
 ## Client usage
 
 - `fetchManifest()` loads `/encrypted/manifest.json`.
