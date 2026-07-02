@@ -9,6 +9,7 @@ import GradeChart from "@/components/GradeChart";
 import CourseSaveButton from "@/components/CourseSaveButton";
 import ShareButton from "@/components/ShareButton";
 import { loadCourseByCode } from "@/lib/encryptedData";
+import { groupBySemester } from "@/lib/semester";
 
 type CourseData = {
   prefix: string;
@@ -27,6 +28,8 @@ function toSectionModel(course: CourseData) {
   return course.sections.map((s, idx) => ({
     id: `${course.prefix}-${course.number}-${s.sectionNumber}-${idx}`,
     sectionNumber: s.sectionNumber,
+    year: s.year,
+    term: s.term,
     instructor: s.instructor,
     course: { prefix: course.prefix, number: course.number, title: course.title },
     gradeA: s.grades.A,
@@ -90,6 +93,7 @@ export default function CoursePage() {
   const aggregate = useMemo(() => aggregateGrades(sections), [sections]);
   const overallGPA = useMemo(() => calculateGPA(aggregate), [aggregate]);
   const aggregateChartData = useMemo(() => toChartData(aggregate), [aggregate]);
+  const semesterGroups = useMemo(() => groupBySemester(sections), [sections]);
 
   if (loading) {
     return (
@@ -181,6 +185,7 @@ export default function CoursePage() {
         <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
           <span className="flex items-center gap-1.5">Overall GPA: <GpaBadge gpa={overallGPA} /></span>
           <span>{sections.length} sections</span>
+          <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
           <span>{aggregate.totalEnroll.toLocaleString()} total students</span>
         </div>
       </div>
@@ -190,11 +195,26 @@ export default function CoursePage() {
         <GradeChart data={aggregateChartData} />
       </div>
 
-      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Sections</h2>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {sections.map((section) => (
-          <SectionCard key={section.id} section={section} />
-        ))}
+      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Sections by Semester</h2>
+      <div className="space-y-10">
+        {semesterGroups.map(({ label, items }) => {
+          const semesterAggregate = aggregateGrades(items);
+          return (
+            <section key={label}>
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-green-100">{label}</h3>
+                <span className="text-sm text-gray-500 dark:text-green-200/70">{items.length} section{items.length !== 1 ? "s" : ""}</span>
+                <span className="text-sm text-gray-500 dark:text-green-200/70">{semesterAggregate.totalEnroll.toLocaleString()} students</span>
+                <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-green-200/70">GPA: <GpaBadge gpa={calculateGPA(semesterAggregate)} /></span>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((section) => (
+                  <SectionCard key={section.id} section={section} />
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );
