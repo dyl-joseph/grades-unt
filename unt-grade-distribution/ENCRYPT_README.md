@@ -76,13 +76,14 @@ If the source file has one row per grade bucket with columns like `Semester/Term
 
 ```bash
 npm run pivot:grades -- \
-  --sheet-url "https://docs.google.com/spreadsheets/d/<spreadsheet-id>/edit" \
-  --out prisma/data/grades.csv \
-  --semester-label test_semester \
+  --input path/to/grade-export.csv \
+  --out prisma/data/grades-2019.csv \
   --split-by-term prisma/data/by-term
 ```
 
-Use `--input path/to/export.csv` instead of `--sheet-url` when you already downloaded the sheet as CSV. The script writes the combined UNT Grades CSV and, when `--split-by-term` is provided, individual per-term CSV tables.
+Use `--sheet-url` instead of `--input` to download a public Google Sheet. The combined output preserves the source year and term; `--semester-label` is available only when a source needs one explicit synthetic label. Section numbers are normalized to match the existing encryptor CSV style, and the optional `--split-by-term` directory contains per-term audit files.
+
+Keep legacy/default data and historical outputs as separate CSV files directly under `prisma/data`. The encryptor reads every CSV in that directory and merges matching courses into one encrypted course blob. Rows without `YEAR` or `TERM` continue to default to Fall 2025, while pivoted historical rows retain their source semester. Each run replaces the generated encrypted directory only after the complete new dataset has been built, so stale blobs are removed without exposing a partial build.
 
 ## Client usage
 

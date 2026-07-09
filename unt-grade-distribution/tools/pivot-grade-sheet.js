@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 const path = require('path');
 const { parse } = require('csv-parse/sync');
@@ -118,6 +119,12 @@ function clean(value) {
   return String(value ?? '').trim();
 }
 
+function normalizeSectionNumber(value) {
+  const sectionNumber = clean(value);
+  if (!/^\d+$/.test(sectionNumber)) return sectionNumber;
+  return String(Number(sectionNumber));
+}
+
 function parseGradeCount(value) {
   const cleaned = clean(value).replace(/,/g, '');
   if (!cleaned) return 0;
@@ -153,7 +160,7 @@ function pivotRows(rows, options = {}) {
   for (const row of rows) {
     const subject = clean(row['Subject']).toUpperCase();
     const catalogNumber = clean(row['Catalog Number']);
-    const sectionNumber = clean(row['Class Section']);
+    const sectionNumber = normalizeSectionNumber(row['Class Section']);
     const title = clean(row['Title']).replace(/\s+/g, ' ');
     const instructor = clean(row['Instructor']).replace(/\s+/g, ' ');
     const semesterTerm = clean(row['Semester/Term']);
@@ -306,7 +313,16 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  normalizeSectionNumber,
+  parseTerm,
+  pivotRows,
+  toCsv,
+};

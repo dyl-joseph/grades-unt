@@ -64,3 +64,13 @@ export function groupBySemester<T extends SemesterLike>(items: T[]) {
     .sort(([a], [b]) => compareSemesterLabels(a, b))
     .map(([label, groupedItems]) => ({ label, items: groupedItems }));
 }
+
+export function semesterWindow(labels: string[], anchor: string, count: 1 | 2) {
+  if (!labels.length) return [];
+
+  const anchorIndex = labels.indexOf(anchor);
+  const selectedIndex = anchorIndex === -1 ? 0 : anchorIndex;
+  const startIndex = Math.min(selectedIndex, Math.max(0, labels.length - count));
+
+  return labels.slice(startIndex, startIndex + count);
+}

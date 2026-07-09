@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { compareSemesterLabels, groupBySemester, semesterLabel } from "./semester";
+import { compareSemesterLabels, groupBySemester, semesterLabel, semesterWindow } from "./semester";
 
 const section = (year: string | null, term: string | null, id: string) => ({ year, term, id });
 
@@ -31,4 +31,15 @@ test("groupBySemester groups sections and sorts newest semester first", () => {
 test("compareSemesterLabels sorts conventional terms by year and academic term", () => {
   const labels = ["Spring 2025", "Fall 2024", "Summer 2025", "Fall 2025"].sort(compareSemesterLabels);
   assert.deepEqual(labels, ["Fall 2025", "Summer 2025", "Spring 2025", "Fall 2024"]);
+});
+
+test("semesterWindow defaults to the two newest semesters", () => {
+  const labels = ["Fall 2025", "Fall 2019", "Spring 2019"];
+  assert.deepEqual(semesterWindow(labels, "", 2), ["Fall 2025", "Fall 2019"]);
+});
+
+test("semesterWindow keeps two semesters visible at the end of the list", () => {
+  const labels = ["Fall 2025", "Fall 2019", "Spring 2019"];
+  assert.deepEqual(semesterWindow(labels, "Spring 2019", 2), ["Fall 2019", "Spring 2019"]);
+  assert.deepEqual(semesterWindow(labels, "Spring 2019", 1), ["Spring 2019"]);
 });
