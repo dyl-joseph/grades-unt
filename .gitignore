@@ -42,7 +42,3 @@ next-env.d.ts
 
 # supabase (local CLI workspace)
 supabase/
-
-# omx state (local agent artifacts)
-.omx/
-**/.omx/
