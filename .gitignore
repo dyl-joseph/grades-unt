@@ -46,3 +46,5 @@ supabase/
 # omx state (local agent artifacts)
 .omx/
 **/.omx/
+# Interrupted encrypted-data builds are temporary and must never be committed.
+unt-grade-distribution/public/.encrypted-build-*/
