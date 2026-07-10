@@ -41,6 +41,13 @@ test("loadCourseByCode decrypts static course data and never falls back to the c
     title: "PRE-CALCULUS",
     sections: [
       {
+        sectionNumber: "301",
+        instructor: { firstName: "Grace", lastName: "Hopper" },
+        year: "2025",
+        term: "Fall",
+        grades: { A: 0, B: 0, C: 0, D: 0, F: 0, P: 0, NP: 0, W: 0, I: 0 },
+      },
+      {
         sectionNumber: "001",
         instructor: { firstName: "Ada", lastName: "Lovelace" },
         year: "2025",
@@ -50,7 +57,7 @@ test("loadCourseByCode decrypts static course data and never falls back to the c
     ],
   };
   const blobId = "math-1650.bin";
-  const { encrypted, meta } = await encryptCourse(course, passphrase);
+  let { encrypted, meta } = await encryptCourse(course, passphrase);
   const calls: string[] = [];
   let missingBlob = false;
 
@@ -85,8 +92,12 @@ test("loadCourseByCode decrypts static course data and never falls back to the c
 
   const loaded = await loadCourseByCode("MATH", "1650");
 
-  assert.deepEqual(loaded, course);
+  assert.deepEqual(loaded, { ...course, sections: [course.sections[1]] });
   assert.ok(!calls.some((url) => url.startsWith("/api/course/")));
+
+  const emptyCourse = { ...course, sections: [course.sections[0]] };
+  ({ encrypted, meta } = await encryptCourse(emptyCourse, passphrase));
+  assert.equal(await loadCourseByCode("MATH", "1650"), null);
 
   delete process.env.NEXT_PUBLIC_DATA_KEY;
   await assert.rejects(() => loadCourseByCode("MATH", "1650"), {

@@ -29,6 +29,11 @@ export type EncryptedCourse = {
   sections: EncryptedSection[];
 };
 
+export function sectionHasGrades(section: EncryptedSection) {
+  const { A, B, C, D, F, P, NP, W, I } = section.grades;
+  return A + B + C + D + F + P + NP + W + I > 0;
+}
+
 let manifestCache: ManifestEntry[] | null = null;
 const COURSE_DATA_KEY_ERROR = "Course data key is missing or invalid for this deployment";
 
@@ -188,7 +193,11 @@ export async function loadCourseByCode(prefix: string, number: string, passphras
   if (!entry) return null;
 
   try {
-    return (await decryptBlob(entry.id, passphrase)) as EncryptedCourse;
+    const course = (await decryptBlob(entry.id, passphrase)) as EncryptedCourse;
+    const sections = course.sections.filter(sectionHasGrades);
+    if (sections.length === 0) return null;
+
+    return { ...course, sections };
   } catch (error) {
     if (isCourseDataKeyError(error)) {
       throw new Error(COURSE_DATA_KEY_ERROR);
@@ -220,7 +229,8 @@ export async function loadInstructorSections(firstName: string, lastName: string
     for (const section of course.sections) {
       if (
         section.instructor.lastName.toLowerCase() === needleLast &&
-        section.instructor.firstName.toLowerCase() === needleFirst
+        section.instructor.firstName.toLowerCase() === needleFirst &&
+        sectionHasGrades(section)
       ) {
         sections.push({
           ...section,

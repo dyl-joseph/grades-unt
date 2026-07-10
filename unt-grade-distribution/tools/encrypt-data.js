@@ -8,15 +8,28 @@ const crypto = require('crypto');
 const { parse } = require('csv-parse/sync');
 const { randomUUID } = require('crypto');
 
+const GRADE_COLUMNS = ['A', 'B', 'C', 'D', 'F', 'P', 'NP', 'W', 'I'];
+
+function sectionHasGrades(section) {
+  const gradeCount = GRADE_COLUMNS.reduce(
+    (total, grade) => total + (Number(section.grades[grade]) || 0),
+    0,
+  );
+
+  return gradeCount > 0;
+}
+
+function courseWithGradedSections(course) {
+  return {
+    ...course,
+    sections: course.sections.filter(sectionHasGrades),
+  };
+}
+
 const DATA_DIR = path.join(__dirname, '..', 'prisma', 'data');
 const OUT_DIR = path.join(__dirname, '..', 'public', 'encrypted');
 
 const ITERATIONS = parseInt(process.env.PBKDF2_ITERATIONS || '200000', 10);
-if (!process.env.MASTER_PASSPHRASE) {
-  console.error('Please set MASTER_PASSPHRASE environment variable to encrypt data.');
-  process.exit(1);
-}
-const PASSPHRASE = process.env.MASTER_PASSPHRASE;
 
 const DEFAULT_YEAR = process.env.DEFAULT_DATA_YEAR || '2025';
 const DEFAULT_TERM = process.env.DEFAULT_DATA_TERM || 'Fall';
@@ -50,6 +63,12 @@ function keyForCourse(prefix, number) {
 }
 
 async function main() {
+  if (!process.env.MASTER_PASSPHRASE) {
+    console.error('Please set MASTER_PASSPHRASE environment variable to encrypt data.');
+    process.exit(1);
+  }
+  const passphrase = process.env.MASTER_PASSPHRASE;
+
   if (!fs.existsSync(DATA_DIR)) {
     console.error('No data directory found at', DATA_DIR);
     process.exit(1);
@@ -111,24 +130,27 @@ async function main() {
     const manifest = [];
     console.log(`Encrypting ${courseMap.size} course blobs...`);
     for (const course of courseMap.values()) {
+      const filteredCourse = courseWithGradedSections(course);
+      if (filteredCourse.sections.length === 0) continue;
+
       const id = randomUUID().replace(/-/g, '');
       const outName = `${id}.bin`;
       const metaName = `${id}.meta.json`;
       const salt = crypto.randomBytes(16);
       const iv = crypto.randomBytes(12);
 
-      const plain = Buffer.from(JSON.stringify(course), 'utf8');
-      const ciphertext = encryptBuffer(plain, PASSPHRASE, salt, iv);
+      const plain = Buffer.from(JSON.stringify(filteredCourse), 'utf8');
+      const ciphertext = encryptBuffer(plain, passphrase, salt, iv);
 
       fs.writeFileSync(path.join(buildBlobsDir, outName), ciphertext);
       fs.writeFileSync(path.join(buildBlobsDir, metaName), JSON.stringify({ iv: b64(iv), salt: b64(salt), iterations: ITERATIONS }));
 
-      const instructorTokens = course.sections.flatMap((s) => [
+      const instructorTokens = filteredCourse.sections.flatMap((s) => [
         s.instructor.lastName,
         `${s.instructor.lastName},${s.instructor.firstName}`,
       ]);
-      const tokens = [ `${course.prefix} ${course.number}`, course.title, ...instructorTokens ].slice(0, 80);
-      manifest.push({ id: outName, tokens, preview: { prefix: course.prefix, number: course.number, title: course.title } });
+      const tokens = [ `${filteredCourse.prefix} ${filteredCourse.number}`, filteredCourse.title, ...instructorTokens ].slice(0, 80);
+      manifest.push({ id: outName, tokens, preview: { prefix: filteredCourse.prefix, number: filteredCourse.number, title: filteredCourse.title } });
     }
 
     fs.writeFileSync(path.join(buildDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
@@ -141,7 +163,11 @@ async function main() {
   console.log('Wrote manifest.json and blobs to', OUT_DIR);
 }
 
-main().catch((e) => {
-  console.error('Encryptor failed:', e);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((e) => {
+    console.error('Encryptor failed:', e);
+    process.exit(1);
+  });
+}
+
+module.exports = { courseWithGradedSections, sectionHasGrades };
