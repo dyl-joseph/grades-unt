@@ -8,7 +8,9 @@ import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
 import CourseSaveButton from "@/components/CourseSaveButton";
 import ShareButton from "@/components/ShareButton";
+import { SemesterSelect, SemesterWindowControls, type SemesterCount } from "@/components/SemesterControls";
 import { loadCourseByCode } from "@/lib/encryptedData";
+import { groupBySemester, semesterWindow } from "@/lib/semester";
 
 type CourseData = {
   prefix: string;
@@ -27,6 +29,8 @@ function toSectionModel(course: CourseData) {
   return course.sections.map((s, idx) => ({
     id: `${course.prefix}-${course.number}-${s.sectionNumber}-${idx}`,
     sectionNumber: s.sectionNumber,
+    year: s.year,
+    term: s.term,
     instructor: s.instructor,
     course: { prefix: course.prefix, number: course.number, title: course.title },
     gradeA: s.grades.A,
@@ -61,12 +65,18 @@ export default function CoursePage() {
   const [course, setCourse] = useState<CourseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [distributionSemester, setDistributionSemester] = useState("all");
+  const [sectionAnchor, setSectionAnchor] = useState("");
+  const [sectionSemesterCount, setSectionSemesterCount] = useState<SemesterCount>(2);
 
   useEffect(() => {
     if (!prefix || !number) return;
     let mounted = true;
-    setLoading(true);
-    setError(null);
+    queueMicrotask(() => {
+      if (!mounted) return;
+      setLoading(true);
+      setError(null);
+    });
 
     loadCourseByCode(prefix, number)
       .then((data) => {
@@ -89,7 +99,29 @@ export default function CoursePage() {
   const sections = useMemo(() => (course ? toSectionModel(course) : []), [course]);
   const aggregate = useMemo(() => aggregateGrades(sections), [sections]);
   const overallGPA = useMemo(() => calculateGPA(aggregate), [aggregate]);
-  const aggregateChartData = useMemo(() => toChartData(aggregate), [aggregate]);
+  const semesterGroups = useMemo(() => groupBySemester(sections), [sections]);
+  const semesterLabels = useMemo(() => semesterGroups.map((group) => group.label), [semesterGroups]);
+  const activeDistributionSemester = distributionSemester === "all" || semesterLabels.includes(distributionSemester)
+    ? distributionSemester
+    : "all";
+  const distributionSections = useMemo(
+    () => activeDistributionSemester === "all"
+      ? sections
+      : semesterGroups.find((group) => group.label === activeDistributionSemester)?.items ?? [],
+    [activeDistributionSemester, sections, semesterGroups]
+  );
+  const distributionAggregate = useMemo(() => aggregateGrades(distributionSections), [distributionSections]);
+  const distributionChartData = useMemo(() => toChartData(distributionAggregate), [distributionAggregate]);
+  const distributionGPA = useMemo(() => calculateGPA(distributionAggregate), [distributionAggregate]);
+  const activeSectionAnchor = semesterLabels.includes(sectionAnchor) ? sectionAnchor : semesterLabels[0] ?? "";
+  const visibleSemesterLabels = useMemo(
+    () => semesterWindow(semesterLabels, activeSectionAnchor, sectionSemesterCount),
+    [activeSectionAnchor, sectionSemesterCount, semesterLabels]
+  );
+  const visibleSemesterGroups = useMemo(
+    () => semesterGroups.filter((group) => visibleSemesterLabels.includes(group.label)),
+    [semesterGroups, visibleSemesterLabels]
+  );
 
   if (loading) {
     return (
@@ -143,11 +175,11 @@ export default function CoursePage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
+        <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
+          <h1 className="min-w-0 break-words text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
             {course.prefix} {course.number} <span className="text-gray-500 dark:text-green-300/60">—</span> {course.title}
           </h1>
-          <div className="flex items-start gap-2">
+          <div className="flex w-full flex-wrap items-start justify-end gap-2 sm:w-auto">
             <ShareButton url={`/course/${course.prefix}/${course.number}`} />
             <CourseSaveButton
               item={{
@@ -171,7 +203,7 @@ export default function CoursePage() {
             />
             <a
               href={`/compare?type=course&a=${course.prefix}:${course.number}`}
-              className="inline-flex items-center rounded-lg border border-green-400/50 bg-green-50 px-3 py-1.5 font-medium text-green-700 transition-all hover:border-green-500/70 hover:bg-green-100 dark:border-green-600/50 dark:bg-green-900/20 dark:text-green-200 dark:hover:border-green-500 dark:hover:bg-green-900/40"
+              className="inline-flex items-center whitespace-nowrap rounded-lg border border-green-400/50 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition-all hover:border-green-500/70 hover:bg-green-100 dark:border-green-600/50 dark:bg-green-900/20 dark:text-green-200 dark:hover:border-green-500 dark:hover:bg-green-900/40"
               title="Compare with another course"
             >
               Compare
@@ -181,20 +213,63 @@ export default function CoursePage() {
         <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
           <span className="flex items-center gap-1.5">Overall GPA: <GpaBadge gpa={overallGPA} /></span>
           <span>{sections.length} sections</span>
+          <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
           <span>{aggregate.totalEnroll.toLocaleString()} total students</span>
         </div>
       </div>
 
-      <div className="mb-10 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-6 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Aggregate Grade Distribution</h2>
-        <GradeChart data={aggregateChartData} />
+      <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60 sm:p-6">
+        <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-green-100">Grade Distribution</h2>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-green-200/70">
+              <span>{activeDistributionSemester === "all" ? "All semesters" : activeDistributionSemester}</span>
+              <span aria-hidden="true">·</span>
+              <span>{distributionSections.length} section{distributionSections.length !== 1 ? "s" : ""}</span>
+              <span aria-hidden="true">·</span>
+              <span className="flex items-center gap-1.5">GPA: <GpaBadge gpa={distributionGPA} /></span>
+            </div>
+          </div>
+          <SemesterSelect
+            id="course-distribution-semester"
+            labels={semesterLabels}
+            value={activeDistributionSemester}
+            onChange={setDistributionSemester}
+          />
+        </div>
+        <GradeChart data={distributionChartData} />
       </div>
 
-      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Sections</h2>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {sections.map((section) => (
-          <SectionCard key={section.id} section={section} />
-        ))}
+      <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-green-100">Sections by Semester</h2>
+        <SemesterWindowControls
+          id="course-section-semester"
+          labels={semesterLabels}
+          anchor={activeSectionAnchor}
+          count={sectionSemesterCount}
+          onAnchorChange={setSectionAnchor}
+          onCountChange={setSectionSemesterCount}
+        />
+      </div>
+      <div className="space-y-10">
+        {visibleSemesterGroups.map(({ label, items }) => {
+          const semesterAggregate = aggregateGrades(items);
+          return (
+            <section key={label}>
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-green-100">{label}</h3>
+                <span className="text-sm text-gray-500 dark:text-green-200/70">{items.length} section{items.length !== 1 ? "s" : ""}</span>
+                <span className="text-sm text-gray-500 dark:text-green-200/70">{semesterAggregate.totalEnroll.toLocaleString()} students</span>
+                <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-green-200/70">GPA: <GpaBadge gpa={calculateGPA(semesterAggregate)} /></span>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((section) => (
+                  <SectionCard key={section.id} section={section} />
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );

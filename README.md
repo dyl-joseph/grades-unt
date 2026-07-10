@@ -96,5 +96,5 @@ DATABASE_URL="postgresql://user:***@host:5432/db" DIRECT_URL="postgresql://user:
 ## Planned features
 
 - **SPOT Evaluations** — integrate Student Perceptions of Teaching data for instructors.
-- **More semesters** — expand grade distribution data beyond the current export.
+- **More historical coverage** — expand beyond the currently imported semesters as additional source exports become available.
 - **Smarter client aggregates** — keep compare-page aggregation fast by precomputing or indexing more summary data in the encrypted manifest layer without reintroducing a live database dependency for public reads.

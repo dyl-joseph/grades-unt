@@ -42,7 +42,7 @@ export default function LazyChart({
   }, []);
 
   return (
-    <div ref={ref} style={{ minHeight: height }}>
+    <div ref={ref} className="min-w-0 overflow-hidden" style={{ minHeight: height }}>
       {visible ? (
         <GradeChart data={data} height={height} mode={mode} />
       ) : (

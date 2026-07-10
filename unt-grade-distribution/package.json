@@ -7,8 +7,9 @@
     "build": "prisma generate && next build --webpack",
     "encrypt": "node ./tools/encrypt-data.js",
     "convert:relational": "node ./tools/convert-relational-to-encrypt-csv.js",
+    "pivot:grades": "node ./tools/pivot-grade-sheet.js",
     "start": "next start",
-    "test": "node --import tsx --test 'src/**/*.test.ts'",
+    "test": "node --import tsx --test 'src/**/*.test.ts' 'tools/**/*.test.js'",
     "lint": "eslint",
     "postinstall": "prisma generate"
   },

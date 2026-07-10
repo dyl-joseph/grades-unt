@@ -7,10 +7,14 @@ import { aggregateGrades, calculateGPA, toChartData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
+import { SemesterSelect, SemesterWindowControls, type SemesterCount } from "@/components/SemesterControls";
 import { fromInstructorSlug, loadInstructorSections } from "@/lib/encryptedData";
+import { groupBySemester, semesterLabel, semesterWindow } from "@/lib/semester";
 
 type SectionWithCourse = {
   sectionNumber: string;
+  year: string | null;
+  term: string | null;
   instructor: { firstName: string; lastName: string };
   grades: { A: number; B: number; C: number; D: number; F: number; P: number; NP: number; W: number; I: number };
   course: { prefix: string; number: string; title: string };
@@ -24,12 +28,18 @@ export default function InstructorPage() {
   const [sections, setSections] = useState<SectionWithCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [distributionSemester, setDistributionSemester] = useState("all");
+  const [sectionAnchor, setSectionAnchor] = useState("");
+  const [sectionSemesterCount, setSectionSemesterCount] = useState<SemesterCount>(2);
 
   useEffect(() => {
     if (!firstName || !lastName) return;
     let mounted = true;
-    setLoading(true);
-    setError(null);
+    queueMicrotask(() => {
+      if (!mounted) return;
+      setLoading(true);
+      setError(null);
+    });
 
     loadInstructorSections(firstName, lastName)
       .then((data) => {
@@ -54,6 +64,8 @@ export default function InstructorPage() {
       sections.map((s, idx) => ({
         id: `${s.course.prefix}-${s.course.number}-${s.sectionNumber}-${idx}`,
         sectionNumber: s.sectionNumber,
+        year: s.year,
+        term: s.term,
         instructor: s.instructor,
         course: s.course,
         gradeA: s.grades.A,
@@ -73,10 +85,40 @@ export default function InstructorPage() {
 
   const overallAggregate = useMemo(() => aggregateGrades(normalizedSections), [normalizedSections]);
   const overallGPA = useMemo(() => calculateGPA(overallAggregate), [overallAggregate]);
+  const semesterGroups = useMemo(() => groupBySemester(normalizedSections), [normalizedSections]);
+  const semesterLabels = useMemo(() => semesterGroups.map((group) => group.label), [semesterGroups]);
+  const activeDistributionSemester = distributionSemester === "all" || semesterLabels.includes(distributionSemester)
+    ? distributionSemester
+    : "all";
+  const distributionSections = useMemo(
+    () => activeDistributionSemester === "all"
+      ? normalizedSections
+      : semesterGroups.find((group) => group.label === activeDistributionSemester)?.items ?? [],
+    [activeDistributionSemester, normalizedSections, semesterGroups]
+  );
+  const distributionAggregate = useMemo(() => aggregateGrades(distributionSections), [distributionSections]);
+  const distributionGPA = useMemo(() => calculateGPA(distributionAggregate), [distributionAggregate]);
+  const activeSectionAnchor = semesterLabels.includes(sectionAnchor) ? sectionAnchor : semesterLabels[0] ?? "";
+  const visibleSemesterLabels = useMemo(
+    () => semesterWindow(semesterLabels, activeSectionAnchor, sectionSemesterCount),
+    [activeSectionAnchor, sectionSemesterCount, semesterLabels]
+  );
+  const visibleSemesterGroups = useMemo(
+    () => semesterGroups.filter((group) => visibleSemesterLabels.includes(group.label)),
+    [semesterGroups, visibleSemesterLabels]
+  );
+  const visibleSections = useMemo(
+    () => normalizedSections.filter((section) => visibleSemesterLabels.includes(semesterLabel(section))),
+    [normalizedSections, visibleSemesterLabels]
+  );
+  const allCourseCount = useMemo(
+    () => new Set(normalizedSections.map((section) => `${section.course.prefix}:${section.course.number}`)).size,
+    [normalizedSections]
+  );
 
   const courseGroups = useMemo(() => {
     const map = new Map<string, { course: { prefix: string; number: string; title: string }; sections: typeof normalizedSections }>();
-    for (const section of normalizedSections) {
+    for (const section of visibleSections) {
       const key = `${section.course.prefix}:${section.course.number}`;
       const existing = map.get(key);
       if (existing) {
@@ -89,7 +131,7 @@ export default function InstructorPage() {
       }
     }
     return Array.from(map.values());
-  }, [normalizedSections]);
+  }, [visibleSections]);
 
   if (loading) {
     return (
@@ -136,12 +178,12 @@ export default function InstructorPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">{firstName} {lastName}</h1>
-          <div className="flex items-start gap-2">
+        <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
+          <h1 className="min-w-0 break-words text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">{firstName} {lastName}</h1>
+          <div className="flex w-full flex-wrap items-start justify-end gap-2 sm:w-auto">
             <a
               href={`/compare?type=instructor&a=${encodeURIComponent(`${lastName},${firstName}`)}`}
-              className="inline-flex items-center rounded-lg border border-green-400/50 bg-green-50 px-3 py-1.5 font-medium text-green-700 transition-all hover:border-green-500/70 hover:bg-green-100 dark:border-green-600/50 dark:bg-green-900/20 dark:text-green-200 dark:hover:border-green-500 dark:hover:bg-green-900/40"
+              className="inline-flex items-center whitespace-nowrap rounded-lg border border-green-400/50 bg-green-50 px-3 py-1.5 font-medium text-green-700 transition-all hover:border-green-500/70 hover:bg-green-100 dark:border-green-600/50 dark:bg-green-900/20 dark:text-green-200 dark:hover:border-green-500 dark:hover:bg-green-900/40"
               title="Compare with another instructor"
             >
               Compare
@@ -151,23 +193,71 @@ export default function InstructorPage() {
         <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
           <span className="flex items-center gap-1.5">Overall GPA: <GpaBadge gpa={overallGPA} /></span>
           <span>{normalizedSections.length} sections</span>
-          <span>{courseGroups.length} course{courseGroups.length !== 1 ? "s" : ""} taught</span>
+          <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
+          <span>{allCourseCount} course{allCourseCount !== 1 ? "s" : ""} taught</span>
         </div>
       </div>
 
-      <div className="mb-10 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-6 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Aggregate Grade Distribution</h2>
-        <GradeChart data={toChartData(overallAggregate)} />
+      <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60 sm:p-6">
+        <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-green-100">Grade Distribution</h2>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-green-200/70">
+              <span>{activeDistributionSemester === "all" ? "All semesters" : activeDistributionSemester}</span>
+              <span aria-hidden="true">·</span>
+              <span>{distributionSections.length} section{distributionSections.length !== 1 ? "s" : ""}</span>
+              <span aria-hidden="true">·</span>
+              <span className="flex items-center gap-1.5">GPA: <GpaBadge gpa={distributionGPA} /></span>
+            </div>
+          </div>
+          <SemesterSelect
+            id="instructor-distribution-semester"
+            labels={semesterLabels}
+            value={activeDistributionSemester}
+            onChange={setDistributionSemester}
+          />
+        </div>
+        <GradeChart data={toChartData(distributionAggregate)} />
       </div>
 
+      <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60 sm:p-5">
+        <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-green-100">Semester Summary</h2>
+          <SemesterWindowControls
+            id="instructor-section-semester"
+            labels={semesterLabels}
+            anchor={activeSectionAnchor}
+            count={sectionSemesterCount}
+            onAnchorChange={setSectionAnchor}
+            onCountChange={setSectionSemesterCount}
+          />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {visibleSemesterGroups.map(({ label, items }) => {
+            const semesterAggregate = aggregateGrades(items);
+            return (
+              <div key={label} className="rounded-2xl border border-jungle-tan-dark/20 bg-white/50 p-3 dark:border-green-900/60 dark:bg-green-950/20">
+                <div className="font-semibold text-gray-900 dark:text-green-100">{label}</div>
+                <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-green-200/70">
+                  <span>{items.length} section{items.length !== 1 ? "s" : ""}</span>
+                  <span>{semesterAggregate.totalEnroll.toLocaleString()} students</span>
+                  <span className="flex items-center gap-1.5">GPA: <GpaBadge gpa={calculateGPA(semesterAggregate)} /></span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-green-100">Courses in Selected Semesters</h2>
       {courseGroups.map(({ course, sections }) => (
         <div key={`${course.prefix}-${course.number}`} className="mb-10">
-          <h2 className="mb-4 text-lg font-semibold">
+          <h3 className="mb-4 flex min-w-0 flex-wrap items-baseline gap-x-2 text-lg font-semibold">
             <Link href={`/course/${course.prefix}/${course.number}`} className="text-primary hover:underline dark:text-jungle-leaf">
               {course.prefix} {course.number}
             </Link>
-            <span className="ml-2 text-gray-500 dark:text-green-300/60">— {course.title}</span>
-          </h2>
+            <span className="min-w-0 break-words text-gray-500 dark:text-green-300/60">— {course.title}</span>
+          </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {sections.map((section) => (
               <SectionCard key={section.id} section={section} />

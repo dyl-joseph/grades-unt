@@ -70,6 +70,21 @@ npm run convert:relational
 
 After conversion, run the encryptor.
 
+### Option C: long-form grade export
+
+If the source file has one row per grade bucket with columns like `Semester/Term`, `Subject`, `Catalog Number`, `Class Section`, `Title`, `Grade`, `Grade Count`, and `Instructor`, pivot it into the encryptor CSV format first:
+
+```bash
+npm run pivot:grades -- \
+  --input path/to/grade-export.csv \
+  --out prisma/data/grades-2019.csv \
+  --split-by-term prisma/data/by-term
+```
+
+Use `--sheet-url` instead of `--input` to download a public Google Sheet. The combined output preserves the source year and term; `--semester-label` is available only when a source needs one explicit synthetic label. Section numbers are normalized to match the existing encryptor CSV style, and the optional `--split-by-term` directory contains per-term audit files.
+
+Keep legacy/default data and historical outputs as separate CSV files directly under `prisma/data`. The encryptor reads every CSV in that directory and merges matching courses into one encrypted course blob. Rows without `YEAR` or `TERM` continue to default to Fall 2025, while pivoted historical rows retain their source semester. Each run replaces the generated encrypted directory only after the complete new dataset has been built, so stale blobs are removed without exposing a partial build.
+
 ## Client usage
 
 - `fetchManifest()` loads `/encrypted/manifest.json`.

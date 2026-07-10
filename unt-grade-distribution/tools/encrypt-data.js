@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Build-time encryptor: read CSVs from prisma/data, group per-course, and
 // produce encrypted blobs + manifest in public/encrypted.
 const fs = require('fs');
@@ -7,16 +8,31 @@ const crypto = require('crypto');
 const { parse } = require('csv-parse/sync');
 const { randomUUID } = require('crypto');
 
+const GRADE_COLUMNS = ['A', 'B', 'C', 'D', 'F', 'P', 'NP', 'W', 'I'];
+
+function sectionHasGrades(section) {
+  const gradeCount = GRADE_COLUMNS.reduce(
+    (total, grade) => total + (Number(section.grades[grade]) || 0),
+    0,
+  );
+
+  return gradeCount > 0;
+}
+
+function courseWithGradedSections(course) {
+  return {
+    ...course,
+    sections: course.sections.filter(sectionHasGrades),
+  };
+}
+
 const DATA_DIR = path.join(__dirname, '..', 'prisma', 'data');
 const OUT_DIR = path.join(__dirname, '..', 'public', 'encrypted');
-const BLOBS_DIR = path.join(OUT_DIR, 'blobs');
 
 const ITERATIONS = parseInt(process.env.PBKDF2_ITERATIONS || '200000', 10);
-if (!process.env.MASTER_PASSPHRASE) {
-  console.error('Please set MASTER_PASSPHRASE environment variable to encrypt data.');
-  process.exit(1);
-}
-const PASSPHRASE = process.env.MASTER_PASSPHRASE;
+
+const DEFAULT_YEAR = process.env.DEFAULT_DATA_YEAR || '2025';
+const DEFAULT_TERM = process.env.DEFAULT_DATA_TERM || 'Fall';
 
 function ensureDir(d) {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
@@ -47,7 +63,11 @@ function keyForCourse(prefix, number) {
 }
 
 async function main() {
-  ensureDir(BLOBS_DIR);
+  if (!process.env.MASTER_PASSPHRASE) {
+    console.error('Please set MASTER_PASSPHRASE environment variable to encrypt data.');
+    process.exit(1);
+  }
+  const passphrase = process.env.MASTER_PASSPHRASE;
 
   if (!fs.existsSync(DATA_DIR)) {
     console.error('No data directory found at', DATA_DIR);
@@ -78,8 +98,8 @@ async function main() {
       const section = {
         sectionNumber: String(row['SECTION NUMBER'] || ''),
         instructor: { firstName, lastName },
-        year: row['YEAR'] ? String(row['YEAR']).trim() : null,
-        term: row['TERM'] ? String(row['TERM']).trim() : null,
+        year: row['YEAR'] ? String(row['YEAR']).trim() : DEFAULT_YEAR,
+        term: row['TERM'] ? String(row['TERM']).trim() : DEFAULT_TERM,
         grades: {
           A: Math.round(parseFloat(row['A']) || 0),
           B: Math.round(parseFloat(row['B']) || 0),
@@ -101,35 +121,53 @@ async function main() {
     }
   }
 
-  const manifest = [];
-  console.log(`Encrypting ${courseMap.size} course blobs...`);
-  for (const [k, course] of courseMap.entries()) {
-    const id = randomUUID().replace(/-/g, '');
-    const outName = `${id}.bin`;
-    const metaName = `${id}.meta.json`;
-    const salt = crypto.randomBytes(16);
-    const iv = crypto.randomBytes(12);
+  const buildDir = path.join(path.dirname(OUT_DIR), `.encrypted-build-${process.pid}`);
+  const buildBlobsDir = path.join(buildDir, 'blobs');
+  fs.rmSync(buildDir, { recursive: true, force: true });
+  ensureDir(buildBlobsDir);
 
-    const plain = Buffer.from(JSON.stringify(course), 'utf8');
-    const ciphertext = encryptBuffer(plain, PASSPHRASE, salt, iv);
+  try {
+    const manifest = [];
+    console.log(`Encrypting ${courseMap.size} course blobs...`);
+    for (const course of courseMap.values()) {
+      const filteredCourse = courseWithGradedSections(course);
+      if (filteredCourse.sections.length === 0) continue;
 
-    fs.writeFileSync(path.join(BLOBS_DIR, outName), ciphertext);
-    fs.writeFileSync(path.join(BLOBS_DIR, metaName), JSON.stringify({ iv: b64(iv), salt: b64(salt), iterations: ITERATIONS }));
+      const id = randomUUID().replace(/-/g, '');
+      const outName = `${id}.bin`;
+      const metaName = `${id}.meta.json`;
+      const salt = crypto.randomBytes(16);
+      const iv = crypto.randomBytes(12);
 
-    // Tokens for simple client-side search - keep these small
-    const instructorTokens = course.sections.flatMap((s) => [
-      s.instructor.lastName,
-      `${s.instructor.lastName},${s.instructor.firstName}`,
-    ]);
-    const tokens = [ `${course.prefix} ${course.number}`, course.title, ...instructorTokens ].slice(0, 80);
-    manifest.push({ id: outName, tokens, preview: { prefix: course.prefix, number: course.number, title: course.title } });
+      const plain = Buffer.from(JSON.stringify(filteredCourse), 'utf8');
+      const ciphertext = encryptBuffer(plain, passphrase, salt, iv);
+
+      fs.writeFileSync(path.join(buildBlobsDir, outName), ciphertext);
+      fs.writeFileSync(path.join(buildBlobsDir, metaName), JSON.stringify({ iv: b64(iv), salt: b64(salt), iterations: ITERATIONS }));
+
+      const instructorTokens = filteredCourse.sections.flatMap((s) => [
+        s.instructor.lastName,
+        `${s.instructor.lastName},${s.instructor.firstName}`,
+      ]);
+      const tokens = [ `${filteredCourse.prefix} ${filteredCourse.number}`, filteredCourse.title, ...instructorTokens ].slice(0, 80);
+      manifest.push({ id: outName, tokens, preview: { prefix: filteredCourse.prefix, number: filteredCourse.number, title: filteredCourse.title } });
+    }
+
+    fs.writeFileSync(path.join(buildDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+    fs.rmSync(OUT_DIR, { recursive: true, force: true });
+    fs.renameSync(buildDir, OUT_DIR);
+  } finally {
+    fs.rmSync(buildDir, { recursive: true, force: true });
   }
 
-  fs.writeFileSync(path.join(OUT_DIR, 'manifest.json'), JSON.stringify(manifest, null, 2));
   console.log('Wrote manifest.json and blobs to', OUT_DIR);
 }
 
-main().catch((e) => {
-  console.error('Encryptor failed:', e);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((e) => {
+    console.error('Encryptor failed:', e);
+    process.exit(1);
+  });
+}
+
+module.exports = { courseWithGradedSections, sectionHasGrades };
