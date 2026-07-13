@@ -424,12 +424,32 @@ function useCompareSide(initialKind: CompareType, initialSelection: Selection) {
   );
 
   const onSelect = useCallback((item: Suggestion) => {
+    const normalizedQuery = debouncedQuery.trim().toLowerCase().replace(/\s+/g, " ");
+    void fetch("/api/search-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        rawQuery: debouncedQuery,
+        normalizedQuery,
+        searchKind: isCourseSuggestion(item) ? "course" : "instructor",
+        source: "compare",
+        coursePrefix: isCourseSuggestion(item) ? item.prefix : undefined,
+        courseNumber: isCourseSuggestion(item) ? item.number : undefined,
+        courseTitle: isCourseSuggestion(item) ? item.title : undefined,
+        instructorFirstName: isInstructorSuggestion(item) ? item.firstName : undefined,
+        instructorLastName: isInstructorSuggestion(item) ? item.lastName : undefined,
+        resultCountCourses: kind === "course" ? results.length : 0,
+        resultCountInstructors: kind === "instructor" ? results.length : 0,
+      }),
+      keepalive: true,
+    });
+
     setSelected(item);
     setQuery("");
     setFocused(false);
     setResults([]);
     setError(null);
-  }, []);
+  }, [debouncedQuery, kind, results]);
 
   useEffect(() => {
     const trimmed = debouncedQuery.trim();

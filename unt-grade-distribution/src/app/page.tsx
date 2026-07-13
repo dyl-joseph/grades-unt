@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
 
 export default function Home() {
@@ -24,10 +25,18 @@ export default function Home() {
       </div>
 
       {/* Hint */}
-      <p className="mt-10 select-none text-center text-base text-jungle-bark dark:text-green-300/50">
-        Search by course (e.g., &ldquo;ACCT 2010&rdquo;) or professor name
-        (e.g., &ldquo;Moore&rdquo;)
-      </p>
+      <div className="mt-4 flex flex-col items-center gap-2 text-center">
+        <p className="select-none text-base text-jungle-bark dark:text-green-300/50">
+          Search by course (e.g., &ldquo;ACCT 2010&rdquo;) or professor name
+          (e.g., &ldquo;Moore&rdquo;)
+        </p>
+        <Link
+          href="/terms"
+          className="text-sm font-medium text-jungle-vine underline decoration-jungle-vine/50 underline-offset-4 transition hover:text-primary hover:decoration-primary dark:text-green-300/80 dark:decoration-green-300/40 dark:hover:text-green-200"
+        >
+          Terms of Service
+        </Link>
+      </div>
     </div>
   );
 }

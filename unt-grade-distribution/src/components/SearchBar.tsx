@@ -183,6 +183,30 @@ export default function SearchBar({
     }
   };
 
+  const logSelection = (resultsItem: SearchResult["courses"][number] | SearchResult["instructors"][number]) => {
+    const normalized = debouncedQuery.trim();
+    if (normalized.length < MIN_QUERY_LENGTH) return;
+
+    void fetch("/api/search-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        rawQuery: debouncedQuery,
+        searchKind: "course" in resultsItem ? "course" : "instructor",
+        source: "site",
+        normalizedQuery: normalized.toLowerCase().replace(/\s+/g, " "),
+        coursePrefix: "prefix" in resultsItem ? resultsItem.prefix : undefined,
+        courseNumber: "number" in resultsItem ? resultsItem.number : undefined,
+        courseTitle: "title" in resultsItem ? resultsItem.title : undefined,
+        instructorFirstName: "firstName" in resultsItem ? resultsItem.firstName : undefined,
+        instructorLastName: "lastName" in resultsItem ? resultsItem.lastName : undefined,
+        resultCountCourses: results?.courses.length ?? 0,
+        resultCountInstructors: results?.instructors.length ?? 0,
+      }),
+      keepalive: true,
+    });
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const items = allItems();
     if (!isOpen || items.length === 0) return;
@@ -276,9 +300,10 @@ export default function SearchBar({
                         ? "bg-green-50 dark:bg-green-900/30"
                         : ""
                     }`}
-                    onClick={() =>
-                      navigate("instructor", String(instructor.id))
-                    }
+                    onClick={() => {
+                      logSelection(instructor);
+                      navigate("instructor", String(instructor.id));
+                    }}
                     disabled={navigatingId !== null}
                   >
                     <span className="font-medium text-gray-900 dark:text-gray-100">
@@ -309,9 +334,10 @@ export default function SearchBar({
                       ? "bg-green-50 dark:bg-green-900/30"
                       : ""
                   }`}
-                  onClick={() =>
-                    navigate("course", `${course.prefix}/${course.number}`)
-                  }
+                  onClick={() => {
+                    logSelection(course);
+                    navigate("course", `${course.prefix}/${course.number}`);
+                  }}
                   disabled={navigatingId !== null}
                 >
                   <span className="font-medium text-gray-900 dark:text-green-100">
@@ -346,9 +372,10 @@ export default function SearchBar({
                         ? "bg-green-50 dark:bg-green-900/30"
                         : ""
                     }`}
-                    onClick={() =>
-                      navigate("instructor", String(instructor.id))
-                    }
+                    onClick={() => {
+                      logSelection(instructor);
+                      navigate("instructor", String(instructor.id));
+                    }}
                     disabled={navigatingId !== null}
                   >
                     <span className="font-medium text-gray-900 dark:text-gray-100">
