@@ -7,9 +7,9 @@ import { aggregateGrades, calculateGPA, toChartData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
-import { SemesterSelect, SemesterWindowControls, type SemesterCount } from "@/components/SemesterControls";
+import { SemesterSelect, SemesterRangeBar } from "@/components/SemesterControls";
 import { fromInstructorSlug, loadInstructorSections } from "@/lib/encryptedData";
-import { groupBySemester, semesterLabel, semesterWindow } from "@/lib/semester";
+import { groupBySemester, semesterLabel } from "@/lib/semester";
 
 type SectionWithCourse = {
   sectionNumber: string;
@@ -29,8 +29,6 @@ export default function InstructorPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [distributionSemester, setDistributionSemester] = useState("all");
-  const [sectionAnchor, setSectionAnchor] = useState("");
-  const [sectionSemesterCount, setSectionSemesterCount] = useState<SemesterCount>(2);
 
   useEffect(() => {
     if (!firstName || !lastName) return;
@@ -87,6 +85,7 @@ export default function InstructorPage() {
   const overallGPA = useMemo(() => calculateGPA(overallAggregate), [overallAggregate]);
   const semesterGroups = useMemo(() => groupBySemester(normalizedSections), [normalizedSections]);
   const semesterLabels = useMemo(() => semesterGroups.map((group) => group.label), [semesterGroups]);
+  const summarySemesterLabels = useMemo(() => [...semesterLabels].reverse(), [semesterLabels]);
   const activeDistributionSemester = distributionSemester === "all" || semesterLabels.includes(distributionSemester)
     ? distributionSemester
     : "all";
@@ -98,11 +97,23 @@ export default function InstructorPage() {
   );
   const distributionAggregate = useMemo(() => aggregateGrades(distributionSections), [distributionSections]);
   const distributionGPA = useMemo(() => calculateGPA(distributionAggregate), [distributionAggregate]);
-  const activeSectionAnchor = semesterLabels.includes(sectionAnchor) ? sectionAnchor : semesterLabels[0] ?? "";
-  const visibleSemesterLabels = useMemo(
-    () => semesterWindow(semesterLabels, activeSectionAnchor, sectionSemesterCount),
-    [activeSectionAnchor, sectionSemesterCount, semesterLabels]
-  );
+  const [sectionLeftBoundary, setSectionLeftBoundary] = useState(0);
+  const [sectionRightBoundary, setSectionRightBoundary] = useState(Math.min(1, summarySemesterLabels.length));
+
+  useEffect(() => {
+    const maxBoundary = summarySemesterLabels.length;
+    setSectionLeftBoundary(0);
+    setSectionRightBoundary(Math.min(2, maxBoundary));
+  }, [summarySemesterLabels]);
+
+  const visibleSemesterLabels = useMemo(() => {
+    if (!summarySemesterLabels.length) return [];
+
+    const left = Math.max(0, Math.min(sectionLeftBoundary, Math.max(0, summarySemesterLabels.length - 1)));
+    const right = Math.max(left + 1, Math.min(sectionRightBoundary, summarySemesterLabels.length));
+
+    return summarySemesterLabels.slice(left, right);
+  }, [sectionLeftBoundary, sectionRightBoundary, summarySemesterLabels]);
   const visibleSemesterGroups = useMemo(
     () => semesterGroups.filter((group) => visibleSemesterLabels.includes(group.label)),
     [semesterGroups, visibleSemesterLabels]
@@ -199,7 +210,7 @@ export default function InstructorPage() {
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60 sm:p-6">
-        <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-4 flex min-w-0 flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-green-100">Grade Distribution</h2>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-green-200/70">
@@ -210,38 +221,56 @@ export default function InstructorPage() {
               <span className="flex items-center gap-1.5">GPA: <GpaBadge gpa={distributionGPA} /></span>
             </div>
           </div>
-          <SemesterSelect
-            id="instructor-distribution-semester"
-            labels={semesterLabels}
-            value={activeDistributionSemester}
-            onChange={setDistributionSemester}
-          />
+          <div className="shrink-0 self-start">
+            <SemesterSelect
+              id="instructor-distribution-semester"
+              labels={semesterLabels}
+              value={activeDistributionSemester}
+              onChange={setDistributionSemester}
+            />
+          </div>
         </div>
         <GradeChart data={toChartData(distributionAggregate)} />
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60 sm:p-5">
-        <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-green-100">Semester Summary</h2>
-          <SemesterWindowControls
-            id="instructor-section-semester"
-            labels={semesterLabels}
-            anchor={activeSectionAnchor}
-            count={sectionSemesterCount}
-            onAnchorChange={setSectionAnchor}
-            onCountChange={setSectionSemesterCount}
+        <div className="mb-4 flex min-w-0 flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-green-100">Semester Summary</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500 dark:text-green-200/70">
+              Drag the two bounds to choose a 1- or 2-semester window. The range can never collapse to zero width.
+            </p>
+          </div>
+          <div className="shrink-0 self-start text-sm font-medium text-gray-500 dark:text-green-200/70">
+            {visibleSemesterLabels.length === 1 ? visibleSemesterLabels[0] : `${visibleSemesterLabels[0] ?? ""} to ${visibleSemesterLabels[1] ?? ""}`}
+          </div>
+        </div>
+        <div className="mb-5 rounded-2xl border border-jungle-tan-dark/20 bg-white/55 px-4 py-4 shadow-sm dark:border-green-900/50 dark:bg-green-950/20 sm:px-5">
+          <SemesterRangeBar
+            labels={summarySemesterLabels}
+            startBoundary={sectionLeftBoundary}
+            endBoundary={sectionRightBoundary}
+            onStartBoundaryChange={setSectionLeftBoundary}
+            onEndBoundaryChange={setSectionRightBoundary}
           />
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {visibleSemesterGroups.map(({ label, items }) => {
             const semesterAggregate = aggregateGrades(items);
             return (
-              <div key={label} className="rounded-2xl border border-jungle-tan-dark/20 bg-white/50 p-3 dark:border-green-900/60 dark:bg-green-950/20">
-                <div className="font-semibold text-gray-900 dark:text-green-100">{label}</div>
-                <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-green-200/70">
-                  <span>{items.length} section{items.length !== 1 ? "s" : ""}</span>
+              <div key={label} className="rounded-2xl border border-jungle-tan-dark/20 bg-white/70 p-4 shadow-sm transition-shadow hover:shadow-md dark:border-green-900/60 dark:bg-green-950/20">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold uppercase tracking-[0.16em] text-jungle-vine dark:text-green-300/80">{label}</div>
+                    <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-green-100">{items.length}</div>
+                    <div className="text-xs text-gray-500 dark:text-green-200/70">section{items.length !== 1 ? "s" : ""}</div>
+                  </div>
+                  <div className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary dark:bg-green-400/15 dark:text-green-300">
+                    GPA {calculateGPA(semesterAggregate)?.toFixed(2) ?? "N/A"}
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-green-200/70">
                   <span>{semesterAggregate.totalEnroll.toLocaleString()} students</span>
-                  <span className="flex items-center gap-1.5">GPA: <GpaBadge gpa={calculateGPA(semesterAggregate)} /></span>
                 </div>
               </div>
             );
