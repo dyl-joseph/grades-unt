@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { aggregateGrades, calculateGPA, toChartData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
-import GradeChart from "@/components/GradeChart";
+import LazyChart from "@/components/LazyChart";
 import { SemesterSelect, SemesterRangeBar } from "@/components/SemesterControls";
 import { fromInstructorSlug, loadInstructorSections } from "@/lib/encryptedData";
 import { groupBySemester, semesterLabel } from "@/lib/semester";
@@ -31,7 +31,10 @@ export default function InstructorPage() {
   const [distributionSemester, setDistributionSemester] = useState("all");
 
   useEffect(() => {
-    if (!firstName || !lastName) return;
+    if (!firstName || !lastName) {
+      queueMicrotask(() => setLoading(false));
+      return;
+    }
     let mounted = true;
     queueMicrotask(() => {
       if (!mounted) return;
@@ -230,7 +233,7 @@ export default function InstructorPage() {
             />
           </div>
         </div>
-        <GradeChart data={toChartData(distributionAggregate)} />
+        <LazyChart data={toChartData(distributionAggregate)} height={300} showDataFallback />
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60 sm:p-5">
