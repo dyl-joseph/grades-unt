@@ -5,7 +5,7 @@ import { aggregateGrades, calculateGPA, toChartData, type ChartDataPoint } from 
 import GradeChart from "@/components/GradeChart";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { SearchResult } from "@/lib/types";
-import { fromInstructorSlug, loadCourseByCode, loadInstructorSections, searchManifest } from "@/lib/encryptedData";
+import { fetchManifest, fromInstructorSlug, loadCourseByCode, loadInstructorSections, searchManifest } from "@/lib/encryptedData";
 
 type CompareType = "course" | "instructor";
 type CourseSuggestion = SearchResult["courses"][number];
@@ -534,6 +534,10 @@ function useCompareSide(initialKind: CompareType, initialSelection: Selection) {
 }
 
 export default function CompareClient({ initialType, initialA }: CompareClientProps) {
+  useEffect(() => {
+    void fetchManifest().catch(() => undefined);
+  }, []);
+
   const leftType = initialCompareType(initialType);
   const rightType = oppositeType(leftType);
   const initialSelection = initialA?.trim() ? initialA.trim() : null;
