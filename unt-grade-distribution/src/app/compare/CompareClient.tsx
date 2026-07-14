@@ -555,7 +555,7 @@ export default function CompareClient({ initialType, initialA }: CompareClientPr
             Compare anything in one place.
           </h1>
           <p className="mt-4 max-w-2xl text-base text-gray-600 dark:text-green-200/75 sm:text-lg">
-            Put courses and professors side by side with a single interface. Switch either panel independently to what you want to inspect.
+            Put courses and professors side by side. Switch either panel to what you want to inspect.
           </p>
         </header>
 
