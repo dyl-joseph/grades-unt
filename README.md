@@ -87,11 +87,11 @@ DATABASE_URL="postgresql://user:***@host:5432/db" DIRECT_URL="postgresql://user:
 
 - [Dylan Joseph](https://github.com/dyl-joseph)
 - [Gautham Nair](https://github.com/GauthamRNair)
-- [Akhil Tumati](https://github.com/YouSoMoose)
 
 ## Initial contributors
 
 - [Sai Are](https://github.com/FrostNinja397)
+- [Akhil Tumati](https://github.com/YouSoMoose)
 
 ## Planned features
 
