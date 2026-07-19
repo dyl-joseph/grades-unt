@@ -12,22 +12,18 @@ type SearchLogPayload = {
   coursePrefix?: unknown;
   courseNumber?: unknown;
   courseTitle?: unknown;
-  instructorFirstName?: unknown;
-  instructorLastName?: unknown;
   resultCountCourses?: unknown;
   resultCountInstructors?: unknown;
 };
 
 type SearchLogRow = {
-  raw_query: string;
-  normalized_query: string;
+  raw_query: string | null;
+  normalized_query: string | null;
   search_kind: SearchKind;
   source: SearchSource;
   course_prefix: string | null;
   course_number: string | null;
   course_title: string | null;
-  instructor_first_name: string | null;
-  instructor_last_name: string | null;
   result_count_courses: number;
   result_count_instructors: number;
 };
@@ -55,24 +51,25 @@ function normalizeQuery(rawQuery: string) {
   return rawQuery.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
-function buildRow(payload: SearchLogPayload): SearchLogRow | null {
-  if (typeof payload.rawQuery !== "string" || payload.rawQuery.trim().length === 0) return null;
-
-  const rawQuery = payload.rawQuery;
-  const normalizedQuery = asTrimmedString(payload.normalizedQuery) ?? normalizeQuery(rawQuery);
+export function buildSearchLogRow(payload: SearchLogPayload): SearchLogRow | null {
   const searchKind = isSearchKind(payload.searchKind) ? payload.searchKind : "unknown";
   const source = isSearchSource(payload.source) ? payload.source : "site";
+  const isCourseSearch = searchKind === "course";
+  const rawQuery = asTrimmedString(payload.rawQuery);
+
+  // Instructor and mixed searches intentionally retain no identifying text or
+  // selected-instructor fields. This lets us count them without learning which
+  // instructor was searched.
+  if (isCourseSearch && !rawQuery) return null;
 
   return {
-    raw_query: rawQuery,
-    normalized_query: normalizedQuery,
+    raw_query: isCourseSearch ? rawQuery : null,
+    normalized_query: isCourseSearch ? asTrimmedString(payload.normalizedQuery) ?? normalizeQuery(rawQuery!) : null,
     search_kind: searchKind,
     source,
-    course_prefix: asTrimmedString(payload.coursePrefix),
-    course_number: asTrimmedString(payload.courseNumber),
-    course_title: asTrimmedString(payload.courseTitle),
-    instructor_first_name: asTrimmedString(payload.instructorFirstName),
-    instructor_last_name: asTrimmedString(payload.instructorLastName),
+    course_prefix: isCourseSearch ? asTrimmedString(payload.coursePrefix) : null,
+    course_number: isCourseSearch ? asTrimmedString(payload.courseNumber) : null,
+    course_title: isCourseSearch ? asTrimmedString(payload.courseTitle) : null,
     result_count_courses: asInteger(payload.resultCountCourses),
     result_count_instructors: asInteger(payload.resultCountInstructors),
   };
@@ -125,9 +122,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const row = buildRow(payload);
+  const row = buildSearchLogRow(payload);
   if (!row) {
-    return NextResponse.json({ error: "rawQuery is required" }, { status: 400 });
+    return NextResponse.json({ error: "rawQuery is required for course searches" }, { status: 400 });
   }
 
   const result = await insertSearchEvent(row);

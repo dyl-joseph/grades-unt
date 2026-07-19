@@ -11,15 +11,13 @@ type SearchLogArgs = {
 };
 
 type SearchLogPayload = {
-  rawQuery: string;
-  normalizedQuery: string;
+  rawQuery?: string;
+  normalizedQuery?: string;
   searchKind: SearchLogKind;
   source: SearchLogSource;
   coursePrefix?: string;
   courseNumber?: string;
   courseTitle?: string;
-  instructorFirstName?: string;
-  instructorLastName?: string;
   resultCountCourses: number;
   resultCountInstructors: number;
 };
@@ -40,18 +38,16 @@ function buildPayload(args: SearchLogArgs): SearchLogPayload | null {
   const plan = getSearchPlan(args.rawQuery);
   const searchKind = resolveSearchKind(args.rawQuery, args.results);
   const course = args.results.courses[0];
-  const instructor = args.results.instructors[0];
+  const isCourseSearch = searchKind === "course";
 
   return {
-    rawQuery: args.rawQuery,
-    normalizedQuery,
+    rawQuery: isCourseSearch ? args.rawQuery : undefined,
+    normalizedQuery: isCourseSearch ? normalizedQuery : undefined,
     searchKind,
     source: args.source,
-    coursePrefix: course?.prefix ?? (plan.queryKind === "course" ? plan.prefix : undefined),
-    courseNumber: course?.number ?? (plan.queryKind === "course" ? plan.number : undefined),
-    courseTitle: course?.title,
-    instructorFirstName: instructor?.firstName,
-    instructorLastName: instructor?.lastName,
+    coursePrefix: isCourseSearch ? course?.prefix ?? (plan.queryKind === "course" ? plan.prefix : undefined) : undefined,
+    courseNumber: isCourseSearch ? course?.number ?? (plan.queryKind === "course" ? plan.number : undefined) : undefined,
+    courseTitle: isCourseSearch ? course?.title : undefined,
     resultCountCourses: args.results.courses.length,
     resultCountInstructors: args.results.instructors.length,
   };
