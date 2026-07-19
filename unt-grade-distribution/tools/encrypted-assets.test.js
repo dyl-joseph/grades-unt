@@ -44,6 +44,17 @@ function assertMetadata(metadata, metadataFile) {
   );
 }
 
+function normalizedInstructorToken(token) {
+  if (typeof token !== "string") return null;
+  const commaIndex = token.indexOf(",");
+  if (commaIndex <= 0 || commaIndex === token.length - 1) return null;
+
+  const lastName = token.slice(0, commaIndex).normalize("NFKC").trim().replace(/\s+/g, " ");
+  const firstName = token.slice(commaIndex + 1).normalize("NFKC").trim().replace(/\s+/g, " ");
+  if (!lastName || !firstName) return null;
+  return `${lastName},${firstName}`.toLowerCase();
+}
+
 test("encrypted manifest and static assets stay in sync", async () => {
   const manifestPath = path.join(encryptedDirectory, "manifest.json");
   const manifest = await readJson(manifestPath);
@@ -81,4 +92,34 @@ test("encrypted manifest and static assets stay in sync", async () => {
     [...expectedFiles].sort(),
     "blob directory must contain exactly one blob and metadata file per manifest entry",
   );
+});
+
+test("current instructor fan-out remains exact and bounded", async () => {
+  const manifest = await readJson(path.join(encryptedDirectory, "manifest.json"));
+  const { findInstructorEntries } = await import("../src/lib/encryptedData.ts");
+  const heEntries = findInstructorEntries(manifest, "Yanyan", "He");
+
+  assert.equal(heEntries.length, 2, "He,Yanyan must select exactly two current course entries");
+  assert.ok(
+    heEntries.every((entry) => entry.tokens.slice(2).includes("He,Yanyan")),
+    "every selected He,Yanyan entry must carry its exact full instructor token",
+  );
+  assert.equal(heEntries.length * 2, 4, "He,Yanyan must require only two blob/meta pairs");
+
+  const entriesByInstructor = new Map();
+  for (const entry of manifest) {
+    const namesInEntry = new Set(
+      entry.tokens.slice(2).map(normalizedInstructorToken).filter(Boolean),
+    );
+    for (const name of namesInEntry) {
+      const entries = entriesByInstructor.get(name) || new Set();
+      entries.add(entry.id);
+      entriesByInstructor.set(name, entries);
+    }
+  }
+
+  const worstCaseAssetRequests = Math.max(
+    ...Array.from(entriesByInstructor.values(), (entries) => entries.size * 2),
+  );
+  assert.ok(worstCaseAssetRequests < 100, `worst current instructor fan-out is ${worstCaseAssetRequests} asset requests`);
 });

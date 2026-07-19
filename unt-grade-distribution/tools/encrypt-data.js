@@ -62,6 +62,35 @@ function keyForCourse(prefix, number) {
   return `${prefix}|${number}`;
 }
 
+function normalizeNamePart(value) {
+  return String(value || '').normalize('NFKC').trim().replace(/\s+/g, ' ');
+}
+
+function instructorManifestToken(instructor) {
+  const lastName = normalizeNamePart(instructor?.lastName);
+  const firstName = normalizeNamePart(instructor?.firstName);
+  if (!lastName || !firstName) return null;
+  return `${lastName},${firstName}`;
+}
+
+function manifestTokensForCourse(course) {
+  const instructors = new Map();
+
+  for (const section of course.sections) {
+    const token = instructorManifestToken(section.instructor);
+    if (!token) continue;
+
+    const key = token.normalize('NFKC').toLowerCase();
+    if (!instructors.has(key)) instructors.set(key, token);
+  }
+
+  return [
+    `${course.prefix} ${course.number}`,
+    course.title,
+    ...instructors.values(),
+  ];
+}
+
 async function main() {
   if (!process.env.MASTER_PASSPHRASE) {
     console.error('Please set MASTER_PASSPHRASE environment variable to encrypt data.');
@@ -145,11 +174,7 @@ async function main() {
       fs.writeFileSync(path.join(buildBlobsDir, outName), ciphertext);
       fs.writeFileSync(path.join(buildBlobsDir, metaName), JSON.stringify({ iv: b64(iv), salt: b64(salt), iterations: ITERATIONS }));
 
-      const instructorTokens = filteredCourse.sections.flatMap((s) => [
-        s.instructor.lastName,
-        `${s.instructor.lastName},${s.instructor.firstName}`,
-      ]);
-      const tokens = [ `${filteredCourse.prefix} ${filteredCourse.number}`, filteredCourse.title, ...instructorTokens ].slice(0, 80);
+      const tokens = manifestTokensForCourse(filteredCourse);
       manifest.push({ id: outName, tokens, preview: { prefix: filteredCourse.prefix, number: filteredCourse.number, title: filteredCourse.title } });
     }
 
@@ -170,4 +195,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { courseWithGradedSections, sectionHasGrades };
+module.exports = { courseWithGradedSections, sectionHasGrades, manifestTokensForCourse };

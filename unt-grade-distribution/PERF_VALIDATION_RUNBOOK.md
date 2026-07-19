@@ -15,9 +15,11 @@ Measure these user-facing flows first:
 
 Suggested success signals:
 
-- Manifest is cached after the first fetch.
+- A burst of SearchBar or Compare mounts produces one manifest request; concurrent queries share it.
+- Across 20 cold search runs, first suggestions have p95 at or below 1 second.
+- Later suggestions have p95 at or below 350 ms, including the 250 ms home/navbar debounce.
 - Course page p95 perceived load is under 2 seconds on representative devices/networks.
-- Instructor page p95 perceived load is under 2 seconds for typical instructors.
+- The `He,Yanyan` instructor page has p95 at or below 2 seconds and fetches only two blob/meta pairs.
 - Browser decrypt time is not a major contributor in performance profiles.
 
 ### Backend/API compatibility path
@@ -47,8 +49,10 @@ Suggested API success criteria:
 
 1. Open a Vercel preview or production deployment.
 2. Test the encrypted static-data path:
-   - search for a course code
-   - search for an instructor
+   - mount or open multiple search controls, then confirm one `/encrypted/manifest.json` request in the network panel
+   - run 20 first-suggestion searches and 20 later-suggestion searches; record p95 separately
+   - search for a spaced and compact course code, such as `CSCE 1010` and `CSCE1010`
+   - search for an instructor, then open `/instructor/He%2CYanyan` and confirm exactly two `.bin` plus two `.meta.json` requests
    - open course pages
    - open instructor pages
    - compare multiple items
@@ -92,6 +96,8 @@ The public encrypted-data path should work without a live database query as long
 - Network waterfall for `/encrypted/manifest.json`
 - Network waterfall for `/encrypted/blobs/*.bin`
 - Network waterfall for `/encrypted/blobs/*.meta.json`
+- `Cache-Control: public, max-age=31536000, immutable` on generated blob and metadata files
+- `Cache-Control: public, max-age=0, must-revalidate` on `/encrypted/manifest.json`
 - WebCrypto decrypt timing from browser profiles when needed
 - Vercel Speed Insights route metrics
 
@@ -107,8 +113,10 @@ The public encrypted-data path should work without a live database query as long
 ## 6. Pass/fail checklist
 
 - PASS: public search works from the encrypted manifest.
+- PASS: concurrent search controls make one manifest request, and compact/spaced course-code search both work.
 - PASS: course pages decrypt static blobs and do not require Postgres for normal browsing.
 - PASS: instructor pages decrypt the needed static blobs and do not require Postgres for normal browsing.
+- PASS: `He,Yanyan` selects two entries (four asset requests) and meets the 2-second p95 budget.
 - PASS: `/api/search` still returns expected results if the compatibility API is exercised.
 - PASS: course-code API searches use indexed prefix/number lookup.
 - PASS: tests and TypeScript pass.

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { SearchResult } from "@/lib/types";
-import { searchManifest } from "@/lib/encryptedData";
+import { fetchManifest, searchManifest } from "@/lib/encryptedData";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -36,6 +36,10 @@ export default function SearchBar({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const clientCache = useRef(new Map<string, SearchResult>());
+
+  useEffect(() => {
+    void fetchManifest().catch(() => undefined);
+  }, []);
 
   const normalizeQuery = useCallback((value: string) => value.trim().toLowerCase(), []);
 
