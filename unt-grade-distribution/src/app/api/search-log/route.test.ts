@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildSearchLogRow } from "./route";
+import { buildSearchLogRow } from "@/lib/search-log";
 
 test("course search logs retain course details", () => {
   const row = buildSearchLogRow({
