@@ -425,19 +425,18 @@ function useCompareSide(initialKind: CompareType, initialSelection: Selection) {
 
   const onSelect = useCallback((item: Suggestion) => {
     const normalizedQuery = debouncedQuery.trim().toLowerCase().replace(/\s+/g, " ");
+    const isCourse = isCourseSuggestion(item);
     void fetch("/api/search-log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        rawQuery: debouncedQuery,
-        normalizedQuery,
-        searchKind: isCourseSuggestion(item) ? "course" : "instructor",
+        rawQuery: isCourse ? debouncedQuery : undefined,
+        normalizedQuery: isCourse ? normalizedQuery : undefined,
+        searchKind: isCourse ? "course" : "instructor",
         source: "compare",
-        coursePrefix: isCourseSuggestion(item) ? item.prefix : undefined,
-        courseNumber: isCourseSuggestion(item) ? item.number : undefined,
-        courseTitle: isCourseSuggestion(item) ? item.title : undefined,
-        instructorFirstName: isInstructorSuggestion(item) ? item.firstName : undefined,
-        instructorLastName: isInstructorSuggestion(item) ? item.lastName : undefined,
+        coursePrefix: isCourse ? item.prefix : undefined,
+        courseNumber: isCourse ? item.number : undefined,
+        courseTitle: isCourse ? item.title : undefined,
         resultCountCourses: kind === "course" ? results.length : 0,
         resultCountInstructors: kind === "instructor" ? results.length : 0,
       }),

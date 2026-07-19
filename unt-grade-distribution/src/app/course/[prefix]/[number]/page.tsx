@@ -8,7 +8,7 @@ import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
 import CourseSaveButton from "@/components/CourseSaveButton";
 import ShareButton from "@/components/ShareButton";
-import { SemesterSelect, SemesterRangeBar } from "@/components/SemesterControls";
+import { SemesterCheckboxGroup, type SemesterSelection } from "@/components/SemesterControls";
 import { loadCourseByCode } from "@/lib/encryptedData";
 import { groupBySemester, semesterLabel } from "@/lib/semester";
 
@@ -65,7 +65,8 @@ export default function CoursePage() {
   const [course, setCourse] = useState<CourseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [distributionSemester, setDistributionSemester] = useState("all");
+  const [distributionSemesters, setDistributionSemesters] = useState<SemesterSelection>("all");
+  const [sectionSemesters, setSectionSemesters] = useState<SemesterSelection>("all");
 
   useEffect(() => {
     if (!prefix || !number) return;
@@ -100,35 +101,21 @@ export default function CoursePage() {
   const semesterGroups = useMemo(() => groupBySemester(sections), [sections]);
   const semesterLabels = useMemo(() => semesterGroups.map((group) => group.label), [semesterGroups]);
   const summarySemesterLabels = useMemo(() => [...semesterLabels].reverse(), [semesterLabels]);
-  const activeDistributionSemester = distributionSemester === "all" || semesterLabels.includes(distributionSemester)
-    ? distributionSemester
-    : "all";
+  const activeDistributionSemesterLabels = distributionSemesters === "all"
+    ? semesterLabels
+    : distributionSemesters.filter((label) => semesterLabels.includes(label));
   const distributionSections = useMemo(
-    () => activeDistributionSemester === "all"
+    () => distributionSemesters === "all"
       ? sections
-      : semesterGroups.find((group) => group.label === activeDistributionSemester)?.items ?? [],
-    [activeDistributionSemester, sections, semesterGroups]
+      : sections.filter((section) => activeDistributionSemesterLabels.includes(semesterLabel(section))),
+    [activeDistributionSemesterLabels, distributionSemesters, sections]
   );
   const distributionAggregate = useMemo(() => aggregateGrades(distributionSections), [distributionSections]);
   const distributionChartData = useMemo(() => toChartData(distributionAggregate), [distributionAggregate]);
   const distributionGPA = useMemo(() => calculateGPA(distributionAggregate), [distributionAggregate]);
-  const [sectionLeftBoundary, setSectionLeftBoundary] = useState(0);
-  const [sectionRightBoundary, setSectionRightBoundary] = useState(Math.min(1, summarySemesterLabels.length));
-
-  useEffect(() => {
-    const maxBoundary = summarySemesterLabels.length;
-    setSectionLeftBoundary(0);
-    setSectionRightBoundary(Math.min(2, maxBoundary));
-  }, [summarySemesterLabels]);
-
-  const visibleSemesterLabels = useMemo(() => {
-    if (!summarySemesterLabels.length) return [];
-
-    const left = Math.max(0, Math.min(sectionLeftBoundary, Math.max(0, summarySemesterLabels.length - 1)));
-    const right = Math.max(left + 1, Math.min(sectionRightBoundary, summarySemesterLabels.length));
-
-    return summarySemesterLabels.slice(left, right);
-  }, [sectionLeftBoundary, sectionRightBoundary, summarySemesterLabels]);
+  const visibleSemesterLabels = sectionSemesters === "all"
+    ? summarySemesterLabels
+    : summarySemesterLabels.filter((label) => sectionSemesters.includes(label));
   const visibleSemesterGroups = useMemo(
     () => semesterGroups.filter((group) => visibleSemesterLabels.includes(group.label)),
     [semesterGroups, visibleSemesterLabels]
@@ -238,7 +225,7 @@ export default function CoursePage() {
           <div className="min-w-0">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-green-100">Grade Distribution</h2>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-green-200/70">
-              <span>{activeDistributionSemester === "all" ? "All semesters" : activeDistributionSemester}</span>
+              <span>{distributionSemesters === "all" ? "All semesters" : `${activeDistributionSemesterLabels.length} selected`}</span>
               <span aria-hidden="true">·</span>
               <span>{distributionSections.length} section{distributionSections.length !== 1 ? "s" : ""}</span>
               <span aria-hidden="true">·</span>
@@ -246,11 +233,11 @@ export default function CoursePage() {
             </div>
           </div>
           <div className="shrink-0 self-start">
-            <SemesterSelect
+            <SemesterCheckboxGroup
               id="course-distribution-semester"
               labels={semesterLabels}
-              value={activeDistributionSemester}
-              onChange={setDistributionSemester}
+              value={distributionSemesters}
+              onChange={setDistributionSemesters}
             />
           </div>
         </div>
@@ -264,23 +251,20 @@ export default function CoursePage() {
         Sections by Semester
       </h2>
       <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500 dark:text-green-200/70">
-        Drag the two bounds to choose a 1- or 2-semester window. The range can never collapse to zero width.
+        Choose the semesters to include in the summary.
       </p>
     </div>
     <div className="shrink-0 self-start text-sm font-medium text-gray-500 dark:text-green-200/70">
-      {visibleSemesterLabels.length === 1
-        ? visibleSemesterLabels[0]
-        : `${visibleSemesterLabels[0] ?? ""} to ${visibleSemesterLabels[1] ?? ""}`}
+      {sectionSemesters === "all" ? "All semesters" : `${visibleSemesterLabels.length} selected`}
     </div>
   </div>
 
-  <div className="mb-5 rounded-2xl border border-jungle-tan-dark/20 bg-white/55 px-4 py-4 shadow-sm dark:border-green-900/50 dark:bg-green-950/20 sm:px-5">
-    <SemesterRangeBar
+  <div className="mb-5 rounded-2xl border border-jungle-tan-dark/20 bg-jungle-tan/65 px-4 py-4 shadow-sm dark:border-green-900/50 dark:bg-green-950/20 sm:px-5">
+    <SemesterCheckboxGroup
+      id="course-summary-semesters"
       labels={summarySemesterLabels}
-      startBoundary={sectionLeftBoundary}
-      endBoundary={sectionRightBoundary}
-      onStartBoundaryChange={setSectionLeftBoundary}
-      onEndBoundaryChange={setSectionRightBoundary}
+      value={sectionSemesters}
+      onChange={setSectionSemesters}
     />
   </div>
 

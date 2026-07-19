@@ -1,82 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateExtensionOrigin } from "@/lib/cors";
-
-type SearchKind = "course" | "instructor" | "mixed" | "unknown";
-type SearchSource = "site" | "compare" | "api" | "other";
-
-type SearchLogPayload = {
-  rawQuery?: unknown;
-  normalizedQuery?: unknown;
-  searchKind?: unknown;
-  source?: unknown;
-  coursePrefix?: unknown;
-  courseNumber?: unknown;
-  courseTitle?: unknown;
-  instructorFirstName?: unknown;
-  instructorLastName?: unknown;
-  resultCountCourses?: unknown;
-  resultCountInstructors?: unknown;
-};
-
-type SearchLogRow = {
-  raw_query: string;
-  normalized_query: string;
-  search_kind: SearchKind;
-  source: SearchSource;
-  course_prefix: string | null;
-  course_number: string | null;
-  course_title: string | null;
-  instructor_first_name: string | null;
-  instructor_last_name: string | null;
-  result_count_courses: number;
-  result_count_instructors: number;
-};
+import { buildSearchLogRow, type SearchLogPayload, type SearchLogRow } from "@/lib/search-log";
 
 const SUPABASE_REST_SUFFIX = "/rest/v1/search_events";
-
-function asTrimmedString(value: unknown) {
-  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
-}
-
-function asInteger(value: unknown) {
-  if (typeof value !== "number" || !Number.isFinite(value)) return 0;
-  return Math.max(0, Math.trunc(value));
-}
-
-function isSearchKind(value: unknown): value is SearchKind {
-  return value === "course" || value === "instructor" || value === "mixed" || value === "unknown";
-}
-
-function isSearchSource(value: unknown): value is SearchSource {
-  return value === "site" || value === "compare" || value === "api" || value === "other";
-}
-
-function normalizeQuery(rawQuery: string) {
-  return rawQuery.trim().replace(/\s+/g, " ").toLowerCase();
-}
-
-function buildRow(payload: SearchLogPayload): SearchLogRow | null {
-  if (typeof payload.rawQuery !== "string" || payload.rawQuery.trim().length === 0) return null;
-
-  const rawQuery = payload.rawQuery;
-  const normalizedQuery = asTrimmedString(payload.normalizedQuery) ?? normalizeQuery(rawQuery);
-  const searchKind = isSearchKind(payload.searchKind) ? payload.searchKind : "unknown";
-  const source = isSearchSource(payload.source) ? payload.source : "site";
-
-  return {
-    raw_query: rawQuery,
-    normalized_query: normalizedQuery,
-    search_kind: searchKind,
-    source,
-    course_prefix: asTrimmedString(payload.coursePrefix),
-    course_number: asTrimmedString(payload.courseNumber),
-    course_title: asTrimmedString(payload.courseTitle),
-    instructor_first_name: asTrimmedString(payload.instructorFirstName),
-    instructor_last_name: asTrimmedString(payload.instructorLastName),
-    result_count_courses: asInteger(payload.resultCountCourses),
-    result_count_instructors: asInteger(payload.resultCountInstructors),
-  };
-}
 
 function getSupabaseConfig() {
   const supabaseUrl = process.env.SUPABASE_URL?.trim();
@@ -125,9 +51,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const row = buildRow(payload);
+  const row = buildSearchLogRow(payload);
   if (!row) {
-    return NextResponse.json({ error: "rawQuery is required" }, { status: 400 });
+    return NextResponse.json({ error: "rawQuery is required for course searches" }, { status: 400 });
   }
 
   const result = await insertSearchEvent(row);
