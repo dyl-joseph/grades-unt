@@ -17,6 +17,12 @@ const MIN_QUERY_LENGTH = 2;
 const DEBOUNCE_MS = 250;
 const MAX_CLIENT_CACHE_ENTRIES = 25;
 
+type SearchSuggestion = SearchResult["courses"][number] | SearchResult["instructors"][number];
+
+function isCourseSuggestion(item: SearchSuggestion): item is SearchResult["courses"][number] {
+  return "prefix" in item;
+}
+
 export default function SearchBar({
   placeholder = "Search course, professor, or class code...",
   autoFocus = false,
@@ -187,10 +193,10 @@ export default function SearchBar({
     }
   };
 
-  const logSelection = (resultsItem: SearchResult["courses"][number] | SearchResult["instructors"][number]) => {
+  const logSelection = (resultsItem: SearchSuggestion) => {
     const normalized = debouncedQuery.trim();
     if (normalized.length < MIN_QUERY_LENGTH) return;
-    const isCourse = "course" in resultsItem;
+    const course = isCourseSuggestion(resultsItem) ? resultsItem : undefined;
 
     void fetch("/api/search-log", {
       method: "POST",
@@ -198,13 +204,13 @@ export default function SearchBar({
       body: JSON.stringify({
         // Do not transmit an instructor query or name. The API records only
         // the anonymous instructor-search event and result counts.
-        rawQuery: isCourse ? debouncedQuery : undefined,
-        searchKind: isCourse ? "course" : "instructor",
+        rawQuery: course ? debouncedQuery : undefined,
+        searchKind: course ? "course" : "instructor",
         source: "site",
-        normalizedQuery: isCourse ? normalized.toLowerCase().replace(/\s+/g, " ") : undefined,
-        coursePrefix: isCourse ? resultsItem.prefix : undefined,
-        courseNumber: isCourse ? resultsItem.number : undefined,
-        courseTitle: isCourse ? resultsItem.title : undefined,
+        normalizedQuery: course ? normalized.toLowerCase().replace(/\s+/g, " ") : undefined,
+        coursePrefix: course?.prefix,
+        courseNumber: course?.number,
+        courseTitle: course?.title,
         resultCountCourses: results?.courses.length ?? 0,
         resultCountInstructors: results?.instructors.length ?? 0,
       }),
