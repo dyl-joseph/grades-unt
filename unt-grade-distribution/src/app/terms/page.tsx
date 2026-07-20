@@ -10,7 +10,7 @@ export default function TermsPage() {
         </h1>
         <div className="mt-4 space-y-4 leading-7 text-jungle-bark/80 dark:text-green-100/80">
           <p>
-            This site logs search activity so we can understand what courses and professors people are looking for.
+            This site logs search activity so we can understand what courses people are looking for.
           </p>
           <p>
             Logged data can be requested publicly by emailing{" "}
