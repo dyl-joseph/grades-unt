@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "description": "Search UNT course grades and instructor GPA from your browser side panel",
   "permissions": ["sidePanel", "storage"],
+  "host_permissions": ["https://www.untgrades.app/*"],
   "side_panel": {
     "default_path": "src/sidepanel/index.html"
   },

@@ -7,6 +7,9 @@
     "sidePanel",
     "storage"
   ],
+  "host_permissions": [
+    "https://www.untgrades.app/*"
+  ],
   "side_panel": {
     "default_path": "src/sidepanel/index.html"
   },
