@@ -78,7 +78,10 @@ test("changing the query cannot select suggestions from the previous query", asy
         { value: pathname },
         createElement("button", {
           id: "change-path",
-          onClick: () => setPathname("/course/ACCT/2010"),
+          onClick: () =>
+            setPathname(
+              pathname === "/course/ACCT/2010" ? "/" : "/course/ACCT/2010"
+            ),
         }),
         createElement(SearchBar)
       )
@@ -137,9 +140,22 @@ test("changing the query cannot select suggestions from the previous query", asy
   );
   assert.ok(instructorButton);
   await act(async () => instructorButton.click());
+  await act(async () => document.getElementById("change-path")!.click());
 
   const searchLogBody = JSON.parse(String(searchLogRequests[0]?.body));
   assert.equal(searchLogBody.searchKind, "instructor");
   assert.equal(searchLogBody.rawQuery, undefined);
   assert.doesNotMatch(JSON.stringify(searchLogBody), /Jane|Doe/);
+
+  await act(async () => changeQuery("ACCT 2010"));
+  const courseButton = Array.from(document.querySelectorAll("button")).find((button) =>
+    button.textContent?.includes("ACCT 2010")
+  );
+  assert.ok(courseButton);
+  await act(async () => courseButton.click());
+
+  const courseLogBody = JSON.parse(String(searchLogRequests[1]?.body));
+  assert.equal(courseLogBody.searchKind, "course");
+  assert.equal(courseLogBody.rawQuery, "ACCT 2010");
+  assert.doesNotMatch(JSON.stringify(courseLogBody), /Jane|Doe/);
 });

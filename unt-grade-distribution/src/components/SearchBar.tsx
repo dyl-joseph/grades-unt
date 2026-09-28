@@ -200,7 +200,7 @@ export default function SearchBar({
   };
 
   const logSelection = (resultsItem: SearchSuggestion) => {
-    const normalized = debouncedQuery.trim();
+    const normalized = query.trim();
     if (normalized.length < MIN_QUERY_LENGTH) return;
     const course = isCourseSuggestion(resultsItem) ? resultsItem : undefined;
 
@@ -208,7 +208,7 @@ export default function SearchBar({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        rawQuery: course ? debouncedQuery : undefined,
+        rawQuery: course ? query : undefined,
         searchKind: course ? "course" : "instructor",
         source: "site",
         normalizedQuery: course ? normalized.toLowerCase().replace(/\s+/g, " ") : undefined,
