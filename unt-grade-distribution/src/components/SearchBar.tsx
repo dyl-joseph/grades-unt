@@ -140,6 +140,8 @@ export default function SearchBar({
     setResults(null);
     setIsOpen(false);
     setHighlightIdx(-1);
+    setLoading(false);
+    setError(null);
   }, [pathname]);
 
   const allItems = useCallback(() => {

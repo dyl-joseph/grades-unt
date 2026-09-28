@@ -44,12 +44,21 @@ test("changing the query cannot select suggestions from the previous query", asy
       preview: { prefix: "CSCE", number: "1030", title: "COMPUTER SCIENCE I" },
     },
   ];
+  let resolveManifest: ((response: Response) => void) | undefined;
+  const pendingManifest = new Promise<Response>((resolve) => {
+    resolveManifest = resolve;
+  });
   const searchLogRequests: Array<RequestInit | undefined> = [];
   const originalFetch = globalThis.fetch;
+  let firstManifestRequest = true;
   globalThis.fetch = async (input, init) => {
     if (String(input) === "/api/search-log") {
       searchLogRequests.push(init);
       return new Response(null, { status: 204 });
+    }
+    if (firstManifestRequest) {
+      firstManifestRequest = false;
+      return pendingManifest;
     }
     return Response.json(manifest);
   };
@@ -97,13 +106,23 @@ test("changing the query cannot select suggestions from the previous query", asy
     changeQuery("ACCT 2010");
     await new Promise((resolve) => setTimeout(resolve, 300));
   });
-  assert.match(document.body.textContent ?? "", /ACCT 2010/);
-
-  await act(async () => {
-    changeQuery("CSCE 1030");
-  });
+  assert.equal(input.getAttribute("aria-busy"), "true");
+  await act(async () => document.getElementById("change-path")!.click());
+  assert.equal(input.getAttribute("aria-busy"), "false");
   assert.doesNotMatch(document.body.textContent ?? "", /ACCT 2010/);
+  resolveManifest!(Response.json(manifest));
+  await act(async () => {
+    await pendingManifest;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
 
+  await act(async () => changeQuery("CSCE 1030"));
+  await act(async () => changeQuery("ACCT 2010"));
+  assert.match(document.body.textContent ?? "", /ACCT 2010/);
+  assert.equal(input.getAttribute("aria-busy"), "false");
+
+  await act(async () => changeQuery("CSCE 1030"));
+  assert.doesNotMatch(document.body.textContent ?? "", /ACCT 2010/);
   await act(async () => {
     input.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
   });
@@ -123,17 +142,4 @@ test("changing the query cannot select suggestions from the previous query", asy
   assert.equal(searchLogBody.searchKind, "instructor");
   assert.equal(searchLogBody.rawQuery, undefined);
   assert.doesNotMatch(JSON.stringify(searchLogBody), /Jane|Doe/);
-
-  await act(async () => {
-    changeQuery("ACCT 2010");
-    await new Promise((resolve) => setTimeout(resolve, 300));
-  });
-  assert.match(document.body.textContent ?? "", /ACCT 2010/);
-  await act(async () => document.getElementById("change-path")!.click());
-  assert.doesNotMatch(document.body.textContent ?? "", /ACCT 2010/);
-
-  await act(async () => changeQuery("CSCE 1030"));
-  await act(async () => changeQuery("ACCT 2010"));
-  assert.match(document.body.textContent ?? "", /ACCT 2010/);
-  assert.equal(input.getAttribute("aria-busy"), "false");
 });
