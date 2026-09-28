@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, useCallback } from "react";
+import DetailErrorBoundary from "./DetailErrorBoundary";
 import SearchView from "./components/SearchView";
 
 const CourseDetail = lazy(() => import("./components/CourseDetail"));
@@ -29,29 +30,37 @@ export default function App() {
       {view.type === "search" && (
         <SearchView onCourseSelect={goToCourse} onInstructorSelect={goToInstructor} />
       )}
-      <Suspense
-        fallback={
-          <div style={{ padding: 24, textAlign: "center", color: "#999" }}>
-            Loading...
-          </div>
-        }
-      >
-        {view.type === "course" && (
-          <CourseDetail
-            prefix={view.prefix}
-            number={view.number}
-            onBack={goToSearch}
-            onInstructorSelect={goToInstructor}
-          />
-        )}
-        {view.type === "instructor" && (
-          <InstructorDetail
-            id={view.id}
-            onBack={goToSearch}
-            onCourseSelect={goToCourse}
-          />
-        )}
-      </Suspense>
+      {view.type !== "search" && (
+        <DetailErrorBoundary
+          key={view.type}
+          onBack={goToSearch}
+          onReload={() => window.location.reload()}
+        >
+          <Suspense
+            fallback={
+              <div style={{ padding: 24, textAlign: "center", color: "#999" }}>
+                Loading...
+              </div>
+            }
+          >
+            {view.type === "course" && (
+              <CourseDetail
+                prefix={view.prefix}
+                number={view.number}
+                onBack={goToSearch}
+                onInstructorSelect={goToInstructor}
+              />
+            )}
+            {view.type === "instructor" && (
+              <InstructorDetail
+                id={view.id}
+                onBack={goToSearch}
+                onCourseSelect={goToCourse}
+              />
+            )}
+          </Suspense>
+        </DetailErrorBoundary>
+      )}
     </div>
   );
 }
