@@ -203,19 +203,24 @@ export default function SearchBar({
     const normalized = query.trim();
     if (normalized.length < MIN_QUERY_LENGTH) return;
     const course = isCourseSuggestion(resultsItem) ? resultsItem : undefined;
-    const includeSearchQuery = Boolean(course && results?.instructors.length === 0);
+    const hasInstructorMatches = Boolean(results?.instructors.length);
+    const courseQuery = course
+      ? hasInstructorMatches
+        ? `${course.prefix} ${course.number}`
+        : query
+      : undefined;
 
     void fetch("/api/search-log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        rawQuery: includeSearchQuery ? query : undefined,
+        rawQuery: courseQuery,
         searchKind: course ? "course" : "instructor",
         source: "site",
-        normalizedQuery: includeSearchQuery ? normalized.toLowerCase().replace(/\s+/g, " ") : undefined,
+        normalizedQuery: courseQuery?.trim().toLowerCase().replace(/\s+/g, " "),
         coursePrefix: course?.prefix,
         courseNumber: course?.number,
-        courseTitle: course?.title,
+        courseTitle: hasInstructorMatches ? undefined : course?.title,
         resultCountCourses: results?.courses.length ?? 0,
         resultCountInstructors: results?.instructors.length ?? 0,
       }),

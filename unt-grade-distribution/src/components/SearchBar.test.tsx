@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { JSDOM } from "jsdom";
 import { act, createElement, useState } from "react";
+import { buildSearchLogRow } from "../lib/search-log";
 import {
   AppRouterContext,
   type AppRouterInstance,
@@ -54,12 +55,16 @@ test("changing the query cannot select suggestions from the previous query", asy
     resolveManifest = resolve;
   });
   const searchLogRequests: Array<RequestInit | undefined> = [];
+  const searchLogStatuses: number[] = [];
   const originalFetch = globalThis.fetch;
   let firstManifestRequest = true;
   globalThis.fetch = async (input, init) => {
     if (String(input) === "/api/search-log") {
       searchLogRequests.push(init);
-      return new Response(null, { status: 204 });
+      const payload = JSON.parse(String(init?.body));
+      const status = buildSearchLogRow(payload) ? 204 : 400;
+      searchLogStatuses.push(status);
+      return new Response(null, { status });
     }
     if (firstManifestRequest) {
       firstManifestRequest = false;
@@ -151,6 +156,7 @@ test("changing the query cannot select suggestions from the previous query", asy
   assert.equal(searchLogBody.searchKind, "instructor");
   assert.equal(searchLogBody.rawQuery, undefined);
   assert.doesNotMatch(JSON.stringify(searchLogBody), /Jane|Doe/);
+  assert.equal(searchLogStatuses[0], 204);
 
   await act(async () => changeQuery("ACCT 2010"));
   const courseButton = Array.from(document.querySelectorAll("button")).find((button) =>
@@ -163,6 +169,7 @@ test("changing the query cannot select suggestions from the previous query", asy
   assert.equal(courseLogBody.searchKind, "course");
   assert.equal(courseLogBody.rawQuery, "ACCT 2010");
   assert.doesNotMatch(JSON.stringify(courseLogBody), /Jane|Doe/);
+  assert.equal(searchLogStatuses[1], 204);
 
   await act(async () => document.getElementById("change-path")!.click());
   await act(async () => changeQuery("Jane"));
@@ -174,6 +181,10 @@ test("changing the query cannot select suggestions from the previous query", asy
 
   const mixedCourseLogBody = JSON.parse(String(searchLogRequests[2]?.body));
   assert.equal(mixedCourseLogBody.searchKind, "course");
-  assert.equal(mixedCourseLogBody.rawQuery, undefined);
-  assert.equal(mixedCourseLogBody.normalizedQuery, undefined);
+  assert.equal(mixedCourseLogBody.rawQuery, "ACCT 2020");
+  assert.equal(mixedCourseLogBody.normalizedQuery, "acct 2020");
+  assert.equal(mixedCourseLogBody.courseTitle, undefined);
+  assert.equal(searchLogStatuses[2], 204);
+  assert.equal(buildSearchLogRow(mixedCourseLogBody)?.raw_query, "ACCT 2020");
+  assert.equal(buildSearchLogRow(mixedCourseLogBody)?.course_title, null);
 });
