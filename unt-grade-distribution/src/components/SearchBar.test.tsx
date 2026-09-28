@@ -131,4 +131,9 @@ test("changing the query cannot select suggestions from the previous query", asy
   assert.match(document.body.textContent ?? "", /ACCT 2010/);
   await act(async () => document.getElementById("change-path")!.click());
   assert.doesNotMatch(document.body.textContent ?? "", /ACCT 2010/);
+
+  await act(async () => changeQuery("CSCE 1030"));
+  await act(async () => changeQuery("ACCT 2010"));
+  assert.match(document.body.textContent ?? "", /ACCT 2010/);
+  assert.equal(input.getAttribute("aria-busy"), "false");
 });

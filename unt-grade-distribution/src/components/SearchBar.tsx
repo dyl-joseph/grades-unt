@@ -32,6 +32,7 @@ export default function SearchBar({
   const router = useRouter();
   const pathname = usePathname();
   const [query, setQuery] = useState("");
+  const [queryRevision, setQueryRevision] = useState(0);
   const [results, setResults] = useState<SearchResult | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
@@ -49,12 +50,24 @@ export default function SearchBar({
   }, []);
 
   const normalizeQuery = useCallback((value: string) => value.trim().toLowerCase(), []);
+  const normalizedDebouncedQuery = normalizeQuery(debouncedQuery);
 
   const updateQuery = useCallback((value: string) => {
     if (value === query) return;
+    const normalized = normalizeQuery(value);
     requestId.current += 1;
     setQuery(value);
-  }, [query]);
+    setError(null);
+    setHighlightIdx(-1);
+
+    const cached = clientCache.current.get(normalized);
+    setResults(cached ?? null);
+    setIsOpen(Boolean(cached));
+    setLoading(normalized.length >= MIN_QUERY_LENGTH && !cached);
+    if (normalized.length >= MIN_QUERY_LENGTH && normalized === normalizedDebouncedQuery && !cached) {
+      setQueryRevision((revision) => revision + 1);
+    }
+  }, [query, normalizeQuery, normalizedDebouncedQuery]);
 
   const rememberResult = useCallback((key: string, value: SearchResult) => {
     const cache = clientCache.current;
@@ -66,15 +79,6 @@ export default function SearchBar({
     }
   }, []);
 
-  const resetResults = useCallback(() => {
-    setResults(null);
-    setIsOpen(false);
-    setHighlightIdx(-1);
-    setLoading(false);
-    setError(null);
-  }, []);
-
-  const normalizedDebouncedQuery = normalizeQuery(debouncedQuery);
   const hasQuery = debouncedQuery.length >= MIN_QUERY_LENGTH;
   const showCoursesFirst = /\d/.test(normalizedDebouncedQuery) || /\b[a-z]{1,4}\s*\d/i.test(normalizedDebouncedQuery);
 
@@ -98,8 +102,8 @@ export default function SearchBar({
     searchManifest(normalized)
       .then((data) => data as SearchResult)
       .then((data) => {
-        if (requestId.current !== currentRequestId) return;
         rememberResult(normalized, data);
+        if (requestId.current !== currentRequestId) return;
         setResults(data);
         setIsOpen(true);
         setHighlightIdx(-1);
@@ -114,7 +118,7 @@ export default function SearchBar({
     return () => {
       if (requestId.current === currentRequestId) requestId.current += 1;
     };
-  }, [debouncedQuery, normalizeQuery, rememberResult]);
+  }, [debouncedQuery, normalizeQuery, queryRevision, rememberResult]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -179,11 +183,6 @@ export default function SearchBar({
 
     setNavigatingId(navId);
     updateQuery("");
-    setLoading(false);
-    setError(null);
-    setResults(null);
-    setIsOpen(false);
-    setHighlightIdx(-1);
 
     if (pathname === targetPath) {
       setNavigatingId(null);
@@ -270,20 +269,7 @@ export default function SearchBar({
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value === query) return;
-            updateQuery(value);
-            setError(null);
-            if (normalizeQuery(value).length < MIN_QUERY_LENGTH) {
-              resetResults();
-            } else {
-              setResults(null);
-              setIsOpen(false);
-              setHighlightIdx(-1);
-              setLoading(true);
-            }
-          }}
+          onChange={(e) => updateQuery(e.target.value)}
           onFocus={() => {
             if (results) setIsOpen(true);
             onFocusChange?.(true);

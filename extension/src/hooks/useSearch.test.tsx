@@ -36,7 +36,11 @@ test("keeps the latest search result when requests resolve out of order", async 
   let current: ReturnType<typeof useSearch> | undefined;
   function Probe() {
     current = useSearch();
-    return createElement("output", null, current.results?.courses[0]?.prefix ?? "no results");
+    return createElement(
+      "output",
+      { "data-loading": String(current.loading) },
+      current.results?.courses[0]?.prefix ?? "no results"
+    );
   }
 
   const root = createRoot(document.getElementById("root")!);
@@ -85,7 +89,23 @@ test("keeps the latest search result when requests resolve out of order", async 
   assert.deepEqual(requests.map((request) => request.query), ["math", "biology"]);
   await act(async () => requests[1].resolve({ ok: true, data: response("BIO") }));
   assert.equal(document.querySelector("output")?.textContent, "BIO");
+  assert.equal(document.querySelector("output")?.getAttribute("data-loading"), "false");
 
   await act(async () => requests[0].resolve({ ok: true, data: response("MATH") }));
   assert.equal(document.querySelector("output")?.textContent, "BIO");
+
+  await act(async () => latestSearch().setQuery("chemistry"));
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  });
+  assert.equal(requests[2]?.query, "chemistry");
+
+  await act(async () => latestSearch().setQuery("math"));
+  await act(async () => latestSearch().setQuery("chemistry"));
+  assert.equal(requests[3]?.query, "chemistry");
+
+  await act(async () => requests[2].resolve({ ok: true, data: response("CHEM") }));
+  await act(async () => requests[3].resolve({ ok: true, data: response("CHEM") }));
+  assert.equal(document.querySelector("output")?.textContent, "CHEM");
+  assert.equal(document.querySelector("output")?.getAttribute("data-loading"), "false");
 });
