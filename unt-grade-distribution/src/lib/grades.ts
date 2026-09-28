@@ -13,6 +13,8 @@ export const GRADE_ORDER = [
   "I",
 ] as const;
 
+export type GradeCounts = Record<(typeof GRADE_ORDER)[number], number>;
+
 /** Letter grades used in GPA calculation (excludes P, NP, W, I) */
 export const LETTER_GRADES = ["A", "B", "C", "D", "F"] as const;
 
@@ -51,6 +53,21 @@ export interface GradeData {
   gradeW: number;
   gradeI: number;
   totalEnroll: number;
+}
+
+export function toGradeData(grades: GradeCounts): GradeData {
+  return {
+    gradeA: grades.A,
+    gradeB: grades.B,
+    gradeC: grades.C,
+    gradeD: grades.D,
+    gradeF: grades.F,
+    gradeP: grades.P,
+    gradeNP: grades.NP,
+    gradeW: grades.W,
+    gradeI: grades.I,
+    totalEnroll: GRADE_ORDER.reduce((total, grade) => total + grades[grade], 0),
+  };
 }
 
 export interface ChartDataPoint {

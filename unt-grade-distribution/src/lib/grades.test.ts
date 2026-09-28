@@ -5,6 +5,7 @@ import {
   calculateGPA,
   gpaColor,
   toChartData,
+  toGradeData,
 } from "./grades";
 
 const emptyGrades = {
@@ -60,6 +61,31 @@ test("toChartData calculates percentage relative to totalEnroll", () => {
   const aEntry = toChartData(data).find((r) => r.grade === "A")!;
   assert.equal(aEntry.count, 1);
   assert.equal(aEntry.percentage, 25);
+});
+
+test("toGradeData maps every grade and sums all nine categories", () => {
+  assert.deepEqual(
+    toGradeData({ A: 1, B: 2, C: 3, D: 4, F: 5, P: 6, NP: 7, W: 8, I: 9 }),
+    {
+      gradeA: 1,
+      gradeB: 2,
+      gradeC: 3,
+      gradeD: 4,
+      gradeF: 5,
+      gradeP: 6,
+      gradeNP: 7,
+      gradeW: 8,
+      gradeI: 9,
+      totalEnroll: 45,
+    }
+  );
+});
+
+test("toGradeData preserves an empty distribution", () => {
+  assert.deepEqual(
+    toGradeData({ A: 0, B: 0, C: 0, D: 0, F: 0, P: 0, NP: 0, W: 0, I: 0 }),
+    emptyGrades
+  );
 });
 
 // aggregateGrades
