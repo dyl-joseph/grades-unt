@@ -1,11 +1,18 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { aggregateGrades, calculateGPA, toChartData, type ChartDataPoint } from "@/lib/grades";
+import { aggregateGrades, calculateGPA, toChartData, toGradeData, type ChartDataPoint } from "@/lib/grades";
 import GradeChart from "@/components/GradeChart";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { SearchResult } from "@/lib/types";
-import { fetchManifest, fromInstructorSlug, loadCourseByCode, loadInstructorSections, searchManifest } from "@/lib/encryptedData";
+import {
+  fetchManifest,
+  fromInstructorSlug,
+  loadCourseByCode,
+  loadInstructorSections,
+  searchManifest,
+  type EncryptedCourse,
+} from "@/lib/encryptedData";
 
 type CompareType = "course" | "instructor";
 type CourseSuggestion = SearchResult["courses"][number];
@@ -44,40 +51,13 @@ function oppositeType(value: CompareType): CompareType {
   return value === "course" ? "instructor" : "course";
 }
 
-function toSectionModels(course: {
-  prefix: string;
-  number: string;
-  title: string;
-  sections: Array<{
-    sectionNumber: string;
-    instructor: { firstName: string; lastName: string };
-    grades: { A: number; B: number; C: number; D: number; F: number; P: number; NP: number; W: number; I: number };
-  }>;
-}) {
+function toSectionModels(course: EncryptedCourse) {
   return course.sections.map((section, index) => ({
     id: `${course.prefix}-${course.number}-${section.sectionNumber}-${index}`,
     sectionNumber: section.sectionNumber,
     instructor: section.instructor,
     course: { prefix: course.prefix, number: course.number, title: course.title },
-    gradeA: section.grades.A,
-    gradeB: section.grades.B,
-    gradeC: section.grades.C,
-    gradeD: section.grades.D,
-    gradeF: section.grades.F,
-    gradeP: section.grades.P,
-    gradeNP: section.grades.NP,
-    gradeW: section.grades.W,
-    gradeI: section.grades.I,
-    totalEnroll:
-      section.grades.A +
-      section.grades.B +
-      section.grades.C +
-      section.grades.D +
-      section.grades.F +
-      section.grades.P +
-      section.grades.NP +
-      section.grades.W +
-      section.grades.I,
+    ...toGradeData(section.grades),
   }));
 }
 
@@ -159,25 +139,7 @@ async function loadSelectionData(type: CompareType, selection: Selection): Promi
     sectionNumber: row.sectionNumber,
     instructor: row.instructor,
     course: row.course,
-    gradeA: row.grades.A,
-    gradeB: row.grades.B,
-    gradeC: row.grades.C,
-    gradeD: row.grades.D,
-    gradeF: row.grades.F,
-    gradeP: row.grades.P,
-    gradeNP: row.grades.NP,
-    gradeW: row.grades.W,
-    gradeI: row.grades.I,
-    totalEnroll:
-      row.grades.A +
-      row.grades.B +
-      row.grades.C +
-      row.grades.D +
-      row.grades.F +
-      row.grades.P +
-      row.grades.NP +
-      row.grades.W +
-      row.grades.I,
+    ...toGradeData(row.grades),
   }));
 
   const aggregate = aggregateGrades(sections);

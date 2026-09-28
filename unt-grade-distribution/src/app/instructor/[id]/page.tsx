@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { aggregateGrades, calculateGPA, toChartData } from "@/lib/grades";
+import { aggregateGrades, calculateGPA, toChartData, toGradeData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import LazyChart from "@/components/LazyChart";
@@ -11,14 +11,7 @@ import { SemesterCheckboxGroup, type SemesterSelection } from "@/components/Seme
 import { fromInstructorSlug, loadInstructorSections } from "@/lib/encryptedData";
 import { groupBySemester, semesterLabel } from "@/lib/semester";
 
-type SectionWithCourse = {
-  sectionNumber: string;
-  year: string | null;
-  term: string | null;
-  instructor: { firstName: string; lastName: string };
-  grades: { A: number; B: number; C: number; D: number; F: number; P: number; NP: number; W: number; I: number };
-  course: { prefix: string; number: string; title: string };
-};
+type SectionWithCourse = Awaited<ReturnType<typeof loadInstructorSections>>[number];
 
 export default function InstructorPage() {
   const params = useParams<{ id: string }>();
@@ -46,7 +39,7 @@ export default function InstructorPage() {
     loadInstructorSections(firstName, lastName)
       .then((data) => {
         if (!mounted) return;
-        setSections(data as SectionWithCourse[]);
+        setSections(data);
       })
       .catch((e: unknown) => {
         if (!mounted) return;
@@ -70,17 +63,7 @@ export default function InstructorPage() {
         term: s.term,
         instructor: s.instructor,
         course: s.course,
-        gradeA: s.grades.A,
-        gradeB: s.grades.B,
-        gradeC: s.grades.C,
-        gradeD: s.grades.D,
-        gradeF: s.grades.F,
-        gradeP: s.grades.P,
-        gradeNP: s.grades.NP,
-        gradeW: s.grades.W,
-        gradeI: s.grades.I,
-        totalEnroll:
-          s.grades.A + s.grades.B + s.grades.C + s.grades.D + s.grades.F + s.grades.P + s.grades.NP + s.grades.W + s.grades.I,
+        ...toGradeData(s.grades),
       })),
     [sections]
   );

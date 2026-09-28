@@ -2,30 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { aggregateGrades, calculateGPA, toChartData } from "@/lib/grades";
+import { aggregateGrades, calculateGPA, toChartData, toGradeData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
 import GradeChart from "@/components/GradeChart";
 import CourseSaveButton from "@/components/CourseSaveButton";
 import ShareButton from "@/components/ShareButton";
 import { SemesterCheckboxGroup, type SemesterSelection } from "@/components/SemesterControls";
-import { loadCourseByCode } from "@/lib/encryptedData";
+import { loadCourseByCode, type EncryptedCourse } from "@/lib/encryptedData";
 import { groupBySemester, semesterLabel } from "@/lib/semester";
 
-type CourseData = {
-  prefix: string;
-  number: string;
-  title: string;
-  sections: Array<{
-    sectionNumber: string;
-    instructor: { firstName: string; lastName: string };
-    year: string | null;
-    term: string | null;
-    grades: { A: number; B: number; C: number; D: number; F: number; P: number; NP: number; W: number; I: number };
-  }>;
-};
-
-function toSectionModel(course: CourseData) {
+function toSectionModel(course: EncryptedCourse) {
   return course.sections.map((s, idx) => ({
     id: `${course.prefix}-${course.number}-${s.sectionNumber}-${idx}`,
     sectionNumber: s.sectionNumber,
@@ -33,17 +20,7 @@ function toSectionModel(course: CourseData) {
     term: s.term,
     instructor: s.instructor,
     course: { prefix: course.prefix, number: course.number, title: course.title },
-    gradeA: s.grades.A,
-    gradeB: s.grades.B,
-    gradeC: s.grades.C,
-    gradeD: s.grades.D,
-    gradeF: s.grades.F,
-    gradeP: s.grades.P,
-    gradeNP: s.grades.NP,
-    gradeW: s.grades.W,
-    gradeI: s.grades.I,
-    totalEnroll:
-      s.grades.A + s.grades.B + s.grades.C + s.grades.D + s.grades.F + s.grades.P + s.grades.NP + s.grades.W + s.grades.I,
+    ...toGradeData(s.grades),
   }));
 }
 
@@ -62,7 +39,7 @@ export default function CoursePage() {
   const prefix = (params?.prefix || "").toUpperCase();
   const number = params?.number || "";
 
-  const [course, setCourse] = useState<CourseData | null>(null);
+  const [course, setCourse] = useState<EncryptedCourse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [distributionSemesters, setDistributionSemesters] = useState<SemesterSelection>("all");
@@ -80,7 +57,7 @@ export default function CoursePage() {
     loadCourseByCode(prefix, number)
       .then((data) => {
         if (!mounted) return;
-        setCourse(data as CourseData | null);
+        setCourse(data);
       })
       .catch((e: unknown) => {
         if (!mounted) return;

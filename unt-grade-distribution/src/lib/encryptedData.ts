@@ -1,3 +1,5 @@
+import type { GradeCounts } from "./grades";
+
 export type ManifestEntry = {
   id: string;
   tokens: string[];
@@ -9,17 +11,7 @@ export type EncryptedSection = {
   instructor: { firstName: string; lastName: string };
   year: string | null;
   term: string | null;
-  grades: {
-    A: number;
-    B: number;
-    C: number;
-    D: number;
-    F: number;
-    P: number;
-    NP: number;
-    W: number;
-    I: number;
-  };
+  grades: GradeCounts;
 };
 
 export type EncryptedCourse = {

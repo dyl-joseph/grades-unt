@@ -6,7 +6,7 @@ import {
   searchManifestEntries,
   sectionHasGrades,
 } from "./encryptedData";
-import { aggregateGrades, calculateGPA } from "./grades";
+import { aggregateGrades, calculateGPA, toGradeData } from "./grades";
 import { compareSemesterLabels, semesterLabel } from "./semester";
 
 const manifestSchema = z.array(z.object({
@@ -109,12 +109,7 @@ export function createGradeDataSource(directory: string, dataKey: () => string |
       const sections = course.sections
         .filter(sectionHasGrades)
         .sort((a, b) => compareSemesterLabels(semesterLabel(a), semesterLabel(b)));
-      const totals = aggregateGrades(sections.map(({ grades }) => ({
-        gradeA: grades.A, gradeB: grades.B, gradeC: grades.C, gradeD: grades.D,
-        gradeF: grades.F, gradeP: grades.P, gradeNP: grades.NP, gradeW: grades.W,
-        gradeI: grades.I,
-        totalEnroll: Object.values(grades).reduce((sum, count) => sum + count, 0),
-      })));
+      const totals = aggregateGrades(sections.map(({ grades }) => toGradeData(grades)));
       const page = sections.slice(offset, offset + limit);
       return {
         prefix: course.prefix,
