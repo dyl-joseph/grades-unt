@@ -46,4 +46,5 @@ run() {
 run "node --test scripts/ci-local.test.js scripts/github-ci.test.js" node --test "$repo_root/scripts/ci-local.test.js" "$repo_root/scripts/github-ci.test.js"
 run "npm --prefix unt-grade-distribution test" npm --prefix "$repo_root/unt-grade-distribution" test
 run "npm --prefix unt-grade-distribution run build" npm --prefix "$repo_root/unt-grade-distribution" run build
+run "npm --prefix extension test" npm --prefix "$repo_root/extension" test
 run "npm --prefix extension run build" npm --prefix "$repo_root/extension" run build

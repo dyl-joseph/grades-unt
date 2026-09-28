@@ -41,6 +41,7 @@ export default function SearchBar({
   const debouncedQuery = useDebounce(query, DEBOUNCE_MS);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const requestId = useRef(0);
   const clientCache = useRef(new Map<string, SearchResult>());
 
   useEffect(() => {
@@ -48,6 +49,12 @@ export default function SearchBar({
   }, []);
 
   const normalizeQuery = useCallback((value: string) => value.trim().toLowerCase(), []);
+
+  const updateQuery = useCallback((value: string) => {
+    if (value === query) return;
+    requestId.current += 1;
+    setQuery(value);
+  }, [query]);
 
   const rememberResult = useCallback((key: string, value: SearchResult) => {
     const cache = clientCache.current;
@@ -71,10 +78,10 @@ export default function SearchBar({
   const hasQuery = debouncedQuery.length >= MIN_QUERY_LENGTH;
   const showCoursesFirst = /\d/.test(normalizedDebouncedQuery) || /\b[a-z]{1,4}\s*\d/i.test(normalizedDebouncedQuery);
 
-  // Fetch results when debounced query changes
   useEffect(() => {
-    const normalized = normalizedDebouncedQuery;
+    const normalized = normalizeQuery(debouncedQuery);
     if (normalized.length < MIN_QUERY_LENGTH) return;
+    const currentRequestId = requestId.current;
 
     const cached = clientCache.current.get(normalized);
     if (cached) {
@@ -86,13 +93,12 @@ export default function SearchBar({
       return;
     }
 
-    let active = true;
     setError(null);
 
     searchManifest(normalized)
       .then((data) => data as SearchResult)
       .then((data) => {
-        if (!active) return;
+        if (requestId.current !== currentRequestId) return;
         rememberResult(normalized, data);
         setResults(data);
         setIsOpen(true);
@@ -100,17 +106,16 @@ export default function SearchBar({
         setLoading(false);
       })
       .catch((cause: unknown) => {
-        if (!active) return;
+        if (requestId.current !== currentRequestId) return;
         setLoading(false);
         setError(cause instanceof Error ? cause.message : "Search request failed");
       });
 
     return () => {
-      active = false;
+      if (requestId.current === currentRequestId) requestId.current += 1;
     };
   }, [debouncedQuery, normalizeQuery, rememberResult]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
@@ -125,6 +130,7 @@ export default function SearchBar({
   }, []);
 
   useEffect(() => {
+    requestId.current += 1;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reset stale navbar SearchBar state on route change
     setNavigatingId(null);
     setResults(null);
@@ -132,7 +138,6 @@ export default function SearchBar({
     setHighlightIdx(-1);
   }, [pathname]);
 
-  // Build flat list of all items for keyboard nav
   const allItems = useCallback(() => {
     if (!results) return [];
     const items: Array<{
@@ -173,7 +178,7 @@ export default function SearchBar({
     const targetPath = type === "course" ? `/course/${id}` : `/instructor/${id}`;
 
     setNavigatingId(navId);
-    setQuery("");
+    updateQuery("");
     setLoading(false);
     setError(null);
     setResults(null);
@@ -202,8 +207,6 @@ export default function SearchBar({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        // Do not transmit an instructor query or name. The API records only
-        // the anonymous instructor-search event and result counts.
         rawQuery: course ? debouncedQuery : undefined,
         searchKind: course ? "course" : "instructor",
         source: "site",
@@ -269,11 +272,15 @@ export default function SearchBar({
           value={query}
           onChange={(e) => {
             const value = e.target.value;
-            setQuery(value);
+            if (value === query) return;
+            updateQuery(value);
             setError(null);
             if (normalizeQuery(value).length < MIN_QUERY_LENGTH) {
               resetResults();
             } else {
+              setResults(null);
+              setIsOpen(false);
+              setHighlightIdx(-1);
               setLoading(true);
             }
           }}

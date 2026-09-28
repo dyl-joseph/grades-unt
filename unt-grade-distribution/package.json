@@ -9,7 +9,7 @@
     "convert:relational": "node ./tools/convert-relational-to-encrypt-csv.js",
     "pivot:grades": "node ./tools/pivot-grade-sheet.js",
     "start": "next start",
-    "test": "node --import tsx --test 'src/**/*.test.ts' 'tools/**/*.test.js'",
+    "test": "node --import tsx --test 'src/**/*.test.ts' 'src/**/*.test.tsx' 'tools/**/*.test.js'",
     "lint": "eslint",
     "postinstall": "prisma generate"
   },
@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jsdom": "^30.0.0",
     "@types/node": "^20",
     "@types/pg": "^8.18.0",
     "@types/react": "^19",
@@ -43,6 +44,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "jsdom": "^30.1.1",
     "prisma": "^7.4.2",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",

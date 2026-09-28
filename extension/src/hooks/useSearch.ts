@@ -11,6 +11,16 @@ export function useSearch() {
   const [error, setError] = useState<string | null>(null);
   const debouncedQuery = useDebounce(query, 250);
   const cache = useRef(new Map<string, SearchResult>());
+  const requestId = useRef(0);
+
+  const updateQuery = useCallback((value: string) => {
+    if (value === query) return;
+    requestId.current += 1;
+    setQuery(value);
+    setResults(null);
+    setLoading(value.trim().length >= MIN_QUERY_LENGTH);
+    setError(null);
+  }, [query]);
 
   const search = useCallback(async (q: string): Promise<SearchResult | null> => {
     const normalized = q.trim().toLowerCase();
@@ -44,21 +54,28 @@ export function useSearch() {
       return;
     }
 
+    const currentRequestId = requestId.current;
     setLoading(true);
     setError(null);
 
     search(debouncedQuery)
       .then((data) => {
+        if (requestId.current !== currentRequestId) return;
         if (data) {
           setResults(data);
         }
         setLoading(false);
       })
       .catch((err) => {
+        if (requestId.current !== currentRequestId) return;
         setError(err instanceof Error ? err.message : "Search failed");
         setLoading(false);
       });
+
+    return () => {
+      if (requestId.current === currentRequestId) requestId.current += 1;
+    };
   }, [debouncedQuery, search]);
 
-  return { query, setQuery, results, loading, error };
+  return { query, setQuery: updateQuery, results, loading, error };
 }

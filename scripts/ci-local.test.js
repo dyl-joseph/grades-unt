@@ -11,6 +11,7 @@ const expectedDryRun = [
   "+ node --test scripts/ci-local.test.js scripts/github-ci.test.js",
   "+ npm --prefix unt-grade-distribution test",
   "+ npm --prefix unt-grade-distribution run build",
+  "+ npm --prefix extension test",
   "+ npm --prefix extension run build",
 ].join("\n") + "\n";
 
