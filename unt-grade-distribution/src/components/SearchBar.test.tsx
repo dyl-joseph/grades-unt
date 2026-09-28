@@ -43,6 +43,11 @@ test("changing the query cannot select suggestions from the previous query", asy
       tokens: ["CSCE 1030", "COMPUTER SCIENCE I"],
       preview: { prefix: "CSCE", number: "1030", title: "COMPUTER SCIENCE I" },
     },
+    {
+      id: "acct-2020.bin",
+      tokens: ["ACCT 2020", "JANE DOE", "Doe,Jane"],
+      preview: { prefix: "ACCT", number: "2020", title: "JANE DOE" },
+    },
   ];
   let resolveManifest: ((response: Response) => void) | undefined;
   const pendingManifest = new Promise<Response>((resolve) => {
@@ -158,4 +163,17 @@ test("changing the query cannot select suggestions from the previous query", asy
   assert.equal(courseLogBody.searchKind, "course");
   assert.equal(courseLogBody.rawQuery, "ACCT 2010");
   assert.doesNotMatch(JSON.stringify(courseLogBody), /Jane|Doe/);
+
+  await act(async () => document.getElementById("change-path")!.click());
+  await act(async () => changeQuery("Jane"));
+  const mixedCourseButton = Array.from(document.querySelectorAll("button")).find((button) =>
+    button.textContent?.includes("ACCT 2020")
+  );
+  assert.ok(mixedCourseButton);
+  await act(async () => mixedCourseButton.click());
+
+  const mixedCourseLogBody = JSON.parse(String(searchLogRequests[2]?.body));
+  assert.equal(mixedCourseLogBody.searchKind, "course");
+  assert.equal(mixedCourseLogBody.rawQuery, undefined);
+  assert.equal(mixedCourseLogBody.normalizedQuery, undefined);
 });
