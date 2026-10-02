@@ -63,13 +63,25 @@ const handler = createMcpHandler((server) => {
 export { handler as GET };
 
 export async function POST(request: Request) {
+  let message: unknown;
   try {
-    const message = await readBoundedJson(request, 32 * 1024);
+    message = await readBoundedJson(request, 32 * 1024);
     // Legacy SDK batching permits up to 100 tool calls for one HTTP quota slot.
     // Modern Streamable HTTP clients send one JSON-RPC message per request.
     if (Array.isArray(message)) throw new RequestBodyError("MCP batch requests are not supported. Send one message per request.", 400);
-    return handler(new Request(request, { body: JSON.stringify(message) }));
   } catch (error) {
     return requestBodyErrorResponse(error);
   }
+
+  // The incoming body is consumed now. Construct from fields rather than
+  // copying that Request: hosted runtimes can reject a consumed request input.
+  // JSON reserialization also makes the original Content-Length stale.
+  const headers = new Headers(request.headers);
+  headers.delete("Content-Length");
+  return handler(new Request(request.url, {
+    method: request.method,
+    headers,
+    body: JSON.stringify(message),
+    signal: request.signal,
+  }));
 }

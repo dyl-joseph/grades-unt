@@ -70,3 +70,60 @@ test("MCP rejects malformed JSON and still supports an ordinary tool call", asyn
   assert.deepEqual(reply.result.structuredContent, { courses: [], instructors: [] });
   assert.equal(search.mock.callCount(), 1);
 });
+
+test("MCP rebuilds consumed streaming requests from fields and removes stale Content-Length", async (t) => {
+  const { NextRequest } = await import("next/server");
+  const NativeRequest = globalThis.Request;
+  const url = "https://www.untgrades.app/api/mcp";
+  const payload = JSON.stringify({
+    jsonrpc: "2.0", id: 99, method: "initialize",
+    params: { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "streamed café", version: "1.0" } },
+  }, null, 2);
+  const bytes = new TextEncoder().encode(payload);
+  const controller = new AbortController();
+  const incoming = new NextRequest(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json", Accept: "application/json, text/event-stream",
+      "MCP-Protocol-Version": "2025-11-25", "Content-Length": String(bytes.length),
+      "X-Request-Test": "preserved",
+    },
+    body: new ReadableStream({ start(stream) { stream.enqueue(bytes); stream.close(); } }),
+    signal: controller.signal,
+  });
+  const rebuilt: Request[] = [];
+  class HostedRequest extends NativeRequest {
+    constructor(input: RequestInfo | URL, init?: RequestInit) {
+      // Model hosted Request implementations that cannot copy a consumed body.
+      if (input instanceof NativeRequest && input.bodyUsed) throw new TypeError("Cannot copy a consumed request");
+      super(input, init);
+      if (input === url) rebuilt.push(this);
+    }
+  }
+  globalThis.Request = HostedRequest;
+  t.after(() => { globalThis.Request = NativeRequest; });
+  const response = await POST(incoming);
+  assert.equal(response.status, 200);
+  assert.match(await response.text(), /"name":"unt-grades"/);
+  assert.equal(incoming.bodyUsed, true);
+  assert.equal(rebuilt.length, 1);
+  assert.equal(rebuilt[0].url, url);
+  assert.equal(rebuilt[0].method, "POST");
+  assert.equal(rebuilt[0].headers.has("content-length"), false);
+  assert.equal(rebuilt[0].headers.get("mcp-protocol-version"), "2025-11-25");
+  assert.equal(rebuilt[0].headers.get("x-request-test"), "preserved");
+  controller.abort();
+  assert.equal(rebuilt[0].signal.aborted, true);
+});
+
+test("MCP does not disguise internal request-construction failures as invalid client JSON", async (t) => {
+  const NativeRequest = globalThis.Request;
+  const incoming = new NativeRequest("https://www.untgrades.app/api/mcp", { method: "POST", body: "{}" });
+  const failure = new Error("Synthetic request-construction failure");
+  class BrokenRequest extends NativeRequest {
+    constructor(input: RequestInfo | URL, init?: RequestInit) { super(input, init); throw failure; }
+  }
+  globalThis.Request = BrokenRequest;
+  t.after(() => { globalThis.Request = NativeRequest; });
+  await assert.rejects(POST(incoming), (error: unknown) => error === failure);
+});
