@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "node --import tsx --test 'src/**/*.test.tsx' 'src/**/*.test.js'",
+    "test": "node --import tsx --test 'src/**/*.test.ts' 'src/**/*.test.tsx' 'src/**/*.test.js'",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },

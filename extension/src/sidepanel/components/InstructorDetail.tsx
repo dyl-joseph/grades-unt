@@ -5,7 +5,7 @@ import GpaBadge from "./GpaBadge";
 import GradeChart from "./GradeChart";
 import SectionCard from "./SectionCard";
 import { useDetail } from "../../hooks/useDetail";
-import type { Section, SectionCourse } from "../../lib/types";
+import { groupSectionsByCourse, instructorPagePath } from "../../lib/sections";
 
 interface InstructorDetailProps {
   id: number;
@@ -29,17 +29,7 @@ export default function InstructorDetail({ id, onBack, onCourseSelect }: Instruc
   const overallGPA = calculateGPA(overallAggregate);
   const chartData = toChartData(overallAggregate);
 
-  const courseMap = new Map<number, { course: SectionCourse; secs: Section[] }>();
-  for (const section of sections) {
-    if (!section.course) continue;
-    const existing = courseMap.get(section.courseId);
-    if (existing) {
-      existing.secs.push(section);
-    } else {
-      courseMap.set(section.courseId, { course: section.course, secs: [section] });
-    }
-  }
-  const courseGroups = Array.from(courseMap.values());
+  const courseGroups = groupSectionsByCourse(sections);
 
   return (
     <div>
@@ -67,7 +57,7 @@ export default function InstructorDetail({ id, onBack, onCourseSelect }: Instruc
       </div>
 
       <a
-        href={`https://www.untgrades.app/instructor/${instructor.id}`}
+        href={`https://www.untgrades.app${instructorPagePath(instructor)}`}
         target="_blank"
         rel="noopener noreferrer"
         style={{ display: "inline-block", marginBottom: 12, fontSize: 13, color: "#1B5E20", textDecoration: "none" }}
@@ -75,8 +65,8 @@ export default function InstructorDetail({ id, onBack, onCourseSelect }: Instruc
         View full page on untgrades.app &#8599;
       </a>
 
-      {courseGroups.map(({ course, secs }) => (
-        <div key={course.id} style={{ marginBottom: 16 }}>
+      {courseGroups.map(({ key, course, secs }) => (
+        <div key={key} style={{ marginBottom: 16 }}>
           <h2 style={{ fontSize: 14, fontWeight: 600, margin: "0 0 8px 0" }}>
             <button
               onClick={() => onCourseSelect(course.prefix, course.number)}
@@ -90,7 +80,7 @@ export default function InstructorDetail({ id, onBack, onCourseSelect }: Instruc
             {secs.map((section) => (
               <SectionCard
                 key={section.id}
-                section={section as GradeData & { sectionNumber: string; instructorId: number; course: { prefix: string; number: string; title: string } }}
+                section={section}
                 showCourse={false}
               />
             ))}

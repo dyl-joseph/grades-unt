@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { CourseDetailResponse, InstructorDetailResponse, ExtensionResponse } from "../lib/types";
 
 export function useDetail() {
@@ -6,8 +6,11 @@ export function useDetail() {
   const [instructorData, setInstructorData] = useState<InstructorDetailResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Only the most recent request may update state; earlier ones can resolve late.
+  const latestRequest = useRef(0);
 
   const fetchCourse = useCallback(async (prefix: string, number: string) => {
+    const requestId = ++latestRequest.current;
     setLoading(true);
     setError(null);
     setInstructorData(null);
@@ -16,16 +19,19 @@ export function useDetail() {
         type: "COURSE_DETAIL",
         payload: { prefix, number },
       });
+      if (requestId !== latestRequest.current) return;
       if (!response.ok) throw new Error(response.error ?? "Failed to load course");
       setCourseData(response.data as CourseDetailResponse);
     } catch (err) {
+      if (requestId !== latestRequest.current) return;
       setError(err instanceof Error ? err.message : "Failed to load course");
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   }, []);
 
   const fetchInstructor = useCallback(async (id: number) => {
+    const requestId = ++latestRequest.current;
     setLoading(true);
     setError(null);
     setCourseData(null);
@@ -34,12 +40,14 @@ export function useDetail() {
         type: "INSTRUCTOR_DETAIL",
         payload: { id: String(id) },
       });
+      if (requestId !== latestRequest.current) return;
       if (!response.ok) throw new Error(response.error ?? "Failed to load instructor");
       setInstructorData(response.data as InstructorDetailResponse);
     } catch (err) {
+      if (requestId !== latestRequest.current) return;
       setError(err instanceof Error ? err.message : "Failed to load instructor");
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   }, []);
 

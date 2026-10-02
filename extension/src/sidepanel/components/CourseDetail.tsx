@@ -69,7 +69,7 @@ export default function CourseDetail({ prefix, number, onBack, onInstructorSelec
         {sections.map((section) => (
           <SectionCard
             key={section.id}
-            section={section as GradeData & { sectionNumber: string; instructorId: number; instructor?: { id: number; firstName: string; lastName: string } }}
+            section={section}
             onInstructorClick={onInstructorSelect}
           />
         ))}
