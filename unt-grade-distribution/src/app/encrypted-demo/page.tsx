@@ -7,7 +7,7 @@ export default function EncryptedDemoPage() {
   const [manifest, setManifest] = useState<ManifestEntry[] | null>(null);
   const [query, setQuery] = useState("");
   const [passphrase, setPassphrase] = useState("");
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +37,7 @@ export default function EncryptedDemoPage() {
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold">Encrypted data demo</h2>
-      <p className="mt-2">Enter a passphrase and search (e.g., "ACCT 2010" or instructor last name).</p>
+      <p className="mt-2">Enter a passphrase and search (e.g., &ldquo;ACCT 2010&rdquo; or instructor last name).</p>
 
       <div className="mt-4 space-y-2 max-w-2xl">
         <input value={passphrase} onChange={(e) => setPassphrase(e.target.value)} placeholder="Passphrase" className="w-full p-2 border" />
@@ -46,7 +46,7 @@ export default function EncryptedDemoPage() {
       </div>
 
       {error && <div className="mt-4 text-red-600">{error}</div>}
-      {result && (
+      {result !== null && (
         <pre className="mt-4 max-w-4xl overflow-auto bg-slate-100 p-4 rounded">{JSON.stringify(result, null, 2)}</pre>
       )}
     </div>

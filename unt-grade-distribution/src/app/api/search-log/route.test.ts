@@ -55,3 +55,40 @@ test("search logging rejects oversized and non-object bodies before external wri
   }
   assert.equal(fetchMock.mock.callCount(), 0);
 });
+
+test("search logging is a no-op when Supabase is not configured", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () => { throw new Error("Unexpected external write"); });
+  const saved = { url: process.env.SUPABASE_URL, key: process.env.SUPABASE_SERVICE_ROLE_KEY };
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  t.after(() => {
+    if (saved.url !== undefined) process.env.SUPABASE_URL = saved.url;
+    if (saved.key !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = saved.key;
+  });
+
+  const response = await POST(new NextRequest("https://example.test/api/search-log", {
+    method: "POST",
+    body: JSON.stringify({ rawQuery: "ACCT 2010", searchKind: "course" }),
+  }));
+  assert.equal(response.status, 204);
+  assert.equal(fetchMock.mock.callCount(), 0);
+});
+
+test("search logging reports upstream network failures instead of throwing", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => { throw new TypeError("fetch failed"); });
+  t.mock.method(console, "error", () => undefined);
+  const saved = { url: process.env.SUPABASE_URL, key: process.env.SUPABASE_SERVICE_ROLE_KEY };
+  process.env.SUPABASE_URL = "https://supabase.example.test";
+  process.env.SUPABASE_SERVICE_ROLE_KEY = "test-key";
+  t.after(() => {
+    if (saved.url === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = saved.url;
+    if (saved.key === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY; else process.env.SUPABASE_SERVICE_ROLE_KEY = saved.key;
+  });
+
+  const response = await POST(new NextRequest("https://example.test/api/search-log", {
+    method: "POST",
+    body: JSON.stringify({ rawQuery: "ACCT 2010", searchKind: "course" }),
+  }));
+  assert.equal(response.status, 500);
+  assert.deepEqual(await response.json(), { error: "Failed to record search" });
+});

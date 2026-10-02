@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { isIP } from "node:net";
+import { NO_STORE_HEADERS } from "./no-store";
 
 type Environment = Record<string, string | undefined>;
 export type LimitGroup = "manifest" | "data" | "api" | "mcp" | "log";
@@ -201,11 +202,7 @@ export function assertVercelRateLimitConfiguration(env: Environment = process.en
   for (const group of Object.keys(DEFAULTS) as LimitGroup[]) requestBuckets(headers, group, env);
 }
 
-export const NO_STORE_HEADERS = {
-  "Cache-Control": "private, no-store, max-age=0",
-  "CDN-Cache-Control": "no-store",
-  "Vercel-CDN-Cache-Control": "no-store",
-};
+export { NO_STORE_HEADERS };
 
 export async function checkRequestLimit(
   request: Request,

@@ -6,7 +6,6 @@ import GradeChart from "./GradeChart";
 interface SectionCardProps {
   section: GradeData & {
     sectionNumber: string;
-    instructorId: number;
     instructor?: { id: number; firstName: string; lastName: string };
     course?: { prefix: string; number: string; title: string };
   };

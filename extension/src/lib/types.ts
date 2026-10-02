@@ -23,7 +23,6 @@ export interface SectionInstructor {
 }
 
 export interface SectionCourse {
-  id: number;
   prefix: string;
   number: string;
   title: string;
@@ -32,8 +31,6 @@ export interface SectionCourse {
 export interface Section {
   id: number;
   sectionNumber: string;
-  courseId: number;
-  instructorId: number;
   gradeA: number;
   gradeB: number;
   gradeC: number;

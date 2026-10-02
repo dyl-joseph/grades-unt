@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { validateExtensionOrigin } from "@/lib/cors";
 
+const PG_INT_MAX = 2_147_483_647;
+
 type RouteParams = Record<string, string | string[] | undefined>;
 
 function coerceRouteParam(value: RouteParams[string]) {
@@ -19,7 +21,9 @@ export async function GET(
   const params = (await ctx.params) ?? {};
   const id = coerceRouteParam(params.id);
   const instructorId = Number(id);
-  if (isNaN(instructorId)) {
+  // Reject "", "1.5", "1e3", "Infinity", out-of-range, etc. before they reach
+  // Prisma: Instructor.id is a Postgres Int (max 2147483647).
+  if (!id || !/^\d+$/.test(id) || instructorId < 1 || instructorId > PG_INT_MAX) {
     return NextResponse.json({ sections: [] }, { status: 400 });
   }
   const instructor = await prisma.instructor.findUnique({

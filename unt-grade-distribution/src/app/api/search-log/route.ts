@@ -17,28 +17,30 @@ function getSupabaseConfig() {
   return { supabaseUrl, serviceRoleKey };
 }
 
-async function insertSearchEvent(row: SearchLogRow) {
-  const config = getSupabaseConfig();
-  if (!config) {
-    return { ok: false as const, status: 503, error: "Supabase logging is not configured" };
+async function insertSearchEvent(row: SearchLogRow, config: NonNullable<ReturnType<typeof getSupabaseConfig>>) {
+  try {
+    const response = await fetch(`${config.supabaseUrl.replace(/\/$/, "")}${SUPABASE_REST_SUFFIX}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${config.serviceRoleKey}`,
+        apikey: config.serviceRoleKey,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(row),
+      cache: "no-store",
+      signal: AbortSignal.timeout(3_000),
+    });
+
+    if (!response.ok) {
+      return { ok: false as const, status: response.status };
+    }
+
+    return { ok: true as const };
+  } catch {
+    // Network failures and timeouts must not surface as unhandled route errors.
+    return { ok: false as const, status: 504 };
   }
-
-  const response = await fetch(`${config.supabaseUrl.replace(/\/$/, "")}${SUPABASE_REST_SUFFIX}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${config.serviceRoleKey}`,
-      apikey: config.serviceRoleKey,
-      "Content-Type": "application/json",
-      Prefer: "return=minimal",
-    },
-    body: JSON.stringify(row),
-  });
-
-  if (!response.ok) {
-    return { ok: false as const, status: response.status };
-  }
-
-  return { ok: true as const };
 }
 
 export async function POST(request: NextRequest) {
@@ -61,7 +63,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "rawQuery is required for course searches" }, { status: 400 });
   }
 
-  const result = await insertSearchEvent(row);
+  const config = getSupabaseConfig();
+  // Logging is optional (local dev, previews): accept and drop instead of erroring on every search.
+  if (!config) return new NextResponse(null, { status: 204 });
+
+  const result = await insertSearchEvent(row, config);
   if (!result.ok) {
     console.error("Search log insert failed", { status: result.status, searchKind: row.search_kind, source: row.source });
     return NextResponse.json({ error: "Failed to record search" }, { status: 500 });

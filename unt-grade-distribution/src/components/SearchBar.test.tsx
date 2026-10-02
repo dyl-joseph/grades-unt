@@ -149,6 +149,9 @@ test("changing the query cannot select suggestions from the previous query", asy
     button.textContent?.includes("Doe, Jane")
   );
   assert.ok(instructorButton);
+  for (const option of document.querySelectorAll<HTMLElement>('[role="option"]')) {
+    assert.equal(option.tabIndex, -1);
+  }
   await act(async () => instructorButton.click());
   await act(async () => document.getElementById("change-path")!.click());
 
@@ -163,6 +166,7 @@ test("changing the query cannot select suggestions from the previous query", asy
     button.textContent?.includes("ACCT 2010")
   );
   assert.ok(courseButton);
+  assert.equal(courseButton.tabIndex, -1);
   assert.equal(input.getAttribute("role"), "combobox");
   const listbox = document.getElementById(input.getAttribute("aria-controls")!);
   assert.equal(listbox?.getAttribute("role"), "listbox");
@@ -197,4 +201,19 @@ test("changing the query cannot select suggestions from the previous query", asy
   assert.equal(searchLogStatuses[2], 204);
   assert.equal(buildSearchLogRow(mixedCourseLogBody)?.raw_query, "ACCT 2020");
   assert.equal(buildSearchLogRow(mixedCourseLogBody)?.course_title, null);
+
+  await act(async () => document.getElementById("change-path")!.click());
+  await act(async () => {
+    changeQuery("CSCE 1030");
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  });
+  await act(async () => {
+    input.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  });
+  assert.equal(pushes.at(-1), "/course/CSCE/1030");
+  const keyboardLogBody = JSON.parse(String(searchLogRequests[3]?.body));
+  assert.equal(keyboardLogBody.searchKind, "course");
+  assert.equal(keyboardLogBody.rawQuery, "CSCE 1030");
+  assert.equal(keyboardLogBody.coursePrefix, "CSCE");
+  assert.equal(searchLogStatuses[3], 204);
 });

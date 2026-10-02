@@ -114,6 +114,7 @@ export default function SearchBar({
         if (requestId.current !== currentRequestId) return;
         setLoading(false);
         setError(cause instanceof Error ? cause.message : "Search request failed");
+        setIsOpen(true);
       });
 
     return () => {
@@ -230,6 +231,12 @@ export default function SearchBar({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape" && isOpen) {
+      e.preventDefault();
+      setIsOpen(false);
+      inputRef.current?.blur();
+      return;
+    }
     const items = allItems();
     if (e.key === "Enter" && isOpen && !loading && !error && items.length === 0 && hasQuery) {
       e.preventDefault();
@@ -249,10 +256,14 @@ export default function SearchBar({
       e.preventDefault();
       const targetIdx = highlightIdx >= 0 ? highlightIdx : 0;
       const item = items[targetIdx];
-      if (item) navigate(item.type, item.id);
-    } else if (e.key === "Escape") {
-      setIsOpen(false);
-      inputRef.current?.blur();
+      if (item) {
+        // Keyboard selections are logged the same way as clicks.
+        const suggestion = item.type === "course"
+          ? results?.courses.find((course) => `${course.prefix}/${course.number}` === item.id)
+          : results?.instructors.find((instructor) => String(instructor.id) === item.id);
+        if (suggestion) logSelection(suggestion);
+        navigate(item.type, item.id);
+      }
     }
   };
 
@@ -286,7 +297,7 @@ export default function SearchBar({
           value={query}
           onChange={(e) => updateQuery(e.target.value)}
           onFocus={() => {
-            if (results) setIsOpen(true);
+            if (results || error) setIsOpen(true);
             onFocusChange?.(true);
           }}
           onKeyDown={handleKeyDown}
@@ -322,6 +333,7 @@ export default function SearchBar({
                     key={`i-${instructor.id}`}
                     id={`${listId}-${idx}`}
                     role="option"
+                    tabIndex={-1}
                     aria-selected={highlightIdx === idx}
                     className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                       highlightIdx === idx
@@ -359,6 +371,7 @@ export default function SearchBar({
                   key={`c-${course.id}`}
                   id={`${listId}-${showCoursesFirst ? i : i + results!.instructors.length}`}
                   role="option"
+                  tabIndex={-1}
                   aria-selected={highlightIdx === (showCoursesFirst ? i : i + results!.instructors.length)}
                   className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                     highlightIdx === (showCoursesFirst ? i : i + results!.instructors.length)
@@ -400,6 +413,7 @@ export default function SearchBar({
                     key={`i-${instructor.id}`}
                     id={`${listId}-${idx}`}
                     role="option"
+                    tabIndex={-1}
                     aria-selected={highlightIdx === idx}
                     className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                       highlightIdx === idx
@@ -433,7 +447,7 @@ export default function SearchBar({
           No matching courses or instructors. Press Enter to see similar searches.
         </div>
       )}
-      {!loading && error && hasQuery && (
+      {isOpen && !loading && error && hasQuery && (
         <div role="alert" className={`search-feedback absolute z-50 mt-2 w-full rounded-2xl border p-4 text-center text-sm text-red-600 shadow-xl dark:text-red-300 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-ui-border dark:bg-ui-surface" : "glass-glossy border-white/40 dark:border-white/15"}`}>
           Could not load search results. Please try again.
         </div>

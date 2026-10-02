@@ -199,45 +199,46 @@
   max-width: 816px;
   margin-inline: auto;
   padding: 64px 24px;
-  align-items: stretch;
+  align-items: center;
   overflow: visible;
 }
 
 .dark .home-title {
-  text-align: left;
+  text-align: center;
   margin: 0 0 32px;
 }
 
 .dark .home-title > p:first-child {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.025em;
   color: var(--color-ui-accent);
 }
 
 .dark .home-title h1 {
   margin-top: 12px;
-  font-size: clamp(40px, 6vw, 56px);
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 600;
+  font-size: clamp(40px, 6vw, 64px);
   color: var(--color-ui-text);
 }
 
 .dark .home-title > p:last-child {
-  font-size: 18px;
-  font-weight: 400;
-  letter-spacing: 0;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.025em;
   color: var(--color-ui-muted);
 }
 
 .dark .home-hints {
-  align-items: flex-start;
-  text-align: left;
+  align-items: center;
+  text-align: center;
   gap: 16px;
   margin-top: 20px;
 }
 
 .dark .home-hints p {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.6;
 }
 
@@ -400,7 +401,7 @@
 @media (max-width: 639px) {
   .dark .home-page {
     padding: 48px 20px;
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .dark .home-title {

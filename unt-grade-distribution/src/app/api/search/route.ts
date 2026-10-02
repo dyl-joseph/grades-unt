@@ -9,6 +9,7 @@ import {
   recordSearchSkip,
 } from "@/lib/metrics";
 import { validateExtensionOrigin } from "@/lib/cors";
+import { NO_STORE_HEADERS } from "@/lib/no-store";
 
 /* ── In-memory LRU cache ─────────────────────────────── */
 const MAX_ENTRIES = 500;
@@ -46,7 +47,8 @@ export async function GET(request: NextRequest) {
   if (originReject) return originReject;
 
   const requestStart = performance.now();
-  const q = (request.nextUrl.searchParams.get("q") ?? "").trim();
+  // Collapse whitespace so the DB query matches what the normalized cache key represents.
+  const q = (request.nextUrl.searchParams.get("q") ?? "").trim().replace(/\s+/g, " ");
   if (q.length < 2) {
     const durationMs = performance.now() - requestStart;
     recordSearchSkip(q, durationMs);
@@ -124,9 +126,10 @@ export async function GET(request: NextRequest) {
     console.error("Search API error:", error);
     const durationMs = performance.now() - requestStart;
     recordSearchError(cacheKey, durationMs, error, queryKind);
+    // Never cache failures at the CDN or echo database errors to clients.
     return NextResponse.json(
-      { error: "Database query failed", details: error instanceof Error ? error.message : String(error) },
-      { status: 500, headers: { ...buildSearchHeaders({ totalDurationMs: durationMs, cacheState: "error", queryKind }) } }
+      { error: "Database query failed" },
+      { status: 500, headers: { ...buildSearchHeaders({ totalDurationMs: durationMs, cacheState: "error", queryKind }), ...NO_STORE_HEADERS } }
     );
   }
 }

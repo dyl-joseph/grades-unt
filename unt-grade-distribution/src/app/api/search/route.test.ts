@@ -3,6 +3,13 @@ import test from "node:test";
 import { NextRequest } from "next/server";
 import { buildSearchHeaders, getCourseSearchWhere, getInstructorSearchWhere, getSearchPlan, normalizeSearchQuery } from "@/lib/search";
 
+// lib/prisma reuses globalThis.prisma outside production; inject a client whose
+// queries fail so these tests never depend on whether a real database is reachable.
+const failingQuery = async () => { throw new Error("connect ECONNREFUSED 10.0.0.5:5432"); };
+Object.assign(globalThis, {
+  prisma: { course: { findMany: failingQuery }, instructor: { findMany: failingQuery } },
+});
+
 test("normalizeSearchQuery collapses whitespace and lowercases", () => {
   assert.equal(normalizeSearchQuery("  ACCT   2010  "), "acct 2010");
 });
@@ -73,4 +80,14 @@ test("search route leaves quota charging to proxy (no duplicate charge)", async 
   const response = await GET(new NextRequest("https://example.test/api/search?q=a"));
   assert.equal(response.status, 200);
   assert.equal(response.headers.has("x-ratelimit-remaining"), false);
+});
+
+test("search route failures are not CDN-cacheable and do not leak database errors", async (t) => {
+  t.mock.method(console, "error", () => undefined);
+  const { GET } = await import("./route");
+
+  const response = await GET(new NextRequest("https://example.test/api/search?q=zz-failure-probe"));
+  assert.equal(response.status, 500);
+  assert.match(response.headers.get("cache-control") ?? "", /no-store/);
+  assert.deepEqual(await response.json(), { error: "Database query failed" });
 });

@@ -12,6 +12,8 @@ import type { CartItem } from "@/lib/types";
 /* ── State shape ─────────────────────────────────────── */
 interface SavedCoursesState {
   items: CartItem[];
+  /** False until localStorage has been read; nothing is persisted before then. */
+  hydrated: boolean;
 }
 
 /* ── Actions ─────────────────────────────────────────── */
@@ -30,15 +32,16 @@ function savedCoursesReducer(
     case "ADD":
       if (state.items.some((i) => i.courseId === action.item.courseId))
         return state;
-      return { items: [...state.items, action.item] };
+      return { ...state, items: [...state.items, action.item] };
     case "REMOVE":
       return {
+        ...state,
         items: state.items.filter((i) => i.courseId !== action.courseId),
       };
     case "CLEAR":
-      return { items: [] };
+      return { ...state, items: [] };
     case "HYDRATE":
-      return { items: action.items };
+      return { items: action.items, hydrated: true };
     default:
       return state;
   }
@@ -57,29 +60,59 @@ const SavedCoursesContext = createContext<SavedCoursesContextValue | null>(null)
 
 const STORAGE_KEY = "unt-grades-saved-courses";
 
+const NUMERIC_FIELDS = [
+  "courseId", "gradeA", "gradeB", "gradeC", "gradeD", "gradeF",
+  "gradeP", "gradeNP", "gradeW", "gradeI", "totalEnroll", "sectionCount",
+] as const;
+
+/** Drop entries that don't match the current CartItem shape (old versions, manual edits). */
+export function parseStoredItems(raw: string | null): CartItem[] {
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is CartItem => {
+      if (!item || typeof item !== "object") return false;
+      const record = item as Record<string, unknown>;
+      return (
+        typeof record.prefix === "string" &&
+        typeof record.number === "string" &&
+        typeof record.title === "string" &&
+        (record.gpa === null || (typeof record.gpa === "number" && Number.isFinite(record.gpa))) &&
+        NUMERIC_FIELDS.every((field) => typeof record[field] === "number" && Number.isFinite(record[field]))
+      );
+    });
+  } catch {
+    return [];
+  }
+}
+
 /* ── Provider ────────────────────────────────────────── */
 export function SavedCoursesProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(savedCoursesReducer, { items: [] });
+  const [state, dispatch] = useReducer(savedCoursesReducer, { items: [], hydrated: false });
 
   // Hydrate from localStorage on mount
   useEffect(() => {
+    let items: CartItem[] = [];
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as CartItem[];
-        if (Array.isArray(parsed)) {
-          dispatch({ type: "HYDRATE", items: parsed });
-        }
-      }
+      items = parseStoredItems(localStorage.getItem(STORAGE_KEY));
     } catch {
-      // Corrupt data — ignore
+      // Storage unavailable (privacy mode, blocked cookies) — start empty
     }
+    dispatch({ type: "HYDRATE", items });
   }, []);
 
-  // Persist to localStorage on every change (skip initial empty state)
+  // Persist to localStorage on every change. Skip the pre-hydration empty
+  // state: writing it would wipe saved courses (and under StrictMode's double
+  // effects the re-run hydrate would then read back []).
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
-  }, [state.items]);
+    if (!state.hydrated) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
+    } catch {
+      // Quota exceeded or storage unavailable — keep in-memory state
+    }
+  }, [state.hydrated, state.items]);
 
   const addCourse = (item: CartItem) => dispatch({ type: "ADD", item });
   const removeCourse = (courseId: number) =>
