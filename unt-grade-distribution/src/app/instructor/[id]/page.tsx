@@ -155,7 +155,7 @@ export default function InstructorPage() {
     return <div className="mx-auto max-w-6xl px-4 py-8 text-red-600 dark:text-red-300">{error}</div>;
   }
 
-  if (!firstName || !lastName) {
+  if (!firstName || !lastName || normalizedSections.length === 0) {
     return <div className="mx-auto max-w-6xl px-4 py-8 text-red-600 dark:text-red-300">Instructor not found</div>;
   }
 

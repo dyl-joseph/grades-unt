@@ -168,6 +168,7 @@ function ComparePanel({
   data,
   loadingData,
   error,
+  dataError,
   onSelect,
   onClear,
 }: {
@@ -184,6 +185,7 @@ function ComparePanel({
   data: CompareData | null;
   loadingData: boolean;
   error: string | null;
+  dataError: string | null;
   onSelect: (item: Suggestion) => void;
   onClear: () => void;
 }) {
@@ -338,6 +340,13 @@ function ComparePanel({
             </div>
             <GradeChart data={data.chartData} height={280} mode="percentage" />
           </>
+        ) : selected && dataError ? (
+          <div
+            role="alert"
+            className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-red-300/60 bg-white/40 px-4 text-center text-sm text-red-600 dark:border-red-800/60 dark:bg-green-950/15 dark:text-red-300"
+          >
+            {dataError}
+          </div>
         ) : (
           <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-jungle-tan-dark/30 bg-white/40 text-center dark:border-green-800/50 dark:bg-green-950/15">
             <div>
@@ -363,6 +372,7 @@ function useCompareSide(initialKind: CompareType, initialSelection: Selection) {
   const [loadingData, setLoadingData] = useState(false);
   const [data, setData] = useState<CompareData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dataError, setDataError] = useState<string | null>(null);
   const debouncedQuery = useDebounce(query, 200);
 
   const clear = useCallback(() => {
@@ -374,6 +384,7 @@ function useCompareSide(initialKind: CompareType, initialSelection: Selection) {
     setLoadingData(false);
     setData(null);
     setError(null);
+    setDataError(null);
   }, []);
 
   const onKindChange = useCallback(
@@ -451,20 +462,21 @@ function useCompareSide(initialKind: CompareType, initialSelection: Selection) {
       if (!selected) {
         setData(null);
         setLoadingData(false);
+        setDataError(null);
         return;
       }
 
       setLoadingData(true);
-      setError(null);
+      setDataError(null);
       try {
         const nextData = await loadSelectionData(kind, selected);
         if (!active) return;
         setData(nextData);
-        if (!nextData) setError("That selection could not be loaded.");
+        if (!nextData) setDataError("That selection could not be loaded.");
       } catch (cause: unknown) {
         if (!active) return;
         setData(null);
-        setError(cause instanceof Error ? cause.message : "Failed to load comparison data");
+        setDataError(cause instanceof Error ? cause.message : "Failed to load comparison data");
       } finally {
         if (active) setLoadingData(false);
       }
@@ -489,6 +501,7 @@ function useCompareSide(initialKind: CompareType, initialSelection: Selection) {
     loadingData,
     results,
     error,
+    dataError,
     onSelect,
     clear,
   };
@@ -539,6 +552,7 @@ export default function CompareClient({ initialType, initialA }: CompareClientPr
             data={left.data}
             loadingData={left.loadingData}
             error={left.error}
+            dataError={left.dataError}
             onSelect={left.onSelect}
             onClear={left.clear}
           />
@@ -563,6 +577,7 @@ export default function CompareClient({ initialType, initialA }: CompareClientPr
             data={right.data}
             loadingData={right.loadingData}
             error={right.error}
+            dataError={right.dataError}
             onSelect={right.onSelect}
             onClear={right.clear}
           />

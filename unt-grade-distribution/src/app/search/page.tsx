@@ -7,7 +7,8 @@ type SearchPageProps = {
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { query } = await searchParams;
-  const searchedQuery = query?.trim() || "that search";
+  const trimmedQuery = query?.trim() ?? "";
+  const searchedQuery = trimmedQuery || "that search";
 
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center px-4 py-10 text-center">
@@ -22,7 +23,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           Nothing matched &ldquo;{searchedQuery}&rdquo;
         </p>
 
-        <SimilarSearches query={searchedQuery} />
+        {/* Only suggest for a real query; the display fallback would fuzzy-match unrelated names. */}
+        {trimmedQuery && <SimilarSearches query={trimmedQuery} />}
 
         <div className="mt-8 h-[min(55dvh,28rem)] w-full overflow-hidden rounded-2xl border-4 border-jungle-tan-dark/50 bg-jungle-tan/80 shadow-[8px_8px_0_rgba(78,52,46,0.2)] dark:border-green-900/70 dark:bg-black dark:shadow-[8px_8px_0_rgba(0,0,0,0.45)]">
           <iframe

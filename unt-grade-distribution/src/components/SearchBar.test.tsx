@@ -187,4 +187,19 @@ test("changing the query cannot select suggestions from the previous query", asy
   assert.equal(searchLogStatuses[2], 204);
   assert.equal(buildSearchLogRow(mixedCourseLogBody)?.raw_query, "ACCT 2020");
   assert.equal(buildSearchLogRow(mixedCourseLogBody)?.course_title, null);
+
+  await act(async () => document.getElementById("change-path")!.click());
+  await act(async () => {
+    changeQuery("CSCE 1030");
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  });
+  await act(async () => {
+    input.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  });
+  assert.equal(pushes.at(-1), "/course/CSCE/1030");
+  const keyboardLogBody = JSON.parse(String(searchLogRequests[3]?.body));
+  assert.equal(keyboardLogBody.searchKind, "course");
+  assert.equal(keyboardLogBody.rawQuery, "CSCE 1030");
+  assert.equal(keyboardLogBody.coursePrefix, "CSCE");
+  assert.equal(searchLogStatuses[3], 204);
 });

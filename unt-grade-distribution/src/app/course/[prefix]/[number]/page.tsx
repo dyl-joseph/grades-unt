@@ -97,10 +97,6 @@ export default function CoursePage() {
     () => semesterGroups.filter((group) => visibleSemesterLabels.includes(group.label)),
     [semesterGroups, visibleSemesterLabels]
   );
-  const visibleSections = useMemo(
-    () => sections.filter((section) => visibleSemesterLabels.includes(semesterLabel(section))),
-    [sections, visibleSemesterLabels]
-  );
 
   if (loading) {
     return (

@@ -248,7 +248,14 @@ export default function SearchBar({
       e.preventDefault();
       const targetIdx = highlightIdx >= 0 ? highlightIdx : 0;
       const item = items[targetIdx];
-      if (item) navigate(item.type, item.id);
+      if (item) {
+        // Keyboard selections are logged the same way as clicks.
+        const suggestion = item.type === "course"
+          ? results?.courses.find((course) => `${course.prefix}/${course.number}` === item.id)
+          : results?.instructors.find((instructor) => String(instructor.id) === item.id);
+        if (suggestion) logSelection(suggestion);
+        navigate(item.type, item.id);
+      }
     } else if (e.key === "Escape") {
       setIsOpen(false);
       inputRef.current?.blur();
