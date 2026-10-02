@@ -35,3 +35,11 @@ test("GitHub CI uses maintained GitHub Actions", () => {
   assert.match(workflow, /uses: actions\/setup-node@v4/);
   assert.match(workflow, /node-version: 22/);
 });
+
+
+test("GitHub CI executes production Lua against an isolated Redis service", () => {
+  assert.match(workflow, /services:\n\s+redis:\n\s+image: redis:7\.4/);
+  assert.match(workflow, /REDIS_TEST_CONTAINER: \$\{\{ job\.services\.redis\.id \}\}/);
+  assert.match(workflow, /run: npm --prefix unt-grade-distribution run test:redis/);
+  assert.doesNotMatch(workflow, /secrets\.(RATE_LIMIT_REDIS|UPSTASH)/);
+});

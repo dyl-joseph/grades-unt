@@ -20,6 +20,14 @@ jobs:
     name: Test and build
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      redis:
+        image: redis:7.4
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     env:
       CI: true
       NEXT_TELEMETRY_DISABLED: "1"
@@ -46,3 +54,8 @@ jobs:
 
       - name: Run local CI gate
         run: scripts/ci-local.sh
+
+      - name: Test production rate-limit Lua against isolated Redis
+        env:
+          REDIS_TEST_CONTAINER: ${{ job.services.redis.id }}
+        run: npm --prefix unt-grade-distribution run test:redis

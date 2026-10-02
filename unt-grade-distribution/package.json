@@ -11,7 +11,8 @@
     "start": "next start",
     "test": "node --import tsx --test 'src/**/*.test.ts' 'src/**/*.test.tsx' 'tools/**/*.test.js'",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test:redis": "node --import tsx --test integration/rate-limit-redis.test.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.1.0",
