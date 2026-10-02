@@ -106,26 +106,26 @@ export default function CoursePage() {
     return (
       <div className="mx-auto max-w-6xl px-4 py-8" aria-busy="true" aria-live="polite">
         <div className="mb-8 animate-pulse space-y-4">
-          <div className="h-8 w-3/5 rounded-full bg-jungle-tan-dark/40 dark:bg-green-950/60" />
+          <div className="h-8 w-3/5 rounded-full bg-jungle-tan-dark/40 dark:bg-ui-raised" />
           <div className="flex gap-3">
-            <div className="h-9 w-24 rounded-full bg-jungle-tan-dark/30 dark:bg-green-950/50" />
-            <div className="h-9 w-28 rounded-full bg-jungle-tan-dark/30 dark:bg-green-950/50" />
+            <div className="h-9 w-24 rounded-full bg-jungle-tan-dark/30 dark:bg-ui-raised" />
+            <div className="h-9 w-28 rounded-full bg-jungle-tan-dark/30 dark:bg-ui-raised" />
           </div>
           <div className="flex gap-4">
-            <div className="h-4 w-28 rounded-full bg-jungle-tan-dark/30 dark:bg-green-950/50" />
-            <div className="h-4 w-20 rounded-full bg-jungle-tan-dark/30 dark:bg-green-950/50" />
-            <div className="h-4 w-32 rounded-full bg-jungle-tan-dark/30 dark:bg-green-950/50" />
+            <div className="h-4 w-28 rounded-full bg-jungle-tan-dark/30 dark:bg-ui-raised" />
+            <div className="h-4 w-20 rounded-full bg-jungle-tan-dark/30 dark:bg-ui-raised" />
+            <div className="h-4 w-32 rounded-full bg-jungle-tan-dark/30 dark:bg-ui-raised" />
           </div>
         </div>
-        <div className="mb-10 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-6 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
-          <div className="mb-4 h-5 w-64 rounded-full bg-jungle-tan-dark/30 dark:bg-green-950/50" />
-          <div className="h-72 rounded-2xl bg-jungle-tan-dark/20 dark:bg-green-950/30" />
+        <div className="mb-10 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-6 shadow-sm dark:border-ui-border dark:bg-ui-surface dark:shadow-none">
+          <div className="mb-4 h-5 w-64 rounded-full bg-jungle-tan-dark/30 dark:bg-ui-raised" />
+          <div className="h-72 rounded-2xl bg-jungle-tan-dark/20 dark:bg-ui-raised" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className="h-40 rounded-2xl border border-jungle-tan-dark/30 bg-jungle-tan-light/70 p-4 shadow-sm animate-pulse dark:border-green-900/60 dark:bg-jungle-canopy/40"
+              className="h-40 rounded-2xl border border-jungle-tan-dark/30 bg-jungle-tan-light/70 p-4 shadow-sm animate-pulse dark:border-ui-border dark:bg-ui-surface dark:shadow-none"
             />
           ))}
         </div>
@@ -155,8 +155,8 @@ export default function CoursePage() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8">
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
-          <h1 className="min-w-0 break-words text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
-            {course.prefix} {course.number} <span className="text-gray-500 dark:text-green-300/60">—</span> {course.title}
+          <h1 className="min-w-0 break-words text-2xl font-bold text-gray-900 dark:text-ui-text sm:text-3xl">
+            {course.prefix} {course.number} <span className="text-gray-500 dark:text-ui-muted">—</span> {course.title}
           </h1>
           <div className="flex w-full flex-wrap items-start justify-end gap-2 sm:w-auto">
             <ShareButton url={`/course/${course.prefix}/${course.number}`} />
@@ -182,14 +182,14 @@ export default function CoursePage() {
             />
             <a
               href={`/compare?type=course&a=${course.prefix}:${course.number}`}
-              className="inline-flex items-center whitespace-nowrap rounded-lg border border-green-400/50 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition-all hover:border-green-500/70 hover:bg-green-100 dark:border-green-600/50 dark:bg-green-900/20 dark:text-green-200 dark:hover:border-green-500 dark:hover:bg-green-900/40"
+              className="inline-flex items-center whitespace-nowrap rounded-lg border border-green-400/50 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition-all hover:border-green-500/70 hover:bg-green-100 dark:border-ui-border dark:bg-ui-selected dark:text-ui-text dark:hover:border-ui-accent dark:hover:bg-ui-selected"
               title="Compare with another course"
             >
               Compare
             </a>
           </div>
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-green-200/70">
+        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-ui-muted">
           <span className="flex items-center gap-1.5">Overall GPA: <GpaBadge gpa={overallGPA} /></span>
           <span>{sections.length} sections</span>
           <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
@@ -197,11 +197,11 @@ export default function CoursePage() {
         </div>
       </div>
 
-      <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60 sm:p-6">
+      <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-ui-border dark:bg-ui-surface dark:shadow-none sm:p-6">
         <div className="mb-4 flex min-w-0 flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-green-100">Grade Distribution</h2>
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-green-200/70">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-ui-text">Grade Distribution</h2>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-ui-muted">
               <span>{distributionSemesters === "all" ? "All semesters" : `${activeDistributionSemesterLabels.length} selected`}</span>
               <span aria-hidden="true">·</span>
               <span>{distributionSections.length} section{distributionSections.length !== 1 ? "s" : ""}</span>
@@ -221,22 +221,22 @@ export default function CoursePage() {
         <GradeChart data={distributionChartData} />
       </div>
 
-      <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60 sm:p-5">
+      <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-ui-border dark:bg-ui-surface dark:shadow-none sm:p-5">
   <div className="mb-4 flex min-w-0 flex-wrap items-start justify-between gap-4">
     <div className="min-w-0">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-green-100">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-ui-text">
         Sections by Semester
       </h2>
-      <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500 dark:text-green-200/70">
+      <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500 dark:text-ui-muted">
         Choose the semesters to include in the summary.
       </p>
     </div>
-    <div className="shrink-0 self-start text-sm font-medium text-gray-500 dark:text-green-200/70">
+    <div className="shrink-0 self-start text-sm font-medium text-gray-500 dark:text-ui-muted">
       {sectionSemesters === "all" ? "All semesters" : `${visibleSemesterLabels.length} selected`}
     </div>
   </div>
 
-  <div className="mb-5 rounded-2xl border border-jungle-tan-dark/20 bg-jungle-tan/65 px-4 py-4 shadow-sm dark:border-green-900/50 dark:bg-green-950/20 sm:px-5">
+  <div className="semester-filter mb-5 rounded-2xl border border-jungle-tan-dark/20 bg-jungle-tan/65 px-4 py-4 shadow-sm dark:border-ui-border dark:bg-ui-raised sm:px-5">
     <SemesterCheckboxGroup
       id="course-summary-semesters"
       labels={summarySemesterLabels}
@@ -251,10 +251,10 @@ export default function CoursePage() {
           return (
             <section key={label}>
               <div className="mb-4 flex flex-wrap items-center gap-3">
-                <h3 className="text-base font-semibold text-gray-900 dark:text-green-100">{label}</h3>
-                <span className="text-sm text-gray-500 dark:text-green-200/70">{items.length} section{items.length !== 1 ? "s" : ""}</span>
-                <span className="text-sm text-gray-500 dark:text-green-200/70">{semesterAggregate.totalEnroll.toLocaleString()} students</span>
-                <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-green-200/70">GPA: <GpaBadge gpa={calculateGPA(semesterAggregate)} /></span>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-ui-text">{label}</h3>
+                <span className="text-sm text-gray-500 dark:text-ui-muted">{items.length} section{items.length !== 1 ? "s" : ""}</span>
+                <span className="text-sm text-gray-500 dark:text-ui-muted">{semesterAggregate.totalEnroll.toLocaleString()} students</span>
+                <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-ui-muted">GPA: <GpaBadge gpa={calculateGPA(semesterAggregate)} /></span>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((section) => (

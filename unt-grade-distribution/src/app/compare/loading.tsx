@@ -9,35 +9,35 @@ export default function Loading() {
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8">
         <header className="mx-auto flex max-w-4xl flex-col items-center text-center">
-          <div className="mb-4 h-6 w-48 animate-pulse rounded-full bg-jungle-tan-dark/30 dark:bg-green-950/50" />
-          <div className="h-14 w-[min(92vw,42rem)] animate-pulse rounded-full bg-jungle-tan-dark/25 dark:bg-green-950/50" />
-          <div className="mt-4 h-5 w-[min(88vw,34rem)] animate-pulse rounded-full bg-jungle-tan-dark/20 dark:bg-green-950/40" />
+          <div className="mb-4 h-6 w-48 animate-pulse rounded-full bg-jungle-tan-dark/30 dark:bg-ui-raised" />
+          <div className="h-14 w-[min(92vw,42rem)] animate-pulse rounded-full bg-jungle-tan-dark/25 dark:bg-ui-raised" />
+          <div className="mt-4 h-5 w-[min(88vw,34rem)] animate-pulse rounded-full bg-jungle-tan-dark/20 dark:bg-ui-raised" />
         </header>
 
         <div className="grid items-start gap-6 lg:grid-cols-[1fr_auto_1fr]">
           {Array.from({ length: 2 }).map((_, index) => (
             <section
               key={index}
-              className="rounded-[28px] border border-jungle-tan-dark/30 bg-jungle-tan-light/90 p-5 shadow-[0_20px_60px_rgba(27,94,32,0.08)] backdrop-blur dark:border-green-900/50 dark:bg-jungle-canopy/70 md:p-6"
+              className="rounded-[28px] border border-jungle-tan-dark/30 bg-jungle-tan-light/90 p-5 shadow-[0_20px_60px_rgba(27,94,32,0.08)] backdrop-blur dark:border-ui-border dark:bg-ui-surface dark:shadow-none md:p-6"
             >
               <div className="mb-5 flex items-start justify-between gap-3">
                 <div className="space-y-3">
-                  <div className="h-3 w-32 animate-pulse rounded-full bg-jungle-tan-dark/25 dark:bg-green-950/50" />
-                  <div className="h-8 w-56 animate-pulse rounded-full bg-jungle-tan-dark/25 dark:bg-green-950/50" />
+                  <div className="h-3 w-32 animate-pulse rounded-full bg-jungle-tan-dark/25 dark:bg-ui-raised" />
+                  <div className="h-8 w-56 animate-pulse rounded-full bg-jungle-tan-dark/25 dark:bg-ui-raised" />
                 </div>
-                <div className="h-8 w-16 animate-pulse rounded-full bg-jungle-tan-dark/25 dark:bg-green-950/50" />
+                <div className="h-8 w-16 animate-pulse rounded-full bg-jungle-tan-dark/25 dark:bg-ui-raised" />
               </div>
-              <div className="mb-4 h-11 animate-pulse rounded-full bg-jungle-tan-dark/20 dark:bg-green-950/40" />
-              <div className="mb-4 h-16 animate-pulse rounded-2xl bg-jungle-tan-dark/15 dark:bg-green-950/30" />
-              <div className="rounded-3xl border border-jungle-tan-dark/25 bg-[#FBF8F3] p-4 dark:border-green-900/50 dark:bg-jungle-canopy/60">
-                <div className="mb-4 h-5 w-48 animate-pulse rounded-full bg-jungle-tan-dark/20 dark:bg-green-950/40" />
-                <div className="h-[280px] animate-pulse rounded-2xl bg-jungle-tan-dark/15 dark:bg-green-950/30" />
+              <div className="mb-4 h-11 animate-pulse rounded-full bg-jungle-tan-dark/20 dark:bg-ui-raised" />
+              <div className="mb-4 h-16 animate-pulse rounded-2xl bg-jungle-tan-dark/15 dark:bg-ui-raised" />
+              <div className="rounded-3xl border border-jungle-tan-dark/25 bg-[#FBF8F3] p-4 dark:border-ui-border dark:bg-ui-surface dark:shadow-none">
+                <div className="mb-4 h-5 w-48 animate-pulse rounded-full bg-jungle-tan-dark/20 dark:bg-ui-raised" />
+                <div className="h-[280px] animate-pulse rounded-2xl bg-jungle-tan-dark/15 dark:bg-ui-raised" />
               </div>
             </section>
           ))}
 
           <div className="flex items-center justify-center lg:min-h-full">
-            <div className="flex h-16 w-16 animate-pulse items-center justify-center rounded-full border border-jungle-tan-dark/25 bg-white/80 shadow-lg dark:border-green-800/60 dark:bg-jungle-canopy/90" />
+            <div className="flex h-16 w-16 animate-pulse items-center justify-center rounded-full border border-jungle-tan-dark/25 bg-white/80 shadow-lg dark:border-ui-border dark:bg-ui-surface dark:shadow-none" />
           </div>
         </div>
       </div>

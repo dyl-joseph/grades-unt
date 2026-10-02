@@ -10,7 +10,7 @@ export default function BookmarkIcon() {
   return (
     <Link
       href="/cart"
-      className="relative inline-flex items-center rounded-lg p-2 text-gray-600 transition-colors hover:text-primary dark:text-green-300 dark:hover:text-jungle-leaf"
+      className="relative inline-flex items-center rounded-lg p-2 text-gray-600 transition-colors hover:text-primary dark:text-ui-accent dark:hover:text-ui-accent"
       aria-label={`Saved courses with ${count} items`}
     >
       <svg

@@ -37,8 +37,8 @@ export default function ShareButton({ url, compact = false }: ShareButtonProps) 
       onClick={handleCopy}
       className={`inline-flex select-none items-center gap-1.5 whitespace-nowrap rounded-lg border transition-all ${
         copied
-          ? "border-green-400 bg-green-50 text-green-700 dark:border-green-600 dark:bg-green-900/30 dark:text-green-300"
-          : "border-jungle-tan-dark/30 bg-jungle-tan-light text-gray-600 hover:border-primary/40 hover:text-primary dark:border-green-800/50 dark:bg-jungle-canopy/60 dark:text-green-300 dark:hover:border-green-600 dark:hover:text-green-200"
+          ? "border-green-400 bg-green-50 text-green-700 dark:border-ui-border dark:bg-ui-selected dark:text-ui-accent"
+          : "border-jungle-tan-dark/30 bg-jungle-tan-light text-gray-600 hover:border-primary/40 hover:text-primary dark:border-ui-border dark:bg-ui-surface dark:text-ui-accent dark:hover:border-ui-accent dark:hover:text-ui-accent"
       } ${compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm"}`}
       title="Copy link to clipboard"
     >

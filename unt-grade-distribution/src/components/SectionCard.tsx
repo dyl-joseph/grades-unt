@@ -46,29 +46,29 @@ export default function SectionCard({
   );
 
   return (
-    <div className="min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm transition-shadow hover:shadow-md dark:border-green-900 dark:bg-jungle-canopy/60">
+    <div className="section-card min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm transition-shadow hover:shadow-md dark:border-ui-border dark:bg-ui-surface">
       <div className="mb-3 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           {showCourse && (
             <Link
               href={`/course/${section.course.prefix}/${section.course.number}`}
-              className="text-sm font-medium text-primary hover:underline dark:text-jungle-leaf"
+              className="text-sm font-medium text-primary hover:underline dark:text-ui-accent"
             >
               {section.course.prefix} {section.course.number}
             </Link>
           )}
           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="max-w-full break-words rounded-full bg-jungle-tan-dark/20 px-2 py-0.5 text-xs font-semibold text-jungle-bark dark:bg-green-950/60 dark:text-green-200">
+            <span className="semester-label max-w-full break-words rounded-full bg-jungle-tan-dark/20 px-2 py-0.5 text-xs font-semibold text-jungle-bark dark:bg-ui-raised dark:text-ui-text">
               {semester}
             </span>
-            <span aria-hidden="true" className="text-gray-300 dark:text-gray-600">·</span>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span aria-hidden="true" className="text-gray-300 dark:text-ui-muted">·</span>
+            <span className="text-sm text-gray-500 dark:text-ui-muted">
               Section {section.sectionNumber}
             </span>
-            <span aria-hidden="true" className="text-gray-300 dark:text-gray-600">·</span>
+            <span aria-hidden="true" className="text-gray-300 dark:text-ui-muted">·</span>
             <Link
               href={`/instructor/${instructorSlug}`}
-              className="min-w-0 break-words text-sm font-medium text-gray-900 hover:text-primary dark:text-green-100 dark:hover:text-jungle-leaf"
+              className="min-w-0 break-words text-sm font-medium text-gray-900 hover:text-primary dark:text-ui-text dark:hover:text-ui-accent"
             >
               {section.instructor.lastName}, {section.instructor.firstName}
             </Link>
@@ -80,7 +80,7 @@ export default function SectionCard({
         </div>
       </div>
       <LazyChart data={chartData} height={200} />
-      <div className="mt-2 text-right text-xs text-gray-400 dark:text-gray-500">
+      <div className="mt-2 text-right text-xs text-gray-400 dark:text-ui-muted">
         {section.totalEnroll} students
       </div>
     </div>

@@ -114,7 +114,7 @@ export default function SimilarSearches({ query }: { query: string }) {
 
   return (
     <section className="mt-8 text-left">
-      <h2 className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-jungle-vine dark:text-green-300">
+      <h2 className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-jungle-vine dark:text-ui-accent">
         Did you mean?
       </h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -122,10 +122,10 @@ export default function SimilarSearches({ query }: { query: string }) {
           <Link
             key={`${result.type}-${result.href}`}
             href={result.href}
-            className="border-2 border-jungle-tan-dark/40 bg-jungle-tan/50 px-4 py-3 font-mono transition hover:border-primary hover:bg-jungle-tan-light dark:border-green-900/70 dark:bg-green-950/30 dark:hover:border-green-500 dark:hover:bg-green-950/60"
+            className="border-2 border-jungle-tan-dark/40 bg-jungle-tan/50 px-4 py-3 font-mono transition hover:border-primary hover:bg-jungle-tan-light dark:border-ui-border dark:bg-ui-raised dark:hover:border-ui-accent dark:hover:bg-ui-raised"
           >
-            <span className="block text-sm font-bold text-primary dark:text-green-200">{result.label}</span>
-            <span className="mt-1 block text-xs text-jungle-bark/70 dark:text-green-200/60">{result.detail}</span>
+            <span className="block text-sm font-bold text-primary dark:text-ui-text">{result.label}</span>
+            <span className="mt-1 block text-xs text-jungle-bark/70 dark:text-ui-muted">{result.detail}</span>
           </Link>
         ))}
       </div>

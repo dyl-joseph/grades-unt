@@ -52,10 +52,10 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 text-center">
-        <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-green-100">
+        <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-ui-text">
           No saved courses yet
         </h1>
-        <p className="mt-2 text-gray-500 dark:text-green-200/60">
+        <p className="mt-2 text-gray-500 dark:text-ui-muted">
           Save courses to compare grade distributions and download a PDF summary.
         </p>
         <Link
@@ -73,10 +73,10 @@ export default function CartPage() {
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-green-100 sm:text-3xl">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-ui-text sm:text-3xl">
             Saved Courses
           </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-green-200/60">
+          <p className="mt-1 text-sm text-gray-500 dark:text-ui-muted">
             {items.length} bookmark{items.length !== 1 ? "s" : ""}
             {overallGPA !== null && (
               <>
@@ -129,11 +129,11 @@ function CartCourseCard({
   const chartData = toChartData(item);
 
   return (
-    <div className="relative rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-green-900 dark:bg-jungle-canopy/60">
+    <div className="relative rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-ui-border dark:bg-ui-surface dark:shadow-none">
       {/* Remove button */}
       <button
         onClick={onRemove}
-        className="absolute right-2 top-2 rounded-md p-1 text-gray-400 transition-colors hover:text-red-500 dark:text-green-300/50 dark:hover:text-red-400"
+        className="absolute right-2 top-2 rounded-md p-1 text-gray-400 transition-colors hover:text-red-500 dark:text-ui-muted dark:hover:text-red-400"
         aria-label="Remove saved course"
       >
         <svg
@@ -157,16 +157,16 @@ function CartCourseCard({
         href={`/course/${item.prefix}/${item.number}`}
         className="group"
       >
-        <h3 className="font-semibold text-gray-900 group-hover:text-primary dark:text-green-100 dark:group-hover:text-jungle-leaf">
+        <h3 className="font-semibold text-gray-900 group-hover:text-primary dark:text-ui-text dark:group-hover:text-ui-accent">
           {item.prefix} {item.number}
         </h3>
-        <p className="mt-0.5 text-sm text-gray-500 dark:text-green-200/60">
+        <p className="mt-0.5 text-sm text-gray-500 dark:text-ui-muted">
           {item.title}
         </p>
       </Link>
 
       {/* Stats */}
-      <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-green-200/60">
+      <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-ui-muted">
         <span className="flex items-center gap-1">
           GPA: <GpaBadge gpa={item.gpa} />
         </span>

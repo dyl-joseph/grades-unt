@@ -45,7 +45,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="rounded-lg p-[8px] text-gray-600 transition-colors dark:text-gray-300"
+      className="rounded-lg p-[8px] text-gray-600 transition-colors dark:text-ui-muted"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDark ? (

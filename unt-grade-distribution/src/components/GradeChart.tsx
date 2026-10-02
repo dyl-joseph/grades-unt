@@ -57,11 +57,11 @@ export default function GradeChart({
   mode = "count",
   height = 300,
 }: GradeChartProps) {
-  const { chartColors } = useTheme();
+  const { isDark, chartColors } = useTheme();
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
+      <BarChart aria-label="Grade distribution" accessibilityLayer data={data} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
         <XAxis
           dataKey="grade"
           tick={{ fontSize: 12, fill: chartColors.axisStroke }}
@@ -82,6 +82,7 @@ export default function GradeChart({
           }
         />
         <Bar
+          isAnimationActive={!isDark}
           dataKey={mode === "count" ? "count" : "percentage"}
           radius={[4, 4, 0, 0]}
         >

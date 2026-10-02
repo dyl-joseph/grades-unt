@@ -1,0 +1,263 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "path": "/",
+    "layout": {
+      "theme": "dark",
+      "width": 1440,
+      "scroll": 1440,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "path": "/cart",
+    "layout": {
+      "theme": "dark",
+      "width": 1440,
+      "scroll": 1440,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "path": "/search?query=zzzznotacourse",
+    "layout": {
+      "theme": "dark",
+      "width": 1440,
+      "scroll": 1440,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "path": "/compare",
+    "layout": {
+      "theme": "dark",
+      "width": 1440,
+      "scroll": 1440,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "path": "/terms",
+    "layout": {
+      "theme": "dark",
+      "width": 1440,
+      "scroll": 1440,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "keyboard": "ArrowDown/Enter/Escape and visible 2px focus passed",
+    "focus": {
+      "tag": "A",
+      "text": "Terms of Service",
+      "outline": "solid",
+      "width": "2px",
+      "color": "rgb(131, 212, 174)"
+    },
+    "themeToggle": "passed",
+    "unconfiguredKeyError": "passed",
+    "errors": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "path": "/",
+    "layout": {
+      "theme": "dark",
+      "width": 390,
+      "scroll": 390,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "path": "/cart",
+    "layout": {
+      "theme": "dark",
+      "width": 390,
+      "scroll": 390,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "path": "/search?query=zzzznotacourse",
+    "layout": {
+      "theme": "dark",
+      "width": 390,
+      "scroll": 390,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "path": "/compare",
+    "layout": {
+      "theme": "dark",
+      "width": 390,
+      "scroll": 390,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "path": "/terms",
+    "layout": {
+      "theme": "dark",
+      "width": 390,
+      "scroll": 390,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "keyboard": "ArrowDown/Enter/Escape and visible 2px focus passed",
+    "focus": {
+      "tag": "A",
+      "text": "Terms of Service",
+      "outline": "solid",
+      "width": "2px",
+      "color": "rgb(131, 212, 174)"
+    },
+    "themeToggle": "passed",
+    "unconfiguredKeyError": "passed",
+    "errors": []
+  },
+  {
+    "viewport": {
+      "width": 320,
+      "height": 740
+    },
+    "path": "/",
+    "layout": {
+      "theme": "dark",
+      "width": 320,
+      "scroll": 320,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 320,
+      "height": 740
+    },
+    "path": "/cart",
+    "layout": {
+      "theme": "dark",
+      "width": 320,
+      "scroll": 320,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 320,
+      "height": 740
+    },
+    "path": "/search?query=zzzznotacourse",
+    "layout": {
+      "theme": "dark",
+      "width": 320,
+      "scroll": 320,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 320,
+      "height": 740
+    },
+    "path": "/compare",
+    "layout": {
+      "theme": "dark",
+      "width": 320,
+      "scroll": 320,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 320,
+      "height": 740
+    },
+    "path": "/terms",
+    "layout": {
+      "theme": "dark",
+      "width": 320,
+      "scroll": 320,
+      "bg": "rgb(16, 20, 19)"
+    },
+    "violations": []
+  },
+  {
+    "viewport": {
+      "width": 320,
+      "height": 740
+    },
+    "keyboard": "ArrowDown/Enter/Escape and visible 2px focus passed",
+    "focus": {
+      "tag": "A",
+      "text": "Terms of Service",
+      "outline": "solid",
+      "width": "2px",
+      "color": "rgb(131, 212, 174)"
+    },
+    "themeToggle": "passed",
+    "unconfiguredKeyError": "passed",
+    "errors": []
+  }
+]

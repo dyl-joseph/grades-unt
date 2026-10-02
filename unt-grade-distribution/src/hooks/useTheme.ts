@@ -37,11 +37,11 @@ export function useTheme() {
   return {
     isDark,
     chartColors: {
-      axisStroke: isDark ? "#d1d5db" : "#374151",
-      tooltipBg: isDark ? "#1f2937" : "#ffffff",
-      tooltipBorder: isDark ? "#374151" : "#e5e7eb",
-      tooltipText: isDark ? "#f9fafb" : "#111827",
-      gridStroke: isDark ? "#374151" : "#e5e7eb",
+      axisStroke: isDark ? "#acb8b1" : "#374151",
+      tooltipBg: isDark ? "#212925" : "#ffffff",
+      tooltipBorder: isDark ? "#39453f" : "#e5e7eb",
+      tooltipText: isDark ? "#edf1ef" : "#111827",
+      gridStroke: isDark ? "#39453f" : "#e5e7eb",
     },
   };
 }

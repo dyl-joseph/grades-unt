@@ -24,10 +24,10 @@ function ChartFallback({
   if (!showData) {
     return (
       <div
-        className="flex items-center justify-center rounded-lg bg-jungle-tan-dark/10 dark:bg-green-900/20"
+        className="flex items-center justify-center rounded-lg bg-jungle-tan-dark/10 dark:bg-ui-selected"
         style={{ height }}
       >
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary dark:border-green-700/30 dark:border-t-green-500" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary dark:border-ui-border dark:border-t-ui-accent" />
       </div>
     );
   }
@@ -37,16 +37,16 @@ function ChartFallback({
   return (
     <div
       aria-label="Grade distribution"
-      className="flex items-end justify-between gap-2 rounded-lg bg-jungle-tan-dark/10 px-3 pb-4 pt-6 dark:bg-green-900/20"
+      className="flex items-end justify-between gap-2 rounded-lg bg-jungle-tan-dark/10 px-3 pb-4 pt-6 dark:bg-ui-selected"
       role="img"
       style={{ height }}
     >
       {data.map((item) => (
-        <div key={item.grade} className="flex min-w-0 flex-1 flex-col items-center gap-1 text-xs text-gray-600 dark:text-green-200/80">
+        <div key={item.grade} className="flex min-w-0 flex-1 flex-col items-center gap-1 text-xs text-gray-600 dark:text-ui-muted">
           <span className="font-medium">{item.count}</span>
-          <div className="flex h-40 w-full items-end rounded-sm bg-jungle-tan-dark/10 dark:bg-green-950/30">
+          <div className="flex h-40 w-full items-end rounded-sm bg-jungle-tan-dark/10 dark:bg-ui-raised">
             <div
-              className="w-full rounded-sm bg-primary/75 dark:bg-green-500/70"
+              className="w-full rounded-sm bg-primary/75 dark:bg-ui-accent"
               style={{ height: `${(item.count / largestCount) * 100}%` }}
             />
           </div>
