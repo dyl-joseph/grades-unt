@@ -25,6 +25,12 @@ Set `NEXT_PUBLIC_DATA_KEY` in the Vercel project to the value used for the deplo
 
 Course results include section grade counts, aggregate counts, and GPA. GPA uses A through F grades. MCP clients send Streamable HTTP requests with POST.
 
+## Request protection
+
+Website manifest/blob reads, compatibility APIs, MCP transport, and search logging have shared IP-based minute/hour budgets. MCP continues to return useful numeric answers within its quota; over-limit requests return 429 with `Retry-After`. Website encryption does not make public data secret.
+
+**Before deployment, configure the server-only shared Redis REST counter. Production fails closed with 503 if it is missing or unavailable.** See [RATE_LIMITS.md](RATE_LIMITS.md) for defaults, campus/NAT tradeoffs, trusted-IP requirements, caching behavior, and preview verification. No production service is provisioned by this change.
+
 ## Getting started
 
 ```bash

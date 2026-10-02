@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { assertVercelRateLimitConfiguration } from "./src/lib/rate-limit";
+
+assertVercelRateLimitConfiguration();
 
 const nextConfig: NextConfig = {
   reactCompiler: true,

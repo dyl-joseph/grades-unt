@@ -66,23 +66,11 @@ test("buildSearchHeaders emits cache and timing metadata", () => {
   assert.match(headers["Server-Timing"], /db;dur=7\.9/);
 });
 
-test("search route consumes one install rate-limit slot per short query", async () => {
+test("search route leaves quota charging to proxy (no duplicate charge)", async () => {
   process.env.DATABASE_URL ??= "postgresql://ci:ci@localhost:5432/ci";
   process.env.DIRECT_URL ??= process.env.DATABASE_URL;
-
   const { GET } = await import("./route");
-  const installId = `route-test-${Date.now()}-${Math.random()}`;
-  const request = () =>
-    new NextRequest("https://example.test/api/search?q=a", {
-      headers: { "x-install-id": installId },
-    });
-
-  for (let i = 0; i < 100; i++) {
-    const response = await GET(request());
-    assert.equal(response.status, 200);
-    assert.equal(response.headers.get("x-ratelimit-remaining"), String(99 - i));
-  }
-
-  const limited = await GET(request());
-  assert.equal(limited.status, 429);
+  const response = await GET(new NextRequest("https://example.test/api/search?q=a"));
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.has("x-ratelimit-remaining"), false);
 });

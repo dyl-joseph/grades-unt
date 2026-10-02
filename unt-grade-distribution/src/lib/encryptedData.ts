@@ -28,6 +28,29 @@ export function sectionHasGrades(section: EncryptedSection) {
 
 const COURSE_DATA_KEY_ERROR = "Course data key is missing or invalid for this deployment";
 
+class RetryableDataError extends Error {}
+
+function transientResponseError(response: Response) {
+  if (response.status !== 429 && response.status < 500) return null;
+
+  const retryAfter = response.headers.get("Retry-After")?.trim();
+  let retrySeconds: number | null = null;
+  if (retryAfter) {
+    const seconds = /^\d+$/.test(retryAfter)
+      ? Number(retryAfter)
+      : (Date.parse(retryAfter) - Date.now()) / 1000;
+    if (Number.isFinite(seconds) && seconds > 0) retrySeconds = Math.ceil(seconds);
+  }
+
+  const reason = response.status === 429
+    ? "Too many course data requests."
+    : "Course data is temporarily unavailable.";
+  const retry = retrySeconds === null
+    ? "Please try again later."
+    : `Please try again in ${retrySeconds} ${retrySeconds === 1 ? "second" : "seconds"}.`;
+  return new RetryableDataError(`${reason} ${retry}`);
+}
+
 type ParsedInstructor = {
   firstName: string;
   lastName: string;
@@ -132,6 +155,8 @@ export function createManifestLoader(request: ManifestRequest = () => fetch("/en
       manifestPromise = Promise.resolve()
         .then(request)
         .then(async (response) => {
+          const transientError = transientResponseError(response);
+          if (transientError) throw transientError;
           if (!response.ok) throw new Error("Failed to load manifest");
 
           const manifest = await response.json();
@@ -173,6 +198,10 @@ export async function decryptBlob(blobId: string, passphrase?: string) {
     fetch(`/encrypted/blobs/${blobId}`),
     fetch(`/encrypted/blobs/${blobId.replace(/\.bin$/, '.meta.json')}`),
   ]);
+  // Check both responses before generic failures so a missing blob cannot hide
+  // throttled metadata (or vice versa). Retrying is left to the caller/user.
+  const transientError = transientResponseError(blobRes) ?? transientResponseError(metaRes);
+  if (transientError) throw transientError;
   if (!blobRes.ok || !metaRes.ok) throw new Error('Failed to fetch blob or metadata');
 
   const meta = await metaRes.json();
@@ -332,6 +361,9 @@ export async function loadInstructorSections(firstName: string, lastName: string
       try {
         return (await decryptBlob(entry.id, passphrase)) as EncryptedCourse;
       } catch (error) {
+        // Returning only the successful courses would misrepresent the
+        // instructor's grades when a request is throttled or unavailable.
+        if (error instanceof RetryableDataError) throw error;
         if (isCourseDataKeyError(error)) throw new Error(COURSE_DATA_KEY_ERROR);
         return null;
       }

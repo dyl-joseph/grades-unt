@@ -1,6 +1,7 @@
 import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
 import { gradeData } from "@/lib/mcp-data";
+import { readBoundedJson, RequestBodyError, requestBodyErrorResponse } from "@/lib/request-body";
 
 export const runtime = "nodejs";
 
@@ -59,4 +60,16 @@ const handler = createMcpHandler((server) => {
   instructions: "Read-only UNT course and instructor grade data. Search for a course or instructor, then request course distributions. Paths in results are relative to this server's origin.",
 });
 
-export { handler as GET, handler as POST };
+export { handler as GET };
+
+export async function POST(request: Request) {
+  try {
+    const message = await readBoundedJson(request, 32 * 1024);
+    // Legacy SDK batching permits up to 100 tool calls for one HTTP quota slot.
+    // Modern Streamable HTTP clients send one JSON-RPC message per request.
+    if (Array.isArray(message)) throw new RequestBodyError("MCP batch requests are not supported. Send one message per request.", 400);
+    return handler(new Request(request, { body: JSON.stringify(message) }));
+  } catch (error) {
+    return requestBodyErrorResponse(error);
+  }
+}

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { validateExtensionOrigin } from "@/lib/cors";
-import { checkInstallRateLimit } from "@/lib/rate-limit";
 
 type RouteParams = Record<string, string | string[] | undefined>;
 
@@ -16,14 +15,6 @@ export async function GET(
 ) {
   const originReject = validateExtensionOrigin(request);
   if (originReject) return originReject;
-
-  const installLimit = checkInstallRateLimit(request);
-  if (!installLimit.allowed) {
-    return NextResponse.json(
-      { error: "Rate limit exceeded" },
-      { status: 429, headers: { "Retry-After": String(installLimit.retryAfter ?? 60) } }
-    );
-  }
 
   const params = (await ctx.params) ?? {};
   const id = coerceRouteParam(params.id);

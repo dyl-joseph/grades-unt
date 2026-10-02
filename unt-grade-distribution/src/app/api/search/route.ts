@@ -9,7 +9,6 @@ import {
   recordSearchSkip,
 } from "@/lib/metrics";
 import { validateExtensionOrigin } from "@/lib/cors";
-import { checkInstallRateLimit } from "@/lib/rate-limit";
 
 /* ── In-memory LRU cache ─────────────────────────────── */
 const MAX_ENTRIES = 500;
@@ -46,15 +45,6 @@ export async function GET(request: NextRequest) {
   const originReject = validateExtensionOrigin(request);
   if (originReject) return originReject;
 
-  const installLimit = checkInstallRateLimit(request);
-  if (!installLimit.allowed) {
-    return NextResponse.json(
-      { error: "Rate limit exceeded" },
-      { status: 429, headers: { "Retry-After": String(installLimit.retryAfter ?? 60) } }
-    );
-  }
-  const installLimitHeaders = { "X-RateLimit-Remaining": String(installLimit.remaining) };
-
   const requestStart = performance.now();
   const q = (request.nextUrl.searchParams.get("q") ?? "").trim();
   if (q.length < 2) {
@@ -62,7 +52,7 @@ export async function GET(request: NextRequest) {
     recordSearchSkip(q, durationMs);
     return NextResponse.json(
       { courses: [], instructors: [] },
-      { headers: { ...installLimitHeaders, ...buildSearchHeaders({ totalDurationMs: durationMs, cacheState: "skip", queryKind: "skip" }) } }
+      { headers: { ...buildSearchHeaders({ totalDurationMs: durationMs, cacheState: "skip", queryKind: "skip" }) } }
     );
   }
 
@@ -78,7 +68,7 @@ export async function GET(request: NextRequest) {
       queryKind
     );
     return NextResponse.json(cached, {
-      headers: { ...installLimitHeaders, ...buildSearchHeaders({
+      headers: { ...buildSearchHeaders({
         totalDurationMs: durationMs,
         cacheState: "hit",
         queryKind,
@@ -122,7 +112,7 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json(result, {
-      headers: { ...installLimitHeaders, ...buildSearchHeaders({
+      headers: { ...buildSearchHeaders({
         totalDurationMs,
         dbDurationMs,
         cacheState: "miss",
@@ -136,7 +126,7 @@ export async function GET(request: NextRequest) {
     recordSearchError(cacheKey, durationMs, error, queryKind);
     return NextResponse.json(
       { error: "Database query failed", details: error instanceof Error ? error.message : String(error) },
-      { status: 500, headers: { ...installLimitHeaders, ...buildSearchHeaders({ totalDurationMs: durationMs, cacheState: "error", queryKind }) } }
+      { status: 500, headers: { ...buildSearchHeaders({ totalDurationMs: durationMs, cacheState: "error", queryKind }) } }
     );
   }
 }

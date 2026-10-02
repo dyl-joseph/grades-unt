@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   createManifestLoader,
+  decryptBlob,
   findInstructorEntries,
   fromInstructorSlug,
   loadCourseByCode,
@@ -108,12 +109,98 @@ test("manifest loader coalesces in-flight work and resets after failures", async
     return Promise.resolve(response);
   });
 
-  await assert.rejects(retryManifest(), { message: "Failed to load manifest" });
+  await assert.rejects(retryManifest(), { message: "Course data is temporarily unavailable. Please try again later." });
   await Promise.resolve();
   await assert.rejects(retryManifest());
   await Promise.resolve();
   assert.deepEqual(await retryManifest(), manifest);
   assert.equal(retryRequests, 3);
+});
+
+test("manifest throttling explains Retry-After, makes no automatic retries, and allows recovery", async (t) => {
+  const originalFetch = globalThis.fetch;
+  const manifest: ManifestEntry[] = [];
+  let requests = 0;
+  globalThis.fetch = async (input) => {
+    assert.equal(String(input), "/encrypted/manifest.json");
+    requests += 1;
+    return requests === 1
+      ? new Response(null, { status: 429, headers: { "Retry-After": "30" } })
+      : Response.json(manifest);
+  };
+  t.after(() => { globalThis.fetch = originalFetch; });
+
+  const loadManifest = createManifestLoader();
+  const first = loadManifest();
+  assert.strictEqual(loadManifest(), first);
+  await assert.rejects(first, { message: "Too many course data requests. Please try again in 30 seconds." });
+  assert.equal(requests, 1);
+
+  assert.deepEqual(await loadManifest(), manifest);
+  assert.deepEqual(await loadManifest(), manifest);
+  assert.equal(requests, 2);
+});
+
+test("manifest unavailability handles HTTP-date and invalid Retry-After values", async (t) => {
+  const originalFetch = globalThis.fetch;
+  const now = Date.parse("2026-01-01T00:00:00Z");
+  t.mock.method(Date, "now", () => now);
+  t.after(() => { globalThis.fetch = originalFetch; });
+
+  for (const [retryAfter, expected] of [
+    ["Thu, 01 Jan 2026 00:00:45 GMT", "Please try again in 45 seconds."],
+    ["1", "Please try again in 1 second."],
+    ["not-a-date", "Please try again later."],
+    ["-1", "Please try again later."],
+    ["0", "Please try again later."],
+    ["Wed, 31 Dec 2025 23:59:59 GMT", "Please try again later."],
+  ]) {
+    globalThis.fetch = async () => new Response(null, { status: 503, headers: { "Retry-After": retryAfter } });
+    await assert.rejects(createManifestLoader()(), { message: `Course data is temporarily unavailable. ${expected}` });
+  }
+});
+
+test("blob and metadata throttling reject clearly and can recover without automatic retries", async (t) => {
+  const originalFetch = globalThis.fetch;
+  t.after(() => { globalThis.fetch = originalFetch; });
+  const value = course("CSCE", "1000", "TEST COURSE", [section("001", "Pat", "Test")]);
+  const encrypted = await encryptCourse(value, passphrase);
+
+  for (const endpoint of ["blob", "metadata"]) {
+    for (const status of [429, 503]) {
+      let failing = true;
+      const requests: string[] = [];
+      globalThis.fetch = async (input) => {
+        const url = String(input);
+        requests.push(url);
+        const isMetadata = url.endsWith(".meta.json");
+        if (failing && isMetadata === (endpoint === "metadata")) {
+          return new Response(null, { status, headers: { "Retry-After": "12" } });
+        }
+        return isMetadata ? Response.json(encrypted.meta) : new Response(encrypted.encrypted.slice(0));
+      };
+
+      const reason = status === 429 ? "Too many course data requests." : "Course data is temporarily unavailable.";
+      await assert.rejects(decryptBlob("retry.bin", passphrase), { message: `${reason} Please try again in 12 seconds.` });
+      assert.deepEqual(requests, ["/encrypted/blobs/retry.bin", "/encrypted/blobs/retry.meta.json"]);
+
+      failing = false;
+      assert.deepEqual(await decryptBlob("retry.bin", passphrase), value);
+      assert.equal(requests.length, 4);
+    }
+  }
+});
+
+test("a missing blob does not mask a metadata rate limit", async (t) => {
+  const originalFetch = globalThis.fetch;
+  t.after(() => { globalThis.fetch = originalFetch; });
+  globalThis.fetch = async (input) => new Response(null, String(input).endsWith(".meta.json")
+    ? { status: 429, headers: { "Retry-After": "10" } }
+    : { status: 404 });
+
+  await assert.rejects(decryptBlob("missing.bin", passphrase), {
+    message: "Too many course data requests. Please try again in 10 seconds.",
+  });
 });
 
 test("static search and instructor loading stay exact, bounded, and concurrent", async (t) => {
@@ -122,6 +209,7 @@ test("static search and instructor loading stay exact, bounded, and concurrent",
   const blobRequests: string[] = [];
   const allRequests: string[] = [];
   const failedBlobs = new Set<string>();
+  const unavailableFiles = new Map<string, number>();
   const deferredBlobs = new Map<string, ReturnType<typeof deferred<Response>>>();
   const deferredStarts: string[] = [];
   let manifestRequests = 0;
@@ -223,12 +311,14 @@ test("static search and instructor loading stay exact, bounded, and concurrent",
 
     const fileName = url.slice(blobPrefix.length);
     blobRequests.push(fileName);
+    const unavailableStatus = unavailableFiles.get(fileName);
+    if (unavailableStatus) return new Response(null, { status: unavailableStatus, headers: { "Retry-After": "20" } });
     const blobId = fileName.endsWith(".meta.json") ? fileName.replace(/\.meta\.json$/, ".bin") : fileName;
     const encrypted = encryptedById.get(blobId);
     if (!encrypted) return new Response(null, { status: 404 });
 
     if (fileName.endsWith(".bin")) {
-      if (failedBlobs.has(blobId)) return new Response(null, { status: 503 });
+      if (failedBlobs.has(blobId)) return new Response(null, { status: 404 });
 
       const pending = deferredBlobs.get(blobId);
       if (pending) {
@@ -313,7 +403,7 @@ test("static search and instructor loading stay exact, bounded, and concurrent",
     assert.deepEqual(blobRequests.sort(), ["li.bin", "li.meta.json", "unicode.bin", "unicode.meta.json", "unicode.bin", "unicode.meta.json"].sort());
   });
 
-  await t.test("partial blob failures keep successfully decrypted instructor sections", async () => {
+  await t.test("missing blobs keep successfully decrypted instructor sections", async () => {
     blobRequests.length = 0;
     failedBlobs.add("partial-bad.bin");
     const sections = await loadInstructorSections("Pat", "Partial", passphrase);
@@ -326,6 +416,31 @@ test("static search and instructor loading stay exact, bounded, and concurrent",
       "partial-bad.bin",
       "partial-bad.meta.json",
     ].sort());
+  });
+
+  await t.test("instructor fanout rejects throttling and server failures rather than showing partial grades, then recovers", async () => {
+    for (const fileName of ["partial-bad.bin", "partial-bad.meta.json"]) {
+      for (const status of [429, 500, 503]) {
+        blobRequests.length = 0;
+        unavailableFiles.set(fileName, status);
+        const reason = status === 429 ? "Too many course data requests." : "Course data is temporarily unavailable.";
+        await assert.rejects(loadInstructorSections("Pat", "Partial", passphrase), {
+          message: `${reason} Please try again in 20 seconds.`,
+        });
+        assert.equal(blobRequests.length, 4);
+        unavailableFiles.clear();
+
+        const recovered = await loadInstructorSections("Pat", "Partial", passphrase);
+        assert.deepEqual(recovered.map((item) => item.course.number), ["3000", "3001"]);
+        assert.equal(blobRequests.length, 8);
+      }
+    }
+  });
+
+  await t.test("invalid data keys still fail the entire instructor load", async () => {
+    await assert.rejects(loadInstructorSections("Pat", "Partial", "wrong-key"), {
+      message: "Course data key is missing or invalid for this deployment",
+    });
   });
 
   await t.test("matching blobs begin decrypting concurrently and retain manifest order", async () => {

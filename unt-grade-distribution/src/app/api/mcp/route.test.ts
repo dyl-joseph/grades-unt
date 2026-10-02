@@ -37,3 +37,36 @@ test("MCP endpoint initializes and exposes read-only grade tools", async () => {
     tool.annotations.readOnlyHint === true
   ));
 });
+
+test("MCP rejects batch amplification before executing any grade tools", async (t) => {
+  const { gradeData } = await import("@/lib/mcp-data");
+  const search = t.mock.method(gradeData, "search", async () => ({ courses: [], instructors: [] }));
+  const message = { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "search_grades", arguments: { query: "CSCE" } } };
+  const response = await POST(new Request("http://localhost/api/mcp", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify([message, message]),
+  }));
+  assert.equal(response.status, 400);
+  assert.match(await response.text(), /batch requests are not supported/);
+  assert.equal(search.mock.callCount(), 0);
+  assert.match(response.headers.get("cache-control") ?? "", /no-store/);
+});
+
+test("MCP bounds actual request body bytes before tool work", async (t) => {
+  const { gradeData } = await import("@/lib/mcp-data");
+  const search = t.mock.method(gradeData, "search", async () => ({ courses: [], instructors: [] }));
+  const response = await POST(new Request("http://localhost/api/mcp", {
+    method: "POST", body: JSON.stringify({ padding: "x".repeat(32 * 1024) }),
+  }));
+  assert.equal(response.status, 413);
+  assert.equal(search.mock.callCount(), 0);
+});
+
+test("MCP rejects malformed JSON and still supports an ordinary tool call", async (t) => {
+  const malformed = await POST(new Request("http://localhost/api/mcp", { method: "POST", body: "{" }));
+  assert.equal(malformed.status, 400);
+  const { gradeData } = await import("@/lib/mcp-data");
+  const search = t.mock.method(gradeData, "search", async () => ({ courses: [], instructors: [] }));
+  const reply = await call("tools/call", 3, { name: "search_grades", arguments: { query: "CSCE" } });
+  assert.deepEqual(reply.result.structuredContent, { courses: [], instructors: [] });
+  assert.equal(search.mock.callCount(), 1);
+});

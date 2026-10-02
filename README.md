@@ -20,6 +20,10 @@ The public website reads from **encrypted static data stored with the deployed s
 
 The Vercel deployment exposes a read-only Streamable HTTP MCP endpoint at [`https://untgrades.app/api/mcp`](https://untgrades.app/api/mcp). Configure an MCP client to connect to that URL. See the [application README](unt-grade-distribution/README.md#mcp-server) for tool inputs and setup.
 
+## Request protection
+
+Website data files, compatibility APIs, MCP requests, and search logging are rate-limited. Production requires a shared Redis REST counter before deployment. See the [deployment and verification guide](unt-grade-distribution/RATE_LIMITS.md). Client-side encryption is not an access-control guarantee.
+
 ## Technical implementation
 
 ### Frontend

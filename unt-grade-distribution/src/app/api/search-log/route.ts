@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateExtensionOrigin } from "@/lib/cors";
 import { buildSearchLogRow, type SearchLogPayload, type SearchLogRow } from "@/lib/search-log";
 
+import { readBoundedJson, requestBodyErrorResponse } from "@/lib/request-body";
+
 const SUPABASE_REST_SUFFIX = "/rest/v1/search_events";
 
 function getSupabaseConfig() {
@@ -46,11 +48,14 @@ export async function POST(request: NextRequest) {
   let payload: SearchLogPayload;
 
   try {
-    payload = (await request.json()) as SearchLogPayload;
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    payload = (await readBoundedJson(request, 4 * 1024)) as SearchLogPayload;
+  } catch (error) {
+    return requestBodyErrorResponse(error);
   }
 
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return NextResponse.json({ error: "JSON body must be an object" }, { status: 400 });
+  }
   const row = buildSearchLogRow(payload);
   if (!row) {
     return NextResponse.json({ error: "rawQuery is required for course searches" }, { status: 400 });
