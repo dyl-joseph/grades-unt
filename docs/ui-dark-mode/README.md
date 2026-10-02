@@ -1,6 +1,6 @@
 Dark-mode UI review for `dyl-joseph/grades-unt`, integrated with main commit `fee4a8dea96103c1094efa1ebe59fd2b173b8336`. Before screenshots use the original `1fdabb59` baseline.
 
-The landing page is centered, retains fireflies, and uses a plain Arial title with the existing sans-serif subtitles and search text. The current neutral palette is retained. Dark-mode gradients and text shimmer are removed; controls, section rows, charts, keyboard focus, and mobile semester filters are clearer. Light-mode styling and grade colors are retained.
+The landing page is centered, retains fireflies, and uses a plain Arial title with the existing sans-serif subtitles and search text. The background is flat almost-black (#08090a), with no dark-mode background gradient. Original desktop font sizes and spacing are restored, while the improved title font and compact mobile sizing are retained. Firefly colors are unchanged. Dark-mode gradients and text shimmer are removed; controls, section rows, charts, keyboard focus, and mobile semester filters are clearer. Light-mode styling and grade colors are retained.
 
 API handlers, MCP, rate limits, encryption, shipped data, credentials, dependencies, extension source, and deployment configuration are unchanged. Verification scripts and generated JSON reports are kept outside the source PR to keep its diff focused.
 
@@ -24,6 +24,8 @@ API handlers, MCP, rate limits, encryption, shipped data, credentials, dependenc
 The directories include 52 actual Chromium screenshots, including populated comparison and saved-course views and search failures. Desktop is 1440×1000; mobile is 390×844. Additional accessibility and keyboard checks run at 320×740.
 
 Detail views use a **synthetic six-section fixture** for ACCT 2010 and Alex Sample through the unchanged client AES-GCM/PBKDF2 decryption path. These are presentation checks, not actual UNT grades. No production data key was used. Delayed and 429/503 responses exercise loading and errors.
+
+Actual browser measurements match the original desktop title (72px), navigation text (34px), search text (18px), search height (62px), margins, padding, and hint gaps. Mobile keeps the compact title and touch controls.
 
 Validation: 11 CI-script tests, 150 web tests, web build, 5 extension tests, extension typecheck/build, and web TypeScript pass. Changed-file lint has zero errors; full lint retains main's 6 errors and no warnings in untouched files. 29 automated WCAG A/AA scans pass with no horizontal overflow. Secondary-text contrast is at least 7.27:1, primary labels 9.18:1, and input boundaries 3.55:1. Light home screenshots were pixel-identical to baseline with animations disabled.
 

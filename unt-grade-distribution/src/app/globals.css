@@ -5,7 +5,7 @@
 
 /* Existing light palette and semantic dark-mode colors. */
 @theme {
-  --color-ui-page: #101413;
+  --color-ui-page: #08090a;
   --color-ui-surface: #191f1d;
   --color-ui-raised: #212925;
   --color-ui-border: #39453f;
@@ -102,12 +102,6 @@
 
 .dark :is(h1, h2, h3) {
   text-wrap: balance;
-}
-
-.dark h1 {
-  font-weight: 650;
-  letter-spacing: -0.035em;
-  line-height: 1.2;
 }
 
 .dark :is(.glass-glossy, .glass-navbar-search) {
@@ -394,11 +388,41 @@
   border-color: var(--color-ui-control);
 }
 
-.dark .compare-page h1 {
-  font-size: clamp(32px, 4vw, 42px);
+/* Preserve the original desktop scale and compact mobile layout. */
+@media (min-width: 640px) {
+  .dark .site-nav > div:first-child { gap: 20px; }
+  .dark .site-nav a[href="/"] { font-size: 34px; letter-spacing: normal; }
+  .dark .nav-actions { gap: 16px; }
+  .dark .nav-actions :is(a, button) { display: inline-flex; width: auto; height: auto; }
+  .dark .nav-actions svg { width: 30px; height: 30px; }
+  .dark .nav-actions a svg { width: 32px; }
+  .dark .home-page { min-height: calc(100dvh - 65px); max-width: none; padding: 0 16px; }
+  .dark .home-title { margin: 16px 0 32px; }
+  .dark .home-title h1 { margin-top: 0; font-size: 72px; font-weight: 600; line-height: 1; }
+  .dark .home-hints { gap: 8px; margin-top: 16px; }
+  .dark .home-hints p { line-height: 24px; }
+  .dark .home-page .course-search input { min-height: 62px; font-size: 18px; border-radius: 16px; }
+  .dark .search-results [role="option"] { min-height: auto; padding: 8px 12px; gap: 0; }
+  .dark .search-results [role="option"] > span:nth-child(2) { margin-left: 8px; }
+  .dark .semester-filter { padding: 16px; }
+  .dark .semester-controls label { padding: 8px 12px; }
+  .dark .section-card { padding: 16px; }
+  .dark .support-widget a { font-size: 14px; padding: 8px 16px; }
 }
 
+.dark .light-background { display: none; }
+
 @media (max-width: 639px) {
+  .dark h1 {
+    font-weight: 650;
+    letter-spacing: -0.035em;
+    line-height: 1.2;
+  }
+
+  .dark .compare-page h1 {
+    font-size: clamp(32px, 4vw, 42px);
+  }
+
   .dark .home-page {
     padding: 48px 20px;
     justify-content: center;
