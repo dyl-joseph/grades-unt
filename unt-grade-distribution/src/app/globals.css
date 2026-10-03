@@ -33,6 +33,12 @@
   --color-jungle-tan-dark: #BBA882;
 }
 
+/* Fonts: next/font sets --font-figtree and --font-bricolage on <html> */
+@theme inline {
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+}
+
 /* Glossy glass effects */
 .glass-glossy {
   background: linear-gradient(
@@ -494,4 +500,34 @@ div:has(> .semester-controls) {
 :root:not(.dark) .course-search input::placeholder {
   color: #4b5563;
   opacity: 1;
+}
+
+/* ── Home hero atmosphere ───────────────────────────── */
+
+
+@keyframes vine-sway {
+  0%, 100% { transform: rotate(-1.2deg); }
+  50% { transform: rotate(1.4deg); }
+}
+
+.vine-sway {
+  transform-origin: top center;
+  animation: vine-sway 11s ease-in-out infinite;
+}
+
+@keyframes dapple-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.55; }
+  100% { transform: translate3d(2.5rem, 1.5rem, 0) scale(1.12); opacity: 0.9; }
+}
+
+.dapple {
+  background: radial-gradient(circle, rgba(255, 214, 120, 0.4) 0%, rgba(255, 214, 120, 0) 65%);
+  animation: dapple-drift 14s ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vine-sway,
+  .dapple {
+    animation: none;
+  }
 }
