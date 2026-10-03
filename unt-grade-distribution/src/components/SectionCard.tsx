@@ -65,14 +65,13 @@ export default function SectionCard({
             <span className="text-sm text-gray-500 dark:text-ui-muted">
               Section {section.sectionNumber}
             </span>
-            <span aria-hidden="true" className="text-gray-300 dark:text-ui-muted">·</span>
+          </div>
             <Link
               href={`/instructor/${instructorSlug}`}
-              className="min-w-0 break-words text-sm font-medium text-gray-900 hover:text-primary dark:text-ui-text dark:hover:text-ui-accent"
+              className="section-instructor block min-w-0 break-words text-gray-900 hover:text-primary dark:text-ui-text dark:hover:text-ui-accent"
             >
-              {section.instructor.lastName}, {section.instructor.firstName}
+              {section.instructor.firstName} {section.instructor.lastName}
             </Link>
-          </div>
         </div>
         <div className="flex shrink-0 items-center gap-2 self-end sm:self-start">
           <ShareButton url={`/instructor/${instructorSlug}`} compact />
@@ -80,8 +79,9 @@ export default function SectionCard({
         </div>
       </div>
       <LazyChart data={chartData} height={200} />
-      <div className="mt-2 text-right text-xs text-gray-400 dark:text-ui-muted">
-        {section.totalEnroll} students
+      <div className="section-footer">
+        <span>{section.totalEnroll} students</span>
+        <span>{section.totalEnroll ? Math.round(section.gradeA / section.totalEnroll * 100) : 0}% received an A</span>
       </div>
     </div>
   );

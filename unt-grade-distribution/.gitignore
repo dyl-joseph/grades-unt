@@ -17,6 +17,8 @@
 
 # next.js
 /.next/
+/.next-preview*/
+/production-server*.log
 /out/
 
 # production
@@ -41,3 +43,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local dependency cache
+/.npm-cache/
+/dev-server.log
+/dev-server-error.log

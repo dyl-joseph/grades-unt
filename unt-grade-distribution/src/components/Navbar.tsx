@@ -20,13 +20,13 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav aria-label="Main navigation" className="site-nav sticky top-0 z-50 border-b border-jungle-tan-dark/30 bg-jungle-tan/90 backdrop-blur-md transition-colors duration-700 dark:border-ui-border dark:bg-ui-page">
+    <nav aria-label="Main navigation" className="site-nav relative z-50 border-b border-jungle-tan-dark/30 bg-jungle-tan/90 backdrop-blur-md transition-colors duration-700 dark:border-ui-border dark:bg-ui-page">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-5 px-5">
         <Link
           href="/"
           className="shrink-0 select-none text-[34px] font-bold text-primary dark:text-ui-accent"
         >
-          UNT Grades
+          <span className="brand-unt">UNT</span> Grades
         </Link>
         {!isHome && (
           <div className={`hidden max-w-md flex-1 transition-all duration-300 sm:block ${scrolled ? "max-h-0 opacity-0" : "max-h-12 opacity-100"}`}>

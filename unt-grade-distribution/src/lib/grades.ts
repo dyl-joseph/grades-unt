@@ -29,15 +29,27 @@ export const GRADE_POINTS: Record<string, number> = {
 
 /** Color map for chart bars */
 export const GRADE_COLORS: Record<string, string> = {
-  A: "#22c55e", // green-500
-  B: "#facc15", // yellow-400
-  C: "#f97316", // orange-500
-  D: "#ef4444", // red-500
-  F: "#991b1b", // red-800
-  P: "#60a5fa", // blue-400
-  NP: "#a78bfa", // violet-400
-  W: "#6b7280", // gray-500
-  I: "#9ca3af", // gray-400
+  A: "#00853e",
+  B: "#82932b",
+  C: "#c39a24",
+  D: "#cc762d",
+  F: "#b34e45",
+  P: "#5c8b7c",
+  NP: "#7a8680",
+  W: "#9caaa0",
+  I: "#bdc5bd",
+};
+
+export const DARK_GRADE_COLORS: Record<string, string> = {
+  A: "#62bd87",
+  B: "#b2c36b",
+  C: "#e5c467",
+  D: "#e5a062",
+  F: "#df8279",
+  P: "#88b5aa",
+  NP: "#a7aeb6",
+  W: "#8597a8",
+  I: "#b8b6aa",
 };
 
 // === Types ===

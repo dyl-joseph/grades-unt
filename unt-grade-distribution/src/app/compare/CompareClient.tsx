@@ -532,16 +532,16 @@ export default function CompareClient({ initialType, initialA }: CompareClientPr
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8">
         <header className="mx-auto flex max-w-4xl flex-col items-center text-center">
           <h1 className="text-4xl font-black tracking-tight text-gray-900 dark:text-ui-text sm:text-5xl lg:text-6xl">
-            Compare anything in one place.
+            Compare your options.
           </h1>
           <p className="mt-4 max-w-2xl text-base text-gray-600 dark:text-ui-muted sm:text-lg">
-            Put courses and professors side by side. Switch either panel to what you want to inspect.
+            Two courses. Two instructors. One clear view of the grades.
           </p>
         </header>
 
         <div className="grid items-start gap-6 lg:grid-cols-[1fr_auto_1fr]">
           <ComparePanel
-            title="Left side"
+            title="Option A"
             kind={left.kind}
             onKindChange={left.onKindChange}
             query={left.query}
@@ -566,7 +566,7 @@ export default function CompareClient({ initialType, initialA }: CompareClientPr
           </div>
 
           <ComparePanel
-            title="Right side"
+            title="Option B"
             kind={right.kind}
             onKindChange={right.onKindChange}
             query={right.query}

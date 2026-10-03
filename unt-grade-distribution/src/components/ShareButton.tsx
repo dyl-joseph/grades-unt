@@ -35,11 +35,7 @@ export default function ShareButton({ url, compact = false }: ShareButtonProps) 
   return (
     <button
       onClick={handleCopy}
-      className={`inline-flex select-none items-center gap-1.5 whitespace-nowrap rounded-lg border transition-all ${
-        copied
-          ? "border-green-400 bg-green-50 text-green-700 dark:border-ui-border dark:bg-ui-selected dark:text-ui-accent"
-          : "border-jungle-tan-dark/30 bg-jungle-tan-light text-gray-600 hover:border-primary/40 hover:text-primary dark:border-ui-border dark:bg-ui-surface dark:text-ui-accent dark:hover:border-ui-accent dark:hover:text-ui-accent"
-      } ${compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm"}`}
+      className={`action-button inline-flex select-none items-center gap-1.5 whitespace-nowrap ${compact ? "action-button-compact" : ""}`}
       title="Copy link to clipboard"
     >
       {copied ? (
