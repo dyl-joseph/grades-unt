@@ -25,7 +25,12 @@ export default function ThemeToggle() {
 
   // Manual changes last for this page session; the OS remains the default.
   const toggle = () => {
-    document.documentElement.classList.toggle("dark", !isDark);
+    const root = document.documentElement;
+    root.classList.add("theme-changing");
+    // Establish the transition styles before changing the palette.
+    void window.getComputedStyle(document.body).backgroundColor;
+    root.classList.toggle("dark", !isDark);
+    window.setTimeout(() => root.classList.remove("theme-changing"), 750);
   };
 
   if (!mounted) {

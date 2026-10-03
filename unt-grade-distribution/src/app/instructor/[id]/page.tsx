@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { aggregateGrades, calculateGPA, toChartData, toGradeData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
+import DataStats from "@/components/DataStats";
 import SectionCard from "@/components/SectionCard";
-import LazyChart from "@/components/LazyChart";
+import GradeChart from "@/components/GradeChart";
 import { SemesterCheckboxGroup, type SemesterSelection } from "@/components/SemesterControls";
 import { fromInstructorSlug, loadInstructorSections } from "@/lib/encryptedData";
 import { groupBySemester, semesterLabel } from "@/lib/semester";
@@ -119,7 +120,7 @@ export default function InstructorPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-8" aria-busy="true" aria-live="polite">
+      <div className="data-page mx-auto max-w-6xl px-4 py-8" aria-busy="true" aria-live="polite">
         <div className="mb-8 animate-pulse space-y-4">
           <div className="h-8 w-1/2 rounded-full bg-jungle-tan-dark/40 dark:bg-ui-raised" />
           <div className="flex gap-4">
@@ -160,26 +161,21 @@ export default function InstructorPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8">
+    <div className="data-page mx-auto max-w-6xl px-4 py-8">
+      <div className="data-hero mb-8">
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
-          <h1 className="min-w-0 break-words text-2xl font-bold text-gray-900 dark:text-ui-text sm:text-3xl">{firstName} {lastName}</h1>
+          <h1 className="min-w-0 break-words text-2xl font-bold text-gray-900 dark:text-ui-text sm:text-3xl"><span className="data-eyebrow">INSTRUCTOR</span>{firstName} {lastName}</h1>
           <div className="flex w-full flex-wrap items-start justify-end gap-2 sm:w-auto">
             <a
               href={`/compare?type=instructor&a=${encodeURIComponent(`${lastName},${firstName}`)}`}
-              className="inline-flex items-center whitespace-nowrap rounded-lg border border-green-400/50 bg-green-50 px-3 py-1.5 font-medium text-green-700 transition-all hover:border-green-500/70 hover:bg-green-100 dark:border-ui-border dark:bg-ui-selected dark:text-ui-text dark:hover:border-ui-accent dark:hover:bg-ui-selected"
+              className="action-button inline-flex items-center whitespace-nowrap"
               title="Compare with another instructor"
             >
               Compare
             </a>
           </div>
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-ui-muted">
-          <span className="flex items-center gap-1.5">Overall GPA: <GpaBadge gpa={overallGPA} /></span>
-          <span>{normalizedSections.length} sections</span>
-          <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
-          <span>{allCourseCount} course{allCourseCount !== 1 ? "s" : ""} taught</span>
-        </div>
+        <DataStats items={[{ label: "Average GPA", value: overallGPA?.toFixed(2) ?? "N/A", detail: "Out of 4.00 · A–F grades" }, { label: "Sections", value: normalizedSections.length, detail: `${semesterGroups.length} semesters available` }, { label: "Courses taught", value: allCourseCount }]} />
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-ui-border dark:bg-ui-surface dark:shadow-none sm:p-6">
@@ -203,7 +199,7 @@ export default function InstructorPage() {
             />
           </div>
         </div>
-        <LazyChart data={toChartData(distributionAggregate)} height={300} showDataFallback />
+        <GradeChart data={toChartData(distributionAggregate)} height={300} controls />
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-ui-border dark:bg-ui-surface dark:shadow-none sm:p-5">

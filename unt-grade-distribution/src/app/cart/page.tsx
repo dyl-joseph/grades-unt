@@ -51,7 +51,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-16 text-center">
+      <div className="data-page empty-state mx-auto max-w-4xl px-4 py-16 text-center">
         <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-ui-text">
           No saved courses yet
         </h1>
@@ -60,7 +60,7 @@ export default function CartPage() {
         </p>
         <Link
           href="/"
-          className="mt-6 inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-jungle-moss"
+          className="action-button mt-6 inline-block"
         >
           Browse Courses
         </Link>
@@ -69,7 +69,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="data-page saved-page mx-auto max-w-6xl px-4 py-8">
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -88,7 +88,7 @@ export default function CartPage() {
         <div className="flex gap-3">
           <button
             onClick={handleDownload}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-jungle-moss"
+            className="action-button inline-flex items-center gap-2"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

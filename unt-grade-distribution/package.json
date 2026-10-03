@@ -15,6 +15,7 @@
     "test:redis": "node --import tsx --test integration/rate-limit-redis.test.ts"
   },
   "dependencies": {
+    "@fontsource/manrope": "^5.3.0",
     "@modelcontextprotocol/server": "^2.1.0",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
