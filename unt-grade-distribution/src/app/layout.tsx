@@ -4,7 +4,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
 import FallingLeaves from "@/components/FallingLeaves";
-import Fireflies from "@/components/Fireflies";
+import Starfield from "@/components/Starfield";
 import KofiWidget from "@/components/KofiWidget";
 import "./globals.css";
 
@@ -45,7 +45,7 @@ export default function RootLayout({
         <div className="light-background pointer-events-none fixed inset-0 z-0 opacity-100 transition-opacity duration-700 dark:opacity-0" style={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(210,140,70,0.18) 100%)' }} />
         {/* Falling leaves (light mode only) */}
         <FallingLeaves />
-        <Fireflies />
+        <Starfield />
         <Providers>
           <Navbar />
           <main className="relative z-20">{children}</main>

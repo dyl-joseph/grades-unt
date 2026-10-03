@@ -5,15 +5,16 @@
 
 /* Existing light palette and semantic dark-mode colors. */
 @theme {
-  --color-ui-page: #08090a;
+  --color-ui-page: #0f1111;
   --color-ui-surface: #191f1d;
   --color-ui-raised: #212925;
   --color-ui-border: #39453f;
   --color-ui-control: #65786d;
   --color-ui-text: #edf1ef;
   --color-ui-muted: #acb8b1;
-  --color-ui-accent: #83d4ae;
-  --color-ui-on-accent: #12251c;
+  --color-ui-accent: #91b39a;
+  --color-ui-forest: #34834a;
+  --color-ui-on-accent: #ffffff;
   --color-ui-selected: #253c31;
   --color-primary: #1B5E20;
   --color-primary-light: #2E7D32;
@@ -133,12 +134,12 @@
 }
 
 .dark :is(.bg-primary, .bg-blue-600) {
-  background: var(--color-ui-accent);
+  background: var(--color-ui-forest);
   color: var(--color-ui-on-accent);
 }
 
 .dark :is(.bg-primary, .bg-blue-600):hover {
-  background: #a0e0be;
+  background: #3a854e;
 }
 
 .dark .site-nav {
@@ -153,7 +154,7 @@
 
 .dark .site-nav a[href="/"] {
   font-size: 22px;
-  font-weight: 650;
+  font-weight: 550;
   letter-spacing: -0.035em;
   color: var(--color-ui-text);
 }
@@ -206,7 +207,7 @@
   font-size: 24px;
   font-weight: 500;
   letter-spacing: 0.025em;
-  color: var(--color-ui-accent);
+  color: var(--color-ui-forest);
 }
 
 .dark .home-title h1 {
@@ -442,9 +443,25 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .starfield { animation: none !important; }
+
   .dark *, .dark *::before, .dark *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* A sparse white star field drifts only a few pixels over a long cycle. */
+.starfield {
+  animation: star-drift 120s ease-in-out infinite alternate;
+}
+
+@keyframes star-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(3px, -2px, 0); }
+}
+
+.dark .course-search input:focus-visible {
+  outline-color: var(--color-ui-forest);
 }

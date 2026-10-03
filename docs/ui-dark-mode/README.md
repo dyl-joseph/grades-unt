@@ -1,6 +1,8 @@
 Dark-mode UI review for `dyl-joseph/grades-unt`, integrated with main commit `fee4a8dea96103c1094efa1ebe59fd2b173b8336`. Before screenshots use the original `1fdabb59` baseline.
 
-The landing page is centered, retains fireflies, and uses a plain Arial title with the existing sans-serif subtitles and search text. The background is flat almost-black (#08090a), with no dark-mode background gradient. Original desktop font sizes and spacing are restored, while the improved title font and compact mobile sizing are retained. Firefly colors are unchanged. Dark-mode gradients and text shimmer are removed; controls, section rows, charts, keyboard focus, and mobile semester filters are clearer. Light-mode styling and grade colors are retained.
+The dark UI uses a sparse starry night: pure white stars in six sizes, stable positions, and a three-pixel drift over two minutes. Reduced motion stops the drift, and stars are hidden in light mode. Data pages dim the stars to keep charts and tables clear. Fireflies are removed.
+
+The background is flat RGB (15, 17, 17), #0f1111, without gradients. The original desktop sizes and spacing are preserved, with the improved Arial title and compact mobile sizing. The navbar brand uses weight 550; the university label and textbox focus use forest green (#34834a). The textbox retains its muted #191f1d surface. Green buttons use white labels, and light-mode styling and grade colors are retained.
 
 API handlers, MCP, rate limits, encryption, shipped data, credentials, dependencies, extension source, and deployment configuration are unchanged. Verification scripts and generated JSON reports are kept outside the source PR to keep its diff focused.
 
@@ -27,11 +29,11 @@ Detail views use a **synthetic six-section fixture** for ACCT 2010 and Alex Samp
 
 Actual browser measurements match the original desktop title (72px), navigation text (34px), search text (18px), search height (62px), margins, padding, and hint gaps. Mobile keeps the compact title and touch controls.
 
-Validation: 11 CI-script tests, 150 web tests, web build, 5 extension tests, extension typecheck/build, and web TypeScript pass. Changed-file lint has zero errors; full lint retains main's 6 errors and no warnings in untouched files. 29 automated WCAG A/AA scans pass with no horizontal overflow. Secondary-text contrast is at least 7.27:1, primary labels 9.18:1, and input boundaries 3.55:1. Light home screenshots were pixel-identical to baseline with animations disabled.
+Validation: 11 CI-script tests, 150 web tests, web build, 5 extension tests, extension typecheck/build, and web TypeScript pass. Changed-file lint has zero errors; full lint retains main's 6 errors and no warnings in untouched files. 29 automated WCAG A/AA scans pass with no horizontal overflow. Secondary-text contrast is at least 7.27:1, white button labels at least 4.52:1 (including hover), input boundaries 3.55:1, and forest-green focus 3.58:1 against the textbox. Light home screenshots were pixel-identical to baseline with animations disabled.
 
 Merged website fixes remain intact: stored courses survive hydration/reload, malformed stored entries are dropped, comparison failures render independently of the dropdown, empty queries show no unrelated suggestions, unknown instructors show not-found, the pre-paint theme honors system preference, and Enter-key selections are logged. Actual desktop/mobile regressions verify these behaviors.
 
-Codex's two search findings are addressed: failed-search feedback dismisses with Escape or an outside click and reopens on focus; all suggestion options are outside the Tab sequence. Component and actual browser regressions check these behaviors, arrow-key selection, empty-popup dismissal, theme persistence, chart tooltips, semester filtering, saving/removing courses, and comparison.
+Codex's two search findings are addressed: failed-search feedback dismisses with Escape or an outside click and reopens on focus; all suggestion options are outside the Tab sequence. Component and actual browser regressions check these behaviors, arrow-key selection, empty-popup dismissal, theme persistence, pure-white stars, reduced-motion/static stars, chart tooltips, semester filtering, saving/removing courses, and comparison.
 
 To review locally, run `npm run dev -- --webpack` in `unt-grade-distribution`, switch to dark mode, and check the screenshot views at the three widths above. In search, use ArrowDown/Enter to select a suggestion, Tab to leave the input, and Escape to dismiss empty/error feedback. Disconnect the manifest request to exercise the search error. Course views require a valid existing data key.
 
