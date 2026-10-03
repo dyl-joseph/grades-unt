@@ -1,0 +1,30 @@
+name: Codex Review (allowlist)
+
+on:
+  pull_request_target:
+    types: [opened, ready_for_review, synchronize, reopened]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  request-codex-review:
+    if: >-
+      github.event.pull_request.draft == false &&
+      (
+        github.event.pull_request.user.login == 'dyl-joseph' ||
+        github.event.pull_request.user.login == 'GauthamRNair' ||
+        github.event.pull_request.user.login == 'YouSoMoose'
+      )
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Request Codex Cloud review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh api             --method POST             "repos/$REPOSITORY/issues/$PR_NUMBER/comments"             -f body='@codex review'

@@ -39,7 +39,7 @@ export default function Navbar() {
         </div>
       </div>
       {!isHome && (
-        <div className={`border-t border-green-100 px-4 py-2 transition-all duration-300 sm:hidden dark:border-ui-border ${scrolled ? "max-h-0 overflow-hidden border-t-0 py-0 opacity-0" : "max-h-20 opacity-100"}`}>
+        <div className={`border-t border-green-100 px-4 py-2 transition-all duration-300 sm:hidden dark:border-0 ${scrolled ? "max-h-0 overflow-hidden border-t-0 py-0 opacity-0" : "max-h-20 opacity-100"}`}>
           <SearchBar compact />
         </div>
       )}

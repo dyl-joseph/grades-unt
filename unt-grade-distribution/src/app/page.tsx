@@ -21,7 +21,7 @@ export default function Home() {
 
       {/* Search bar — centered, no card */}
       <div className="relative w-full max-w-3xl">
-        <SearchBar autoFocus />
+        <SearchBar />
       </div>
 
       {/* Hint */}

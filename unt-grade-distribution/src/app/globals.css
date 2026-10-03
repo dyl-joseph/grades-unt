@@ -143,8 +143,8 @@
 }
 
 .dark .site-nav {
-  background: var(--color-ui-page);
-  border-color: var(--color-ui-border);
+  background: transparent;
+  border: 0;
   backdrop-filter: none;
 }
 
@@ -281,12 +281,12 @@
   box-shadow: inset 3px 0 var(--color-ui-accent);
 }
 
-.dark .semester-controls {
+.semester-controls {
   min-width: 0;
   max-width: 100%;
 }
 
-.dark div:has(> .semester-controls) {
+div:has(> .semester-controls) {
   min-width: 0;
   max-width: 100%;
   flex-shrink: 1;
@@ -443,9 +443,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .starfield { animation: none !important; }
+  .starfield, .star { animation: none !important; }
 
-  .dark *, .dark *::before, .dark *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -462,6 +462,36 @@
   to { transform: translate3d(3px, -2px, 0); }
 }
 
+.dark .course-search input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Keyboard focus stays inside the input, without an outer halo. */
 .dark .course-search input:focus-visible {
-  outline-color: var(--color-ui-forest);
+  box-shadow: inset 0 -2px var(--color-ui-accent);
+}
+
+.star {
+  animation: star-twinkle 18s ease-in-out infinite;
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: calc(var(--star-opacity) * 0.1); }
+  50% { opacity: var(--star-opacity); }
+}
+
+/* Keep small labels readable on the existing warm light surfaces. */
+:root:not(.dark) {
+  --color-gray-400: #4b5563;
+  --color-gray-500: #4b5563;
+}
+
+:root:not(.dark) [class*="text-jungle-vine"] {
+  color: #365f24;
+}
+
+:root:not(.dark) .course-search input::placeholder {
+  color: #4b5563;
+  opacity: 1;
 }

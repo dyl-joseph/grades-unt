@@ -1,7 +1,7 @@
 export default function TermsPage() {
   return (
     <main className="mx-auto flex min-h-[calc(100dvh-4rem-1px)] max-w-3xl flex-col px-4 py-12 text-jungle-bark dark:text-ui-text">
-      <div className="rounded-[28px] border border-jungle-tan-dark/30 bg-jungle-tan-light/85 p-6 shadow-[0_20px_60px_rgba(27,94,32,0.08)] backdrop-blur dark:border-ui-border dark:bg-ui-surface dark:shadow-none md:p-8">
+      <div className="rounded-[28px] border border-jungle-tan-dark/30 bg-jungle-tan-light/85 p-6 shadow-[0_20px_60px_rgba(27,94,32,0.08)] backdrop-blur dark:border-ui-border dark:bg-ui-surface dark:shadow-none dark:rounded-xl md:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-jungle-vine/80 dark:text-ui-muted">
           Legal
         </p>

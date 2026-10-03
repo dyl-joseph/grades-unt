@@ -8,34 +8,24 @@ export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      const saved = localStorage.getItem("theme");
-      if (saved === "dark") {
-        document.documentElement.classList.add("dark");
-      } else if (saved === "light") {
-        document.documentElement.classList.remove("dark");
-      } else if (
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      ) {
-        document.documentElement.classList.add("dark");
-      }
+    const preference = window.matchMedia("(prefers-color-scheme: dark)");
+    const applySystemTheme = () => {
+      document.documentElement.classList.toggle("dark", preference.matches);
+    };
 
-      setMounted(true);
-    }, 0);
+    applySystemTheme();
+    preference.addEventListener("change", applySystemTheme);
+    const timeout = window.setTimeout(() => setMounted(true), 0);
 
-    return () => window.clearTimeout(timeout);
+    return () => {
+      window.clearTimeout(timeout);
+      preference.removeEventListener("change", applySystemTheme);
+    };
   }, []);
 
+  // Manual changes last for this page session; the OS remains the default.
   const toggle = () => {
-    const next = !isDark;
-
-    if (next) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    document.documentElement.classList.toggle("dark", !isDark);
   };
 
   if (!mounted) {
