@@ -28,10 +28,10 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('theme');
-                  if (theme === 'dark' || (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    document.documentElement.classList.add('dark');
-                  }
+                  document.documentElement.classList.toggle(
+                    'dark',
+                    window.matchMedia('(prefers-color-scheme: dark)').matches
+                  );
                 } catch(e) {}
               })();
             `,
