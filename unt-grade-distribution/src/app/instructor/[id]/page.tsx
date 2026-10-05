@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { aggregateGrades, calculateGPA, toChartData, toGradeData } from "@/lib/grades";
 import GpaBadge from "@/components/GpaBadge";
 import SectionCard from "@/components/SectionCard";
-import LazyChart from "@/components/LazyChart";
+import LazyChart, { preloadGradeChart } from "@/components/LazyChart";
 import { SemesterCheckboxGroup, type SemesterSelection } from "@/components/SemesterControls";
 import { fromInstructorSlug, loadInstructorSections } from "@/lib/encryptedData";
 import { groupBySemester, semesterLabel } from "@/lib/semester";
@@ -30,6 +30,7 @@ export default function InstructorPage() {
       return;
     }
     let mounted = true;
+    preloadGradeChart();
     queueMicrotask(() => {
       if (!mounted) return;
       setLoading(true);
@@ -203,7 +204,7 @@ export default function InstructorPage() {
             />
           </div>
         </div>
-        <LazyChart data={toChartData(distributionAggregate)} height={300} showDataFallback />
+        <LazyChart data={toChartData(distributionAggregate)} height={300} priority />
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 shadow-sm dark:border-ui-border dark:bg-ui-surface dark:shadow-none sm:p-5">
