@@ -3,56 +3,29 @@
 import { lazy, Suspense, useRef, useState, useEffect } from "react";
 import type { ChartDataPoint } from "@/lib/grades";
 
-const GradeChart = lazy(() => import("./GradeChart"));
+const loadGradeChart = () => import("./GradeChart");
+const GradeChart = lazy(loadGradeChart);
+
+/** Starts downloading the chart chunk ahead of the first render. */
+export function preloadGradeChart() {
+  void loadGradeChart();
+}
 
 interface LazyChartProps {
   data: ChartDataPoint[];
   height?: number;
   mode?: "count" | "percentage";
-  showDataFallback?: boolean;
+  /** Render immediately instead of waiting to scroll into view (for above-the-fold charts). */
+  priority?: boolean;
 }
 
-function ChartFallback({
-  data,
-  height,
-  showData,
-}: {
-  data: ChartDataPoint[];
-  height: number;
-  showData: boolean;
-}) {
-  if (!showData) {
-    return (
-      <div
-        className="flex items-center justify-center rounded-lg bg-jungle-tan-dark/10 dark:bg-ui-selected"
-        style={{ height }}
-      >
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary dark:border-ui-border dark:border-t-ui-accent" />
-      </div>
-    );
-  }
-
-  const largestCount = Math.max(1, ...data.map((item) => item.count));
-
+function ChartFallback({ height }: { height: number }) {
   return (
     <div
-      aria-label="Grade distribution"
-      className="flex items-end justify-between gap-2 rounded-lg bg-jungle-tan-dark/10 px-3 pb-4 pt-6 dark:bg-ui-selected"
-      role="img"
+      className="flex items-center justify-center rounded-lg bg-jungle-tan-dark/10 dark:bg-ui-selected"
       style={{ height }}
     >
-      {data.map((item) => (
-        <div key={item.grade} className="flex min-w-0 flex-1 flex-col items-center gap-1 text-xs text-gray-600 dark:text-ui-muted">
-          <span className="font-medium">{item.count}</span>
-          <div className="flex h-40 w-full items-end rounded-sm bg-jungle-tan-dark/10 dark:bg-ui-raised">
-            <div
-              className="w-full rounded-sm bg-primary/75 dark:bg-ui-accent"
-              style={{ height: `${(item.count / largestCount) * 100}%` }}
-            />
-          </div>
-          <span>{item.grade}</span>
-        </div>
-      ))}
+      <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary dark:border-ui-border dark:border-t-ui-accent" />
     </div>
   );
 }
@@ -61,19 +34,20 @@ function ChartFallback({
  * Renders a GradeChart only once the component scrolls into view.
  * Uses IntersectionObserver with a 200px rootMargin so charts start
  * loading slightly before they become visible (smoother experience).
+ * Pass `priority` for charts in the initial viewport to skip the observer.
  */
 export default function LazyChart({
   data,
   height = 200,
   mode = "count",
-  showDataFallback = false,
+  priority = false,
 }: LazyChartProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(priority);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || visible) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -87,16 +61,16 @@ export default function LazyChart({
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [visible]);
 
   return (
     <div ref={ref} className="min-w-0 overflow-hidden" style={{ minHeight: height }}>
       {visible ? (
-        <Suspense fallback={<ChartFallback data={data} height={height} showData={showDataFallback} />}>
+        <Suspense fallback={<ChartFallback height={height} />}>
           <GradeChart data={data} height={height} mode={mode} />
         </Suspense>
       ) : (
-        <ChartFallback data={data} height={height} showData={showDataFallback} />
+        <ChartFallback height={height} />
       )}
     </div>
   );
