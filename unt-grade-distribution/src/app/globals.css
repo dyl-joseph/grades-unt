@@ -495,3 +495,43 @@ div:has(> .semester-controls) {
   color: #4b5563;
   opacity: 1;
 }
+
+/* Homepage interactions and layout. */
+.course-play-card {
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .course-play-card:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgb(0 0 0 / 8%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .course-play-card:active:not(:disabled) {
+    transform: translateY(1px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .course-play-card { transition: none; }
+}
+
+.home-student .home-page {
+  min-height: auto;
+  max-width: none;
+  padding: 64px 24px 40px;
+  gap: 28px;
+}
+
+.home-student .home-title {
+  margin: 0;
+}
+
+@media (max-width: 639px) {
+  .home-student .home-page {
+    padding: 40px 20px 32px;
+    gap: 24px;
+  }
+}

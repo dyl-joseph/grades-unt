@@ -2,6 +2,9 @@
 
 import { useSavedCourses } from "@/context/SavedCoursesContext";
 import type { CartItem } from "@/lib/types";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface SaveForLaterButtonProps {
   item: CartItem;
@@ -10,14 +13,30 @@ interface SaveForLaterButtonProps {
 export default function SaveForLaterButton({
   item,
 }: SaveForLaterButtonProps) {
-  const { addCourse, removeCourse, isSaved } = useSavedCourses();
+  const { items, addCourse, removeCourse, isSaved } = useSavedCourses();
   const isBookmarked = isSaved(item.courseId);
+  const [celebrating, setCelebrating] = useState(false);
+
+  useEffect(() => {
+    if (!celebrating) return;
+    const timer = window.setTimeout(() => setCelebrating(false), 8000);
+    return () => window.clearTimeout(timer);
+  }, [celebrating]);
+
+  function toggleSave() {
+    if (isBookmarked) {
+      removeCourse(item.courseId);
+      setCelebrating(false);
+    } else {
+      addCourse(item);
+      if (items.length === 0) setCelebrating(true);
+    }
+  }
 
   return (
+    <>
     <button
-      onClick={() =>
-        isBookmarked ? removeCourse(item.courseId) : addCourse(item)
-      }
+      onClick={toggleSave}
       aria-label={isBookmarked ? "Remove bookmark" : "Save bookmark"}
       className={`inline-flex select-none items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-medium transition-all ${
         isBookmarked
@@ -63,5 +82,16 @@ export default function SaveForLaterButton({
         </>
       )}
     </button>
+    {celebrating && isBookmarked && createPortal(
+      <div className="fixed bottom-6 left-1/2 z-[100] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-start gap-3 rounded-xl border border-primary/30 bg-jungle-tan-light p-4 text-jungle-bark shadow-lg dark:border-ui-border dark:bg-ui-surface dark:text-ui-text">
+        <div className="flex-1">
+          <p role="status" className="font-semibold">Your semester is taking shape.</p>
+          <Link href="/cart" className="mt-1 inline-block text-sm underline underline-offset-4">First class saved. See your shortlist →</Link>
+        </div>
+        <button type="button" onClick={() => setCelebrating(false)} aria-label="Dismiss saved-course message" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg hover:bg-primary/10 dark:hover:bg-ui-raised">×</button>
+      </div>,
+      document.body
+    )}
+    </>
   );
 }

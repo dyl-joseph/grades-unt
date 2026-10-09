@@ -26,12 +26,17 @@ Generated files:
 ```text
 public/encrypted/
 ├── manifest.json
+├── home-stats.json
 └── blobs/
     ├── <id>.bin
     └── <id>.meta.json
 ```
 
 `manifest.json` remains mutable metadata. Each generated blob ID is a UUID-derived filename, so a deployment may cache its matching `.bin` and `.meta.json` files for one year. Do not reuse an ID for changed encrypted content.
+
+`home-stats.json` contains public course aggregates for the home-page rankings, with no section or instructor records. Rankings include only four-digit courses numbered 1000–2999 with at least 200 letter grades (A–F) across all semesters. GPA excludes P, NP, W, and I; the D/F/W percentage uses all recorded grade outcomes as its denominator.
+
+The normal application build does not run the encryptor. When enabling rankings on an existing dataset, regenerate and commit the static data using the source CSVs and the existing deployment passphrase. Check that `public/encrypted/home-stats.json` is present before deployment; without it, the ranking section is hidden. A deployment without this file still supports search and the example-course links.
 
 ## CSV format
 

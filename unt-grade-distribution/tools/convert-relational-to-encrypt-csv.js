@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports -- This CLI runs as CommonJS. */
 const fs = require('fs');
 const path = require('path');
 const { parse } = require('csv-parse/sync');

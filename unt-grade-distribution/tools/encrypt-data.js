@@ -91,6 +91,73 @@ function manifestTokensForCourse(course) {
   ];
 }
 
+const HOME_STATS_MIN_STUDENTS = 200;
+const HOME_STATS_LIST_SIZE = 6;
+const INTRO_COURSE_NUMBER = /^[12]\d{3}$/;
+
+function sumGrades(sections) {
+  const totals = Object.fromEntries(GRADE_COLUMNS.map((grade) => [grade, 0]));
+  for (const section of sections) {
+    for (const grade of GRADE_COLUMNS) totals[grade] += Number(section.grades[grade]) || 0;
+  }
+  return totals;
+}
+
+// Same weighting as calculateGPA in src/lib/grades.ts: letter grades only.
+function gpaFromTotals(totals) {
+  const letters = totals.A + totals.B + totals.C + totals.D + totals.F;
+  if (letters === 0) return null;
+  const points = 4 * totals.A + 3 * totals.B + 2 * totals.C + totals.D;
+  return Math.round((points / letters) * 100) / 100;
+}
+
+const DIST_GRADES = ['A', 'B', 'C', 'D', 'F', 'W'];
+
+// Share of each of A, B, C, D, F, W (percent, one decimal) for the mini grade bars.
+function distFromTotals(totals) {
+  const sum = DIST_GRADES.reduce((total, grade) => total + totals[grade], 0);
+  if (sum === 0) return null;
+  return DIST_GRADES.map((grade) => Math.round((totals[grade] / sum) * 1000) / 10);
+}
+
+function studentsFromTotals(totals) {
+  return GRADE_COLUMNS.reduce((sum, grade) => sum + totals[grade], 0);
+}
+
+// Aggregates only: no sections or instructors. Shown on the home page.
+function buildHomeStats(courses, minStudents = HOME_STATS_MIN_STUDENTS, listSize = HOME_STATS_LIST_SIZE) {
+  const ranked = [];
+
+  for (const course of courses) {
+    if (!INTRO_COURSE_NUMBER.test(course.number)) continue;
+    const totals = sumGrades(course.sections);
+    const gpa = gpaFromTotals(totals);
+    const students = studentsFromTotals(totals);
+    const letterGrades = totals.A + totals.B + totals.C + totals.D + totals.F;
+    if (gpa === null || letterGrades < minStudents) continue;
+
+    ranked.push({
+      prefix: course.prefix,
+      number: course.number,
+      title: course.title,
+      gpa,
+      dfwRate: Math.round(((totals.D + totals.F + totals.W) / students) * 1000) / 10,
+      students,
+      dist: distFromTotals(totals),
+    });
+  }
+
+  const byCode = (a, b) => a.prefix.localeCompare(b.prefix) || a.number.localeCompare(b.number);
+  const easiest = [...ranked].sort((a, b) => b.gpa - a.gpa || b.students - a.students || byCode(a, b));
+  const hardest = [...ranked].sort((a, b) => a.gpa - b.gpa || b.students - a.students || byCode(a, b));
+
+  return {
+    minStudents,
+    easiest: easiest.slice(0, listSize),
+    hardest: hardest.slice(0, listSize),
+  };
+}
+
 async function main() {
   if (!process.env.MASTER_PASSPHRASE) {
     console.error('Please set MASTER_PASSPHRASE environment variable to encrypt data.');
@@ -157,10 +224,12 @@ async function main() {
 
   try {
     const manifest = [];
+    const gradedCourses = [];
     console.log(`Encrypting ${courseMap.size} course blobs...`);
     for (const course of courseMap.values()) {
       const filteredCourse = courseWithGradedSections(course);
       if (filteredCourse.sections.length === 0) continue;
+      gradedCourses.push(filteredCourse);
 
       const id = randomUUID().replace(/-/g, '');
       const outName = `${id}.bin`;
@@ -179,6 +248,7 @@ async function main() {
     }
 
     fs.writeFileSync(path.join(buildDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+    fs.writeFileSync(path.join(buildDir, 'home-stats.json'), JSON.stringify(buildHomeStats(gradedCourses)));
     fs.rmSync(OUT_DIR, { recursive: true, force: true });
     fs.renameSync(buildDir, OUT_DIR);
   } finally {
@@ -195,4 +265,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { courseWithGradedSections, sectionHasGrades, manifestTokensForCourse };
+module.exports = { buildHomeStats, courseWithGradedSections, sectionHasGrades, manifestTokensForCourse };
