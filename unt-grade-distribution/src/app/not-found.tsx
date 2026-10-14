@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_NAME } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: { absolute: `Page Not Found | ${SITE_NAME}` },
+};
 
 export default function NotFound() {
   return (

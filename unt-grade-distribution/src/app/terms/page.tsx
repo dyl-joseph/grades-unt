@@ -1,3 +1,12 @@
+import type { Metadata } from "next";
+import { pageMetadata, SITE_NAME } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: `Terms of Service | ${SITE_NAME}`,
+  description: "Terms of service for UNT Grades: what search activity the site logs and how to request that data.",
+  path: "/terms",
+});
+
 export default function TermsPage() {
   return (
     <main className="mx-auto flex min-h-[calc(100dvh-4rem-1px)] max-w-3xl flex-col px-4 py-12 text-jungle-bark dark:text-ui-text">

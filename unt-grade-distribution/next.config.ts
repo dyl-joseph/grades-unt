@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   outputFileTracingIncludes: {
     "/api/mcp": ["./public/encrypted/**/*"],
+    // generateMetadata reads course and instructor names from the manifest.
+    "/course/[prefix]/[number]": ["./public/encrypted/manifest.json"],
+    "/instructor/[id]": ["./public/encrypted/manifest.json"],
   },
   turbopack: {
     root: __dirname,

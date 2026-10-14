@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SimilarSearches from "./SimilarSearches";
+import { pageMetadata, SITE_NAME } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: `Search Results | ${SITE_NAME}`,
+  description: "Search UNT Grades for University of North Texas courses and professors.",
+  path: "/search",
+});
 
 type SearchPageProps = {
   searchParams: Promise<{ query?: string }>;

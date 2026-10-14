@@ -6,12 +6,15 @@ import Providers from "@/components/Providers";
 import FallingLeaves from "@/components/FallingLeaves";
 import Starfield from "@/components/Starfield";
 import KofiWidget from "@/components/KofiWidget";
+import { HOME_DESCRIPTION, HOME_TITLE, SITE_NAME, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
+// Defaults only. Each page sets its own title, description, canonical, and Open Graph tags.
 export const metadata: Metadata = {
-  title: "UNT Grade Distribution",
-  description:
-    "Explore grade distributions for courses and professors at the University of North Texas.",
+  metadataBase: new URL(SITE_URL),
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  openGraph: { siteName: SITE_NAME, type: "website" },
 };
 
 export default function RootLayout({
