@@ -244,6 +244,17 @@ export function findInstructorEntries(manifest: ManifestEntry[], firstName: stri
     .map(({ entry }) => entry);
 }
 
+/** Every distinct instructor in the manifest, using the first spelling seen for each. */
+export function listInstructors(manifest: ManifestEntry[]) {
+  const instructors = new Map<string, { firstName: string; lastName: string }>();
+  for (const { instructors: entryInstructors } of indexedManifest(manifest)) {
+    for (const { key, firstName, lastName } of entryInstructors) {
+      if (!instructors.has(key)) instructors.set(key, { firstName, lastName });
+    }
+  }
+  return [...instructors.values()];
+}
+
 export function searchManifestEntries(manifest: ManifestEntry[], q: string) {
   const query = normalizeText(q);
   if (query.length < 2) return { courses: [], instructors: [] as Array<{ id: string; firstName: string; lastName: string }> };

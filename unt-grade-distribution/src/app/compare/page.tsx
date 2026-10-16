@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import CompareClient from "./CompareClient";
+import { pageMetadata, SITE_NAME } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: `Compare Courses and Professors | ${SITE_NAME}`,
+  description: "Compare grade distributions side by side for University of North Texas courses or professors.",
+  path: "/compare",
+});
 
 type CompareSearchParams = {
   type?: string | string[];
