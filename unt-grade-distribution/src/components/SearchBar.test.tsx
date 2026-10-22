@@ -25,6 +25,7 @@ test("changing the query cannot select suggestions from the previous query", asy
 
   const pushes: string[] = [];
   const router: AppRouterInstance = {
+    bfcacheId: "test",
     back() {},
     forward() {},
     refresh() {},
