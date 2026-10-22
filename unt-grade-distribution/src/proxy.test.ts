@@ -91,6 +91,30 @@ test("MCP preflight preserves protocol/session headers and DELETE support", asyn
   }
 });
 
+test("MCP allows UNTangle's browser origin, including path aliases, and no other routes", async (t) => {
+  configure(t);
+  t.mock.method(globalThis, "fetch", async () => Response.json({ result: [1, 59, 0] }));
+  const untangle = "https://untangleapp.vercel.app";
+  for (const path of ["/api/mcp", "/api/mcp/"]) {
+    for (const method of ["OPTIONS", "POST"]) {
+      const response = await proxy(makeRequest(path, { method, headers: { origin: untangle } }));
+      assert.equal(response.headers.get("access-control-allow-origin"), untangle, `${method} ${path}`);
+    }
+  }
+  const otherRoute = await proxy(makeRequest("/api/search", { method: "OPTIONS", headers: { origin: untangle } }));
+  assert.equal(otherRoute.headers.has("access-control-allow-origin"), false);
+  const otherSite = await proxy(makeRequest("/api/mcp", { method: "OPTIONS", headers: { origin: "https://example.com" } }));
+  assert.equal(otherSite.headers.has("access-control-allow-origin"), false);
+});
+
+test("MCP_CORS_ORIGINS replaces the default browser origins", async (t) => {
+  configure(t, { MCP_CORS_ORIGINS: "https://a.example, https://b.example" });
+  const allowed = await proxy(makeRequest("/api/mcp", { method: "OPTIONS", headers: { origin: "https://b.example" } }));
+  assert.equal(allowed.headers.get("access-control-allow-origin"), "https://b.example");
+  const dropped = await proxy(makeRequest("/api/mcp", { method: "OPTIONS", headers: { origin: "https://untangleapp.vercel.app" } }));
+  assert.equal(dropped.headers.has("access-control-allow-origin"), false);
+});
+
 test("static manifest, binary and metadata responses are checked before the file handler", async (t) => {
   configure(t);
   const calls: unknown[][] = [];
