@@ -193,27 +193,27 @@ function ComparePanel({
   const open = focused && hasQuery && (loadingResults || results.length > 0 || !!error);
 
   return (
-    <section className="rounded-[28px] border border-jungle-tan-dark/30 bg-jungle-tan-light/90 p-5 shadow-[0_20px_60px_rgba(27,94,32,0.08)] backdrop-blur dark:border-ui-border dark:bg-ui-surface dark:shadow-none md:p-6">
+    <section className="rounded-[28px] border p-5 border-ui-border bg-ui-surface md:p-6">
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-jungle-vine/80 dark:text-ui-muted">{title}</p>
-          <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-ui-text">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-ui-muted">{title}</p>
+          <h2 className="mt-1 text-2xl font-bold text-ui-text">
             Compare {kind === "course" ? "courses" : "professors"}
           </h2>
         </div>
         <button
           type="button"
           onClick={onClear}
-          className="rounded-full border border-jungle-tan-dark/30 px-3 py-1.5 text-sm font-semibold text-jungle-bark transition hover:border-primary/40 hover:bg-white/60 hover:text-primary dark:border-ui-border dark:text-ui-text dark:hover:bg-ui-raised"
+          className="rounded-full border px-3 py-1.5 text-sm font-semibold transition hover:border-ui-accent hover:text-ui-accent border-ui-border text-ui-text hover:bg-ui-raised"
         >
           Clear
         </button>
       </div>
 
       <div className="mb-4">
-        <div className="relative grid h-12 grid-cols-2 rounded-full border border-jungle-tan-dark/30 bg-white/60 p-1 text-sm shadow-sm dark:border-ui-border dark:bg-ui-raised">
+        <div className="relative grid h-12 grid-cols-2 rounded-full border p-1 text-sm shadow-sm border-ui-border bg-ui-raised">
           <span
-            className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-md transition-transform duration-300 ease-out dark:bg-ui-accent ${
+            className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full shadow-md transition-transform duration-300 ease-out bg-ui-forest ${
               kind === "instructor" ? "translate-x-full" : "translate-x-0"
             }`}
             aria-hidden="true"
@@ -226,8 +226,8 @@ function ComparePanel({
               onClick={() => onKindChange(value)}
               className={`relative z-10 flex items-center justify-center rounded-full px-4 font-semibold transition-colors duration-300 ${
                 kind === value
-                  ? "text-white dark:text-ui-on-accent"
-                  : "text-jungle-bark hover:text-primary dark:text-ui-text dark:hover:text-ui-accent"
+                  ? "text-ui-on-accent"
+                  : "text-ui-text hover:text-ui-accent"
               }`}
             >
               {value === "course" ? "Courses" : "Professors"}
@@ -245,27 +245,27 @@ function ComparePanel({
           onBlur={() => onFocusChange(false)}
           aria-label={`${title} search`}
           placeholder={`Search ${kind === "course" ? "course code or title" : "professor name"}`}
-          className="w-full rounded-2xl border border-jungle-tan-dark/30 bg-white/85 px-4 py-3 pr-11 text-gray-900 shadow-inner outline-none ring-0 transition placeholder:text-gray-500 focus:border-primary/40 focus:ring-2 focus:ring-primary/20 dark:border-ui-border dark:bg-ui-surface dark:shadow-none dark:text-ui-text dark:placeholder:text-ui-muted dark:focus:border-ui-accent dark:focus:ring-ui-accent/30"
+          className="w-full rounded-2xl border px-4 py-3 pr-11 outline-none ring-0 transition focus:ring-2 border-ui-border bg-ui-surface text-ui-text placeholder:text-ui-muted focus:border-ui-accent focus:ring-ui-accent/30"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
           {loadingResults ? (
-            <svg className="h-4 w-4 animate-spin text-jungle-vine dark:text-ui-muted" viewBox="0 0 24 24" fill="none">
+            <svg className="h-4 w-4 animate-spin text-ui-muted" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           ) : (
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-jungle-vine/70 dark:text-ui-muted">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-ui-muted">
               {kind === "course" ? "CRS" : "PROF"}
             </span>
           )}
         </div>
 
         {open && (
-          <div className="absolute z-20 mt-2 max-h-72 w-full overflow-auto rounded-2xl border border-jungle-tan-dark/30 bg-[#F8F4EE] shadow-2xl dark:border-ui-border dark:bg-ui-surface dark:shadow-none">
+          <div className="absolute z-20 mt-2 max-h-72 w-full overflow-auto rounded-2xl border border-ui-border bg-ui-surface">
             {error ? (
               <div className="px-4 py-3 text-sm text-red-600 dark:text-red-300">{error}</div>
             ) : results.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-gray-500 dark:text-ui-muted">No results found.</div>
+              <div className="px-4 py-3 text-sm text-ui-muted">No results found.</div>
             ) : (
               results.map((item) => (
                 <button
@@ -273,9 +273,9 @@ function ComparePanel({
                   type="button"
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => onSelect(item)}
-                  className="flex w-full items-center gap-3 border-b border-jungle-tan-dark/10 px-4 py-3 text-left transition last:border-b-0 hover:bg-green-50 dark:border-ui-border dark:hover:bg-ui-raised"
+                  className="flex w-full items-center gap-3 border-b px-4 py-3 text-left transition last:border-b-0 border-ui-border hover:bg-ui-raised"
                 >
-                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary dark:bg-ui-selected dark:text-ui-accent">
+                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold bg-ui-selected text-ui-accent">
                     {kind === "course"
                       ? isCourseSuggestion(item)
                         ? item.prefix
@@ -285,14 +285,14 @@ function ComparePanel({
                         : "PR"}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-semibold text-gray-900 dark:text-ui-text">
+                    <span className="block font-semibold text-ui-text">
                       {kind === "course" && isCourseSuggestion(item)
                         ? `${item.prefix} ${item.number}`
                         : kind === "instructor" && isInstructorSuggestion(item)
                           ? `${item.lastName}, ${item.firstName}`
                           : "Result"}
                     </span>
-                    <span className="block truncate text-sm text-gray-500 dark:text-ui-muted">
+                    <span className="block truncate text-sm text-ui-muted">
                       {kind === "course" && isCourseSuggestion(item)
                         ? item.title
                         : kind === "instructor" && isInstructorSuggestion(item)
@@ -307,35 +307,35 @@ function ComparePanel({
         )}
       </div>
 
-      <div className="mb-4 min-h-12 rounded-2xl border border-dashed border-jungle-tan-dark/35 bg-white/40 px-4 py-3 dark:border-ui-border dark:bg-ui-raised">
+      <div className="mb-4 min-h-12 rounded-2xl border border-dashed px-4 py-3 border-ui-border bg-ui-raised">
         {selected ? (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white dark:bg-ui-accent dark:text-ui-on-accent">
+            <span className="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] bg-ui-forest text-ui-on-accent">
               Selected
             </span>
-            <span className="font-semibold text-gray-900 dark:text-ui-text">
+            <span className="font-semibold text-ui-text">
               {selectionLabel(kind, selected, data?.label)}
             </span>
           </div>
         ) : (
-          <p className="text-sm text-gray-500 dark:text-ui-muted">
+          <p className="text-sm text-ui-muted">
             Pick a {kind === "course" ? "course" : "professor"} to load the distribution.
           </p>
         )}
       </div>
 
-      <div className="rounded-3xl border border-jungle-tan-dark/25 bg-[#FBF8F3] p-4 dark:border-ui-border dark:bg-ui-surface dark:shadow-none">
+      <div className="rounded-3xl border p-4 border-ui-border bg-ui-surface">
         {loadingData ? (
           <div className="animate-pulse space-y-4">
-            <div className="h-5 w-44 rounded-full bg-jungle-tan-dark/30 dark:bg-ui-raised" />
-            <div className="h-[260px] rounded-2xl bg-jungle-tan-dark/15 dark:bg-ui-raised" />
+            <div className="h-5 w-44 rounded-full bg-ui-raised" />
+            <div className="h-[260px] rounded-2xl bg-ui-raised" />
           </div>
         ) : data ? (
           <>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-ui-text">{data.label}</h3>
-                <p className="text-sm text-gray-500 dark:text-ui-muted">
+                <h3 className="text-lg font-semibold text-ui-text">{data.label}</h3>
+                <p className="text-sm text-ui-muted">
                   {data.summary.sections} sections · {data.summary.students.toLocaleString()} students · GPA {data.summary.gpa === null ? "N/A" : data.summary.gpa.toFixed(2)}
                 </p>
               </div>
@@ -345,15 +345,15 @@ function ComparePanel({
         ) : selected && dataError ? (
           <div
             role="alert"
-            className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-red-300/60 bg-white/40 px-4 text-center text-sm text-red-600 dark:border-ui-border dark:bg-ui-raised dark:text-red-300"
+            className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed px-4 text-center text-sm text-red-600 border-ui-border bg-ui-raised dark:text-red-300"
           >
             {dataError}
           </div>
         ) : (
-          <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-jungle-tan-dark/30 bg-white/40 text-center dark:border-ui-border dark:bg-ui-raised">
+          <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed text-center border-ui-border bg-ui-raised">
             <div>
-              <p className="text-lg font-semibold text-gray-800 dark:text-ui-text">No comparison loaded</p>
-              <p className="mt-1 text-sm text-gray-500 dark:text-ui-muted">
+              <p className="text-lg font-semibold text-ui-text">No comparison loaded</p>
+              <p className="mt-1 text-sm text-ui-muted">
                 Search and select a {kind === "course" ? "course" : "professor"} above.
               </p>
             </div>
@@ -531,10 +531,10 @@ export default function CompareClient({ initialType, initialA }: CompareClientPr
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8">
         <header className="mx-auto flex max-w-4xl flex-col items-center text-center">
-          <h1 className="text-4xl font-black tracking-tight text-gray-900 dark:text-ui-text sm:text-5xl lg:text-6xl">
+          <h1 className="text-4xl font-black tracking-tight text-ui-text sm:text-5xl lg:text-6xl">
             Compare anything in one place.
           </h1>
-          <p className="mt-4 max-w-2xl text-base text-gray-600 dark:text-ui-muted sm:text-lg">
+          <p className="mt-4 max-w-2xl text-base text-ui-muted sm:text-lg">
             Put courses and professors side by side. Switch either panel to what you want to inspect.
           </p>
         </header>
@@ -560,7 +560,7 @@ export default function CompareClient({ initialType, initialA }: CompareClientPr
           />
 
           <div className="flex items-center justify-center lg:min-h-full">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-jungle-tan-dark/25 bg-white/80 text-lg font-black text-primary shadow-lg dark:border-ui-border dark:bg-ui-surface dark:shadow-none dark:text-ui-accent">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full border text-lg font-black border-ui-border bg-ui-surface text-ui-accent">
               VS
             </div>
           </div>
@@ -585,7 +585,7 @@ export default function CompareClient({ initialType, initialA }: CompareClientPr
           />
         </div>
 
-        <div className="mx-auto max-w-4xl rounded-3xl border border-jungle-tan-dark/25 bg-white/70 px-5 py-4 text-sm text-gray-600 shadow-sm backdrop-blur dark:border-ui-border dark:bg-ui-surface dark:shadow-none dark:text-ui-muted">
+        <div className="mx-auto max-w-4xl rounded-3xl border px-5 py-4 text-sm backdrop-blur border-ui-border bg-ui-surface text-ui-muted">
           Start with a course or professor on either side, then switch panels independently if you want a mixed comparison.
         </div>
       </div>

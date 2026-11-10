@@ -3,19 +3,22 @@
 /* Enable class-based dark mode (for manual toggle) */
 @variant dark (&:where(.dark, .dark *));
 
-/* Existing light palette and semantic dark-mode colors. */
+/* Both themes share one quiet data-workspace design. The ui-* roles below
+   are the light values; .dark swaps them, so components name a role once. */
 @theme {
-  --color-ui-page: #0f1111;
-  --color-ui-surface: #191f1d;
-  --color-ui-raised: #212925;
-  --color-ui-border: #39453f;
-  --color-ui-control: #65786d;
-  --color-ui-text: #edf1ef;
-  --color-ui-muted: #acb8b1;
-  --color-ui-accent: #91b39a;
-  --color-ui-forest: #34834a;
+  --color-ui-page: #f6f8f7;
+  --color-ui-surface: #ffffff;
+  --color-ui-raised: #eaefec;
+  --color-ui-border: #d3dcd7;
+  --color-ui-control: #8c9c93;
+  --color-ui-text: #16201b;
+  --color-ui-muted: #4c5a52;
+  --color-ui-accent: #2d6b40;
+  --color-ui-forest: #22703c;
+  --color-ui-forest-hover: #1b5e31;
   --color-ui-on-accent: #ffffff;
-  --color-ui-selected: #253c31;
+  --color-ui-selected: #e1ede5;
+  --color-ui-shadow: #16201b1f;
   --color-primary: #1B5E20;
   --color-primary-light: #2E7D32;
   --color-primary-dark: #0D3B13;
@@ -33,137 +36,85 @@
   --color-jungle-tan-dark: #BBA882;
 }
 
-/* Glossy glass effects */
-.glass-glossy {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0.4) 100%
-  );
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.1);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
-}
-
-
-/* Sparkle shimmer effect for light-mode text */
-@keyframes sparkle-shift {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-.sparkle-text {
-  background-image: linear-gradient(
-    105deg,
-    currentColor 0%,
-    currentColor 44%,
-    rgba(134, 239, 172, 0.9) 47%,
-    rgba(134, 239, 172, 1) 49%,
-    rgba(134, 239, 172, 0.9) 51%,
-    currentColor 54%,
-    currentColor 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: sparkle-shift 3s ease-in-out infinite;
-}
-
-
-/* Frosty/opaque navbar search bar */
-.glass-navbar-search {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.75) 0%,
-    rgba(255, 255, 255, 0.55) 50%,
-    rgba(255, 255, 255, 0.65) 100%
-  );
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.8),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.2);
-  -webkit-backdrop-filter: blur(32px) saturate(2);
-  backdrop-filter: blur(32px) saturate(2);
-}
-
-/* Dark mode is a quiet data workspace. Light-mode effects remain above. */
+/* Dark mode keeps its original palette. */
 .dark {
   color-scheme: dark;
+  --color-ui-page: #0f1111;
+  --color-ui-surface: #191f1d;
+  --color-ui-raised: #212925;
+  --color-ui-border: #39453f;
+  --color-ui-control: #65786d;
+  --color-ui-text: #edf1ef;
+  --color-ui-muted: #acb8b1;
+  --color-ui-accent: #91b39a;
+  --color-ui-forest: #34834a;
+  --color-ui-forest-hover: #3a854e;
+  --color-ui-on-accent: #ffffff;
+  --color-ui-selected: #253c31;
+  --color-ui-shadow: #00000055;
 }
 
-.dark body {
+body {
   background: var(--color-ui-page);
   color: var(--color-ui-text);
 }
 
-.dark :is(h1, h2, h3) {
+:is(h1, h2, h3) {
   text-wrap: balance;
 }
 
-.dark :is(.glass-glossy, .glass-navbar-search) {
+:is(.glass-glossy, .glass-navbar-search) {
   background: var(--color-ui-surface);
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-.dark .sparkle-text {
-  background: none;
-  -webkit-text-fill-color: currentColor;
-  text-shadow: none;
-  animation: none;
-}
-
-.dark :is(button, a, input, select, [tabindex]):focus-visible {
+:is(button, a, input, select, [tabindex]):focus-visible {
   outline: 2px solid var(--color-ui-accent);
   outline-offset: 3px;
 }
 
-.dark button {
+button {
   cursor: pointer;
 }
 
-.dark button:disabled {
+button:disabled {
   cursor: default;
   opacity: 0.5;
 }
 
-.dark :is(.bg-primary, .bg-blue-600) {
+:is(.bg-primary, .bg-blue-600) {
   background: var(--color-ui-forest);
   color: var(--color-ui-on-accent);
 }
 
-.dark :is(.bg-primary, .bg-blue-600):hover {
-  background: #3a854e;
+:is(.bg-primary, .bg-blue-600):hover {
+  background: var(--color-ui-forest-hover);
 }
 
-.dark .site-nav {
+.site-nav {
   background: transparent;
   border: 0;
   backdrop-filter: none;
 }
 
-.dark .site-nav > div:first-child {
+.site-nav > div:first-child {
   gap: 16px;
 }
 
-.dark .site-nav a[href="/"] {
+.site-nav a[href="/"] {
   font-size: 22px;
   font-weight: 550;
   letter-spacing: -0.035em;
   color: var(--color-ui-text);
 }
 
-.dark .nav-actions {
+.nav-actions {
   gap: 4px;
 }
 
-.dark .nav-actions :is(a, button) {
+.nav-actions :is(a, button) {
   display: grid;
   place-items: center;
   width: 44px;
@@ -171,24 +122,24 @@
   color: var(--color-ui-muted);
 }
 
-.dark .nav-actions :is(a, button):hover {
+.nav-actions :is(a, button):hover {
   background: var(--color-ui-raised);
   color: var(--color-ui-text);
 }
 
-.dark .nav-actions svg {
+.nav-actions svg {
   width: 21px;
   height: 21px;
 }
 
 /* A collapsed navbar search must become visible when reached by keyboard. */
-.dark .site-nav div:has(> .course-search):focus-within {
+.site-nav div:has(> .course-search):focus-within {
   max-height: 80px;
   opacity: 1;
   overflow: visible;
 }
 
-.dark .home-page {
+.home-page {
   min-height: calc(100dvh - 144px);
   height: auto;
   max-width: 816px;
@@ -198,19 +149,19 @@
   overflow: visible;
 }
 
-.dark .home-title {
+.home-title {
   text-align: center;
   margin: 0 0 32px;
 }
 
-.dark .home-title > p:first-child {
+.home-title > p:first-child {
   font-size: 24px;
   font-weight: 500;
   letter-spacing: 0.025em;
   color: var(--color-ui-forest);
 }
 
-.dark .home-title h1 {
+.home-title h1 {
   margin-top: 12px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 600;
@@ -218,66 +169,66 @@
   color: var(--color-ui-text);
 }
 
-.dark .home-title > p:last-child {
+.home-title > p:last-child {
   font-size: 20px;
   font-weight: 500;
   letter-spacing: 0.025em;
   color: var(--color-ui-muted);
 }
 
-.dark .home-hints {
+.home-hints {
   align-items: center;
   text-align: center;
   gap: 16px;
   margin-top: 20px;
 }
 
-.dark .home-hints p {
+.home-hints p {
   font-size: 16px;
   line-height: 1.6;
 }
 
-.dark .course-search input {
+.course-search input {
   border-color: var(--color-ui-control);
   border-radius: 10px;
   min-height: 40px;
   box-shadow: none;
 }
 
-.dark .home-page .course-search input {
+.home-page .course-search input {
   min-height: 60px;
   font-size: 16px;
 }
 
-.dark .search-results,
-.dark .search-feedback {
+.search-results,
+.search-feedback {
   border-radius: 10px;
   background: var(--color-ui-surface);
-  box-shadow: 0 12px 32px #0005;
+  box-shadow: 0 12px 32px var(--color-ui-shadow);
 }
 
-.dark .search-results [role="option"] {
+.search-results [role="option"] {
   min-height: 44px;
   padding: 12px 16px;
   gap: 8px;
   align-items: baseline;
 }
 
-.dark .search-results [role="option"] > span:first-child {
+.search-results [role="option"] > span:first-child {
   flex-shrink: 0;
 }
 
-.dark .search-results [role="option"] > span:nth-child(2) {
+.search-results [role="option"] > span:nth-child(2) {
   margin-left: 0;
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.dark .search-results [role="option"]:is(:hover, [aria-selected="true"]):not(:disabled) {
+.search-results [role="option"]:is(:hover, [aria-selected="true"]):not(:disabled) {
   background: var(--color-ui-selected);
 }
 
-.dark .search-results [role="option"][aria-selected="true"] {
+.search-results [role="option"][aria-selected="true"] {
   box-shadow: inset 3px 0 var(--color-ui-accent);
 }
 
@@ -292,7 +243,7 @@ div:has(> .semester-controls) {
   flex-shrink: 1;
 }
 
-.dark .semester-filter {
+.semester-filter {
   background: transparent;
   border: 0;
   border-bottom: 1px solid var(--color-ui-border);
@@ -301,26 +252,26 @@ div:has(> .semester-controls) {
   padding: 0 0 20px;
 }
 
-.dark .semester-controls label {
+.semester-controls label {
   border: 1px solid transparent;
   background: transparent;
   box-shadow: none;
   padding: 8px 10px;
 }
 
-.dark .semester-controls label:has(:checked) {
+.semester-controls label:has(:checked) {
   background: var(--color-ui-selected);
 }
 
-.dark .semester-controls label:hover {
+.semester-controls label:hover {
   border-color: var(--color-ui-border);
 }
 
-.dark .semester-controls input {
+.semester-controls input {
   accent-color: var(--color-ui-accent);
 }
 
-.dark .section-card {
+.section-card {
   background: transparent;
   border: 0;
   border-top: 1px solid var(--color-ui-border);
@@ -329,22 +280,28 @@ div:has(> .semester-controls) {
   box-shadow: none;
 }
 
-.dark .section-card .semester-label {
+.section-card .semester-label {
   border-radius: 4px;
 }
 
-.dark .gpa-value {
+.gpa-value {
   border-radius: 4px;
   font-variant-numeric: tabular-nums;
 }
 
+/* Same muted badge treatment in both themes, so color reads as a hint, not a highlight. */
+.gpa-value.bg-green-500 { background: #dcefe2; color: #1d5c33; }
+.gpa-value.bg-yellow-400 { background: #f6ecc9; color: #6b5310; }
+.gpa-value.bg-orange-500 { background: #f9e1d0; color: #8a3f12; }
+.gpa-value.bg-red-600 { background: #f8dcdf; color: #9b1c2c; }
+.gpa-value.bg-gray-400 { background: var(--color-ui-raised); color: var(--color-ui-muted); }
 .dark .gpa-value.bg-green-500 { background: #254b38; color: #a5e4be; }
 .dark .gpa-value.bg-yellow-400 { background: #443a21; color: #f2d78c; }
 .dark .gpa-value.bg-orange-500 { background: #4b3022; color: #f5be93; }
 .dark .gpa-value.bg-red-600 { background: #4c292d; color: #ffb3b8; }
 .dark .gpa-value.bg-gray-400 { background: var(--color-ui-raised); color: var(--color-ui-muted); }
 
-.dark .support-widget {
+.support-widget {
   position: relative;
   inset: auto;
   display: flex;
@@ -355,7 +312,7 @@ div:has(> .semester-controls) {
   z-index: 20;
 }
 
-.dark .support-widget a {
+.support-widget a {
   min-width: auto;
   border: 0;
   background: transparent;
@@ -366,13 +323,18 @@ div:has(> .semester-controls) {
   padding: 8px 0;
 }
 
-.dark .support-widget a:hover {
+.support-widget a:hover {
   color: var(--color-ui-accent);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 
-.dark :is(.empty-search-game, .compare-decoration) {
+.compare-decoration {
+  display: none;
+}
+
+/* The no-results game stays in light mode; dark mode keeps it hidden as before. */
+.dark .empty-search-game {
   display: none;
 }
 
@@ -380,64 +342,62 @@ div:has(> .semester-controls) {
   min-height: calc(100dvh - 144px);
 }
 
-.dark .compare-page :is(.rounded-3xl, .rounded-\[28px\]) {
+.compare-page :is(.rounded-3xl, .rounded-\[28px\]) {
   border-radius: 12px;
   box-shadow: none;
 }
 
-.dark .compare-page input {
+.compare-page input {
   border-color: var(--color-ui-control);
 }
 
 /* Preserve the original desktop scale and compact mobile layout. */
 @media (min-width: 640px) {
-  .dark .site-nav > div:first-child { gap: 20px; }
-  .dark .site-nav a[href="/"] { font-size: 34px; letter-spacing: normal; }
-  .dark .nav-actions { gap: 16px; }
-  .dark .nav-actions :is(a, button) { display: inline-flex; width: auto; height: auto; }
-  .dark .nav-actions svg { width: 30px; height: 30px; }
-  .dark .nav-actions a svg { width: 32px; }
-  .dark .home-page { min-height: calc(100dvh - 65px); max-width: none; padding: 0 16px; }
-  .dark .home-title { margin: 16px 0 32px; }
-  .dark .home-title h1 { margin-top: 0; font-size: 72px; font-weight: 600; line-height: 1; }
-  .dark .home-hints { gap: 8px; margin-top: 16px; }
-  .dark .home-hints p { line-height: 24px; }
-  .dark .home-page .course-search input { min-height: 62px; font-size: 18px; border-radius: 16px; }
-  .dark .search-results [role="option"] { min-height: auto; padding: 8px 12px; gap: 0; }
-  .dark .search-results [role="option"] > span:nth-child(2) { margin-left: 8px; }
-  .dark .semester-filter { padding: 16px; }
-  .dark .semester-controls label { padding: 8px 12px; }
-  .dark .section-card { padding: 16px; }
-  .dark .support-widget a { font-size: 14px; padding: 8px 16px; }
+  .site-nav > div:first-child { gap: 20px; }
+  .site-nav a[href="/"] { font-size: 34px; letter-spacing: normal; }
+  .nav-actions { gap: 16px; }
+  .nav-actions :is(a, button) { display: inline-flex; width: auto; height: auto; }
+  .nav-actions svg { width: 30px; height: 30px; }
+  .nav-actions a svg { width: 32px; }
+  .home-page { min-height: calc(100dvh - 65px); max-width: none; padding: 0 16px; }
+  .home-title { margin: 16px 0 32px; }
+  .home-title h1 { margin-top: 0; font-size: 72px; font-weight: 600; line-height: 1; }
+  .home-hints { gap: 8px; margin-top: 16px; }
+  .home-hints p { line-height: 24px; }
+  .home-page .course-search input { min-height: 62px; font-size: 18px; border-radius: 16px; }
+  .search-results [role="option"] { min-height: auto; padding: 8px 12px; gap: 0; }
+  .search-results [role="option"] > span:nth-child(2) { margin-left: 8px; }
+  .semester-filter { padding: 16px; }
+  .semester-controls label { padding: 8px 12px; }
+  .section-card { padding: 16px; }
+  .support-widget a { font-size: 14px; padding: 8px 16px; }
 }
 
-.dark .light-background { display: none; }
-
 @media (max-width: 639px) {
-  .dark h1 {
+  h1 {
     font-weight: 650;
     letter-spacing: -0.035em;
     line-height: 1.2;
   }
 
-  .dark .compare-page h1 {
+  .compare-page h1 {
     font-size: clamp(32px, 4vw, 42px);
   }
 
-  .dark .home-page {
+  .home-page {
     padding: 48px 20px;
     justify-content: center;
   }
 
-  .dark .home-title {
+  .home-title {
     margin-bottom: 24px;
   }
 
-  .dark .search-results {
+  .search-results {
     max-height: 40dvh;
   }
 
-  .dark .site-nav > div:first-child {
+  .site-nav > div:first-child {
     padding-inline: 16px;
   }
 }
@@ -462,13 +422,13 @@ div:has(> .semester-controls) {
   to { transform: translate3d(3px, -2px, 0); }
 }
 
-.dark .course-search input:focus {
+.course-search input:focus {
   outline: none;
   box-shadow: none;
 }
 
 /* Keyboard focus stays inside the input, without an outer halo. */
-.dark .course-search input:focus-visible {
+.course-search input:focus-visible {
   box-shadow: inset 0 -2px var(--color-ui-accent);
 }
 
@@ -481,17 +441,21 @@ div:has(> .semester-controls) {
   50% { opacity: var(--star-opacity); }
 }
 
-/* Keep small labels readable on the existing warm light surfaces. */
+/* Light mode: keep any remaining gray utility labels at readable contrast. */
 :root:not(.dark) {
   --color-gray-400: #4b5563;
   --color-gray-500: #4b5563;
 }
 
-:root:not(.dark) [class*="text-jungle-vine"] {
-  color: #365f24;
+:root:not(.dark) .course-search input::placeholder {
+  color: var(--color-ui-muted);
+  opacity: 1;
 }
 
-:root:not(.dark) .course-search input::placeholder {
-  color: #4b5563;
-  opacity: 1;
+/* Theme switches cross-fade the whole page at once (see lib/theme.ts), so
+   every surface, the leaves and the stars change together. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 500ms;
+  animation-timing-function: ease-in-out;
 }

@@ -19,7 +19,7 @@ export default function GpaBadge({ gpa, data, label = "Average GPA" }: GpaBadgeP
       </span>
       <span
         role="tooltip"
-        className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded bg-gray-950 px-2 py-1 text-xs font-medium text-white shadow-lg group-hover:block group-focus:block dark:bg-ui-raised dark:text-ui-on-accent"
+        className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded px-2 py-1 text-xs font-medium shadow-lg group-hover:block group-focus:block bg-ui-raised text-ui-text"
       >
         {label}
       </span>

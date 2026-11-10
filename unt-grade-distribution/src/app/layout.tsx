@@ -42,11 +42,9 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="font-sans antialiased bg-jungle-tan text-gray-900 transition-colors duration-700 dark:bg-ui-page dark:text-ui-text"
+        className="font-sans antialiased bg-ui-page text-ui-text"
       >
-        {/* Light mode gradient overlay — warm orange at bottom */}
-        <div className="light-background pointer-events-none fixed inset-0 z-0 opacity-100 transition-opacity duration-700 dark:opacity-0" style={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(210,140,70,0.18) 100%)' }} />
-        {/* Falling leaves (light mode only) */}
+        {/* Ambient backgrounds: leaves in light mode, stars in dark mode */}
         <FallingLeaves />
         <Starfield />
         <Providers>
