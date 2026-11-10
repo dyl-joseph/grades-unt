@@ -452,10 +452,41 @@ div:has(> .semester-controls) {
   opacity: 1;
 }
 
-/* Theme switches cross-fade the whole page at once (see lib/theme.ts), so
-   every surface, the leaves and the stars change together. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 500ms;
-  animation-timing-function: ease-in-out;
+/* While the theme switches (see lib/theme.ts), every page color changes
+   together over the same half second. The starfield keeps its own fade. */
+@media (prefers-reduced-motion: no-preference) {
+  .theme-switching,
+  .theme-switching *:not(.starfield-layer),
+  .theme-switching *::before,
+  .theme-switching *::after {
+    transition-property: background-color, border-color, color, fill, stroke, outline-color, text-decoration-color, box-shadow !important;
+    transition-duration: 500ms !important;
+    transition-timing-function: ease-in-out !important;
+    transition-delay: 0s !important;
+  }
+}
+
+/* The starfield fades out while its stars grow into leaves, and fades back in
+   once the leaves have settled into stars (see FallingLeaves). */
+.starfield-layer {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 900ms ease-in-out, visibility 0s linear 900ms;
+}
+
+.dark .starfield-layer {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 1400ms ease-in-out 900ms, visibility 0s;
+}
+
+.dark .starfield-layer.starfield-dim {
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starfield-layer,
+  .dark .starfield-layer {
+    transition: none;
+  }
 }

@@ -3,8 +3,13 @@
 import type { CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 
+export const STARFIELD_WIDTH = 1440;
+export const STARFIELD_HEIGHT = 1000;
+/** How many stars the home page shows; other pages show all of them. */
+export const HOME_STAR_COUNT = 360;
+
 // Fixed positions keep the sky stable across route changes and hydration.
-const stars = (() => {
+export const stars = (() => {
   let seed = 8128;
   const random = () => {
     seed = (seed * 1664525 + 1013904223) >>> 0;
@@ -24,16 +29,16 @@ const stars = (() => {
 export default function Starfield() {
   const pathname = usePathname();
   const isHome = pathname === "/";
-  const visibleStars = isHome ? stars.slice(0, 360) : stars;
+  const visibleStars = isHome ? stars.slice(0, HOME_STAR_COUNT) : stars;
 
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none fixed inset-0 z-[1] hidden overflow-hidden dark:block ${isHome ? "opacity-100" : "opacity-80"}`}
+      className={`starfield-layer pointer-events-none fixed inset-0 z-[1] overflow-hidden ${isHome ? "" : "starfield-dim"}`}
     >
       <svg
         className="starfield h-full w-full"
-        viewBox="0 0 1440 1000"
+        viewBox={`0 0 ${STARFIELD_WIDTH} ${STARFIELD_HEIGHT}`}
         preserveAspectRatio="xMidYMid slice"
         focusable="false"
       >
