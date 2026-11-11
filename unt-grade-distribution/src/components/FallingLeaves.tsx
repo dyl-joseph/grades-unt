@@ -109,11 +109,27 @@ export default function FallingLeaves() {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     function resize() {
+      const oldWidth = w;
       w = canvas!.width = window.innerWidth;
       h = canvas!.height = window.innerHeight;
       // Dark mode shows only the starfield; leaves are made from it on the next switch.
-      if (dark) leaves = [];
-      else generateLeaves();
+      if (dark) {
+        leaves = leaves.filter((leaf) => leaf.phase === "toStar");
+        return;
+      }
+      if (oldWidth === 0 || leaves.length === 0) {
+        generateLeaves();
+        return;
+      }
+      // Phones resize the viewport whenever the address bar slides in or out
+      // while scrolling. Keep the leaves where they are instead of scattering
+      // a new set; only follow a width change and top up or trim the count.
+      if (w !== oldWidth) {
+        for (const leaf of leaves) leaf.x *= w / oldWidth;
+      }
+      const target = leafCount();
+      while (leaves.length > target) leaves.pop();
+      while (leaves.length < target) leaves.push(makeLeaf(true));
     }
 
     function leafCount() {

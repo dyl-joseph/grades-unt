@@ -20,7 +20,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav aria-label="Main navigation" className="site-nav sticky top-0 z-50 border-b border-ui-border bg-ui-page">
+    <nav aria-label="Main navigation" className={`site-nav sticky top-0 z-50 border-b border-ui-border bg-ui-page ${scrolled ? "is-scrolled" : ""}`}>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-5 px-5">
         <Link
           href="/"
