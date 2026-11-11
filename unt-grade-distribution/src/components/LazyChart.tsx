@@ -22,10 +22,10 @@ interface LazyChartProps {
 function ChartFallback({ height }: { height: number }) {
   return (
     <div
-      className="flex items-center justify-center rounded-lg bg-jungle-tan-dark/10 dark:bg-ui-selected"
+      className="flex items-center justify-center rounded-lg bg-ui-selected"
       style={{ height }}
     >
-      <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary dark:border-ui-border dark:border-t-ui-accent" />
+      <div className="h-5 w-5 animate-spin rounded-full border-2 border-ui-border border-t-ui-accent" />
     </div>
   );
 }

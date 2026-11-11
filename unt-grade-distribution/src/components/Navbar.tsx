@@ -20,11 +20,11 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav aria-label="Main navigation" className="site-nav sticky top-0 z-50 border-b border-jungle-tan-dark/30 bg-jungle-tan/90 backdrop-blur-md transition-colors duration-700 dark:border-ui-border dark:bg-ui-page">
+    <nav aria-label="Main navigation" className="site-nav sticky top-0 z-50 border-b border-ui-border bg-ui-page">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-5 px-5">
         <Link
           href="/"
-          className="shrink-0 select-none text-[34px] font-bold text-primary dark:text-ui-accent"
+          className="shrink-0 select-none text-[34px] font-bold text-ui-accent"
         >
           UNT Grades
         </Link>
@@ -39,7 +39,7 @@ export default function Navbar() {
         </div>
       </div>
       {!isHome && (
-        <div className={`border-t border-green-100 px-4 py-2 transition-all duration-300 sm:hidden dark:border-0 ${scrolled ? "max-h-0 overflow-hidden border-t-0 py-0 opacity-0" : "max-h-20 opacity-100"}`}>
+        <div className={`px-4 py-2 transition-all duration-300 sm:hidden ${scrolled ? "max-h-0 overflow-hidden border-t-0 py-0 opacity-0" : "max-h-20 opacity-100"}`}>
           <SearchBar compact />
         </div>
       )}

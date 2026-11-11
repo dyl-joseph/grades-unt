@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
+import { setDarkTheme } from "@/lib/theme";
 
 export default function ThemeToggle() {
   const { isDark } = useTheme();
@@ -9,11 +10,10 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-color-scheme: dark)");
-    const applySystemTheme = () => {
-      document.documentElement.classList.toggle("dark", preference.matches);
-    };
+    const applySystemTheme = () => setDarkTheme(preference.matches);
 
-    applySystemTheme();
+    // The inline script in layout.tsx already set the theme before paint.
+    document.documentElement.classList.toggle("dark", preference.matches);
     preference.addEventListener("change", applySystemTheme);
     const timeout = window.setTimeout(() => setMounted(true), 0);
 
@@ -25,7 +25,7 @@ export default function ThemeToggle() {
 
   // Manual changes last for this page session; the OS remains the default.
   const toggle = () => {
-    document.documentElement.classList.toggle("dark", !isDark);
+    setDarkTheme(!isDark);
   };
 
   if (!mounted) {
@@ -35,7 +35,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="rounded-lg p-[8px] text-gray-600 transition-colors dark:text-ui-muted"
+      className="rounded-lg p-[8px] transition-colors text-ui-muted"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDark ? (

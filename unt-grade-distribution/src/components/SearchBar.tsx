@@ -273,7 +273,7 @@ export default function SearchBar({
     <div ref={containerRef} className={`course-search relative w-full ${compact ? "" : "max-w-3xl mx-auto"}`}>
       <div className="relative">
         <svg
-          className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${compact ? "h-4 w-4" : "h-6 w-6 left-4"}`}
+          className={`absolute left-3 top-1/2 -translate-y-1/2 text-ui-muted ${compact ? "h-4 w-4" : "h-6 w-6 left-4"}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -305,11 +305,11 @@ export default function SearchBar({
           autoFocus={autoFocus}
           aria-busy={loading}
           aria-invalid={error ? "true" : undefined}
-          className={`w-full rounded-2xl border pl-9 pr-9 text-gray-900 placeholder:text-gray-500/70 focus:outline-none focus:ring-2 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light py-1.5 text-sm shadow-sm focus:border-primary/40 focus:ring-primary/20 dark:border-ui-border dark:bg-ui-surface dark:focus:border-ui-accent dark:focus:ring-ui-accent/30" : "glass-glossy border-white/40 py-4 pl-12 text-lg shadow-lg focus:border-white/60 focus:ring-white/40 dark:border-white/15 dark:focus:border-white/25 dark:focus:ring-ui-accent/30"} dark:text-ui-text dark:placeholder:text-ui-muted`}
+          className={`w-full rounded-2xl border pl-9 pr-9 text-ui-text placeholder:text-ui-muted focus:outline-none focus:ring-2 ${compact ? "py-1.5 text-sm shadow-sm border-ui-border bg-ui-surface focus:border-ui-accent focus:ring-ui-accent/30" : "glass-glossy border-ui-border py-4 pl-12 text-lg shadow-lg focus:border-ui-accent dark:border-white/15 dark:focus:border-white/25 focus:ring-ui-accent/30"}`}
         />
         {loading && hasQuery && (
           <svg
-            className={`absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400 dark:text-ui-muted ${compact ? "h-4 w-4" : "h-5 w-5"}`}
+            className={`absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-ui-muted ${compact ? "h-4 w-4" : "h-5 w-5"}`}
             viewBox="0 0 24 24"
             fill="none"
           >
@@ -320,10 +320,10 @@ export default function SearchBar({
       </div>
 
       {isOpen && items.length > 0 && (
-        <div id={listId} role="listbox" aria-label="Search suggestions" className={`search-results absolute z-50 mt-2 w-full max-h-[70vh] overflow-y-auto rounded-2xl border shadow-xl ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-ui-border dark:bg-ui-surface" : "glass-glossy border-white/40 dark:border-white/15"}`}>
+        <div id={listId} role="listbox" aria-label="Search suggestions" className={`search-results absolute z-50 mt-2 w-full max-h-[70vh] overflow-y-auto rounded-2xl border shadow-xl ${compact ? "border-ui-border bg-ui-surface" : "glass-glossy border-ui-border dark:border-white/15"}`}>
           {(!showCoursesFirst && results!.instructors.length > 0) && (
             <div>
-              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-ui-accent">
+              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-ui-accent">
                 Instructors
               </div>
               {results!.instructors.map((instructor, i) => {
@@ -337,7 +337,7 @@ export default function SearchBar({
                     aria-selected={highlightIdx === idx}
                     className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                       highlightIdx === idx
-                        ? "bg-green-50 dark:bg-ui-selected"
+                        ? "bg-ui-selected"
                         : ""
                     }`}
                     onClick={() => {
@@ -346,11 +346,11 @@ export default function SearchBar({
                     }}
                     disabled={navigatingId !== null}
                   >
-                    <span className="font-medium text-gray-900 dark:text-ui-text">
+                    <span className="font-medium text-ui-text">
                       {instructor.lastName}, {instructor.firstName}
                     </span>
                     {navigatingId === `instructor-${instructor.id}` && (
-                      <svg className="ml-auto h-4 w-4 animate-spin text-gray-400 dark:text-ui-muted" viewBox="0 0 24 24" fill="none">
+                      <svg className="ml-auto h-4 w-4 animate-spin text-ui-muted" viewBox="0 0 24 24" fill="none">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
@@ -363,7 +363,7 @@ export default function SearchBar({
 
           {results!.courses.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-ui-accent">
+              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-ui-accent">
                 Courses
               </div>
               {results!.courses.map((course, i) => (
@@ -375,7 +375,7 @@ export default function SearchBar({
                   aria-selected={highlightIdx === (showCoursesFirst ? i : i + results!.instructors.length)}
                   className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                     highlightIdx === (showCoursesFirst ? i : i + results!.instructors.length)
-                      ? "bg-green-50 dark:bg-ui-selected"
+                      ? "bg-ui-selected"
                       : ""
                   }`}
                   onClick={() => {
@@ -384,14 +384,14 @@ export default function SearchBar({
                   }}
                   disabled={navigatingId !== null}
                 >
-                  <span className="font-medium text-gray-900 dark:text-ui-text">
+                  <span className="font-medium text-ui-text">
                     {course.prefix} {course.number}
                   </span>
-                  <span className="ml-2 text-gray-500 dark:text-ui-muted">
+                  <span className="ml-2 text-ui-muted">
                     — {course.title}
                   </span>
                   {navigatingId === `course-${course.prefix}/${course.number}` && (
-                    <svg className="ml-auto h-4 w-4 animate-spin text-gray-400 dark:text-ui-muted" viewBox="0 0 24 24" fill="none">
+                    <svg className="ml-auto h-4 w-4 animate-spin text-ui-muted" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
@@ -403,7 +403,7 @@ export default function SearchBar({
 
           {showCoursesFirst && results!.instructors.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-jungle-vine dark:text-ui-accent">
+              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-ui-accent">
                 Instructors
               </div>
               {results!.instructors.map((instructor, i) => {
@@ -417,7 +417,7 @@ export default function SearchBar({
                     aria-selected={highlightIdx === idx}
                     className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                       highlightIdx === idx
-                        ? "bg-green-50 dark:bg-ui-selected"
+                        ? "bg-ui-selected"
                         : ""
                     }`}
                     onClick={() => {
@@ -426,11 +426,11 @@ export default function SearchBar({
                     }}
                     disabled={navigatingId !== null}
                   >
-                    <span className="font-medium text-gray-900 dark:text-ui-text">
+                    <span className="font-medium text-ui-text">
                       {instructor.lastName}, {instructor.firstName}
                     </span>
                     {navigatingId === `instructor-${instructor.id}` && (
-                      <svg className="ml-auto h-4 w-4 animate-spin text-gray-400 dark:text-ui-muted" viewBox="0 0 24 24" fill="none">
+                      <svg className="ml-auto h-4 w-4 animate-spin text-ui-muted" viewBox="0 0 24 24" fill="none">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
@@ -443,12 +443,12 @@ export default function SearchBar({
         </div>
       )}
       {isOpen && !loading && !error && hasQuery && items.length === 0 && (
-        <div role="status" className="search-feedback absolute z-50 mt-2 w-full rounded-2xl border border-jungle-tan-dark/30 bg-jungle-tan-light p-4 text-sm text-gray-600 shadow-xl dark:border-ui-border dark:bg-ui-surface dark:text-ui-muted">
+        <div role="status" className="search-feedback absolute z-50 mt-2 w-full rounded-2xl border p-4 text-sm shadow-xl border-ui-border bg-ui-surface text-ui-muted">
           No matching courses or instructors. Press Enter to see similar searches.
         </div>
       )}
       {isOpen && !loading && error && hasQuery && (
-        <div role="alert" className={`search-feedback absolute z-50 mt-2 w-full rounded-2xl border p-4 text-center text-sm text-red-600 shadow-xl dark:text-red-300 ${compact ? "border-jungle-tan-dark/30 bg-jungle-tan-light dark:border-ui-border dark:bg-ui-surface" : "glass-glossy border-white/40 dark:border-white/15"}`}>
+        <div role="alert" className={`search-feedback absolute z-50 mt-2 w-full rounded-2xl border p-4 text-center text-sm text-red-600 shadow-xl dark:text-red-300 ${compact ? "border-ui-border bg-ui-surface" : "glass-glossy border-ui-border dark:border-white/15"}`}>
           Could not load search results. Please try again.
         </div>
       )}
