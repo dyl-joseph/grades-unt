@@ -110,8 +110,19 @@ export default function FallingLeaves() {
 
     function resize() {
       const oldWidth = w;
-      w = canvas!.width = window.innerWidth;
-      h = canvas!.height = window.innerHeight;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      // Phones change the viewport height whenever the address bar slides in or
+      // out while scrolling. Resizing a canvas wipes it and stretches it for a
+      // frame, so the canvas only grows to the tallest height seen and stays
+      // pinned to the top; it is rebuilt only when the width really changes.
+      if (width === oldWidth && height <= h) return;
+      w = width;
+      h = width === oldWidth ? Math.max(h, height) : height;
+      canvas!.width = w;
+      canvas!.height = h;
+      canvas!.style.width = `${w}px`;
+      canvas!.style.height = `${h}px`;
       // Dark mode shows only the starfield; leaves are made from it on the next switch.
       if (dark) {
         leaves = leaves.filter((leaf) => leaf.phase === "toStar");
@@ -121,9 +132,8 @@ export default function FallingLeaves() {
         generateLeaves();
         return;
       }
-      // Phones resize the viewport whenever the address bar slides in or out
-      // while scrolling. Keep the leaves where they are instead of scattering
-      // a new set; only follow a width change and top up or trim the count.
+      // Keep the leaves where they are instead of scattering a new set; only
+      // follow a width change and top up or trim the count.
       if (w !== oldWidth) {
         for (const leaf of leaves) leaf.x *= w / oldWidth;
       }
@@ -141,9 +151,11 @@ export default function FallingLeaves() {
 
     /** On-screen position and size of the starfield's stars (the SVG uses "slice" scaling). */
     function screenStars() {
-      const scale = Math.max(w / STARFIELD_WIDTH, h / STARFIELD_HEIGHT);
+      // The starfield fills the current viewport, which can be shorter than the canvas.
+      const viewHeight = window.innerHeight;
+      const scale = Math.max(w / STARFIELD_WIDTH, viewHeight / STARFIELD_HEIGHT);
       const offsetX = (w - STARFIELD_WIDTH * scale) / 2;
-      const offsetY = (h - STARFIELD_HEIGHT * scale) / 2;
+      const offsetY = (viewHeight - STARFIELD_HEIGHT * scale) / 2;
       const visible = isHome ? stars.slice(0, HOME_STAR_COUNT) : stars;
       return visible
         .map((star) => ({
@@ -152,7 +164,7 @@ export default function FallingLeaves() {
           radius: Math.max(0.8, star.radius * scale),
           alpha: star.opacity,
         }))
-        .filter((star) => star.x >= 0 && star.x <= w && star.y >= 0 && star.y <= h);
+        .filter((star) => star.x >= 0 && star.x <= w && star.y >= 0 && star.y <= viewHeight);
     }
 
     function starsToLeaves(now: number) {
@@ -343,7 +355,7 @@ export default function FallingLeaves() {
   return (
     <canvas
       ref={canvasRef}
-      className={`pointer-events-none fixed inset-0 z-[1] ${
+      className={`pointer-events-none fixed left-0 top-0 z-[1] ${
         isHome ? "opacity-100" : "opacity-45"
       }`}
       aria-hidden="true"
