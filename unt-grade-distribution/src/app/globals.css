@@ -6,19 +6,19 @@
 /* Both themes share one quiet data-workspace design. The ui-* roles below
    are the light values; .dark swaps them, so components name a role once. */
 @theme {
-  --color-ui-page: #f6f8f7;
-  --color-ui-surface: #ffffff;
-  --color-ui-raised: #eaefec;
-  --color-ui-border: #d3dcd7;
-  --color-ui-control: #8c9c93;
-  --color-ui-text: #16201b;
-  --color-ui-muted: #4c5a52;
+  --color-ui-page: #f2ede4;
+  --color-ui-surface: #faf7f1;
+  --color-ui-raised: #e8e1d5;
+  --color-ui-border: #d8cebd;
+  --color-ui-control: #9c907c;
+  --color-ui-text: #1d1a15;
+  --color-ui-muted: #574f43;
   --color-ui-accent: #2d6b40;
   --color-ui-forest: #22703c;
   --color-ui-forest-hover: #1b5e31;
   --color-ui-on-accent: #ffffff;
-  --color-ui-selected: #e1ede5;
-  --color-ui-shadow: #16201b1f;
+  --color-ui-selected: #e2e8d8;
+  --color-ui-shadow: #2a21141f;
   --color-primary: #1B5E20;
   --color-primary-light: #2E7D32;
   --color-primary-dark: #0D3B13;
@@ -97,6 +97,13 @@ button:disabled {
   background: transparent;
   border: 0;
   backdrop-filter: none;
+}
+
+/* Once the page scrolls, the sticky navbar needs its own background so
+   content doesn't show through behind the logo and icons. */
+.site-nav.is-scrolled {
+  background: var(--color-ui-page);
+  border-bottom: 1px solid var(--color-ui-border);
 }
 
 .site-nav > div:first-child {
