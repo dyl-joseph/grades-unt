@@ -12,7 +12,7 @@ const zlib = require('zlib');
 const { parse } = require('csv-parse/sync');
 
 const OUTPUT_COLUMNS = ['YEAR', 'TERM', 'PREFIX', 'NUMBER', 'SECTION', 'RATING', 'CEI', 'RESPONSES', 'ENROLLED'];
-const DEFAULT_MIN_RESPONSES = 5;
+const DEFAULT_MIN_RESPONSES = 3;
 
 const SOURCE = {
   year: 'Year',

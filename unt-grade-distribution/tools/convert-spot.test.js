@@ -76,14 +76,14 @@ test('writes rounded ratings without instructor identifiers', () => {
 test('drops unrated and low-response sections', () => {
   const { rows, stats } = convertSpotRows([
     reportRow({ Section: '1', 'Overall Summative Rating (Median)': '', 'Number of Completed Questionnaires': '0' }),
-    reportRow({ Section: '2', 'Number of Completed Questionnaires': '4' }),
-    reportRow({ Section: '3', 'Number of Completed Questionnaires': '5', 'Challenge and Engagement Index (CEI)': '' }),
+    reportRow({ Section: '2', 'Number of Completed Questionnaires': '2' }),
+    reportRow({ Section: '3', 'Number of Completed Questionnaires': '3', 'Challenge and Engagement Index (CEI)': '' }),
   ]);
 
   assert.deepEqual(rows.map((row) => [row.SECTION, row.CEI]), [['3', '']]);
   assert.equal(stats.noRating, 1);
   assert.equal(stats.lowResponses, 1);
-  assert.equal(convertSpotRows([reportRow({ 'Number of Completed Questionnaires': '4' })], { minResponses: 3 }).rows.length, 1);
+  assert.equal(convertSpotRows([reportRow({ 'Number of Completed Questionnaires': '2' })], { minResponses: 2 }).rows.length, 1);
 });
 
 test('keeps a shared evaluation once and drops per-instructor evaluations of one section', () => {

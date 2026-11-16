@@ -104,7 +104,7 @@ npm run convert:spot -- --input "path/to/PIR Request - SPOT - 2026 Spring.xlsx"
 This writes `prisma/data/spot/spot-<year>-<term>.csv` (git-ignored) with only `YEAR,TERM,PREFIX,NUMBER,SECTION,RATING,CEI,RESPONSES,ENROLLED`. `.xlsx` (first worksheet) and `.csv` inputs are accepted. The converter drops:
 
 - rows with no rating or no responses;
-- rows with fewer than five completed questionnaires (`--min-responses` changes the floor), because a median of a few answers is noisy and can expose one student's response;
+- rows with fewer than three completed questionnaires (`--min-responses` changes the floor), because a median of a few answers is noisy and can expose one student's response;
 - sections evaluated separately for several instructors, because the report has no names to tell the ratings apart.
 
 Cross-listed sections share one evaluation, so each of them carries the same rating and the combined response count.
