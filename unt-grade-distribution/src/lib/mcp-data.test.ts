@@ -57,6 +57,7 @@ const fixtureCourses = [
           year: "2024",
           term: "Fall",
           grades: { A: 2, B: 2, C: 0, D: 0, F: 0, P: 0, NP: 0, W: 0, I: 0 },
+          spot: { rating: 4.6, cei: null, responses: 12, enrolled: 30 },
         },
       ],
     } satisfies EncryptedCourse,
@@ -173,6 +174,19 @@ test("search returns matching courses and instructors from the manifest", async 
         { firstName: "Ada", lastName: "Lovelace", path: "/instructor/Lovelace%2CAda" },
       ],
     });
+  } finally {
+    await fixture.close();
+  }
+});
+
+test("course reads keep SPOT ratings on the sections that have them", async () => {
+  const fixture = await createFixture(dataKey);
+  try {
+    const rated = await fixture.dataSource.getCourse("MATH", "2000", 0, 5);
+    assert.deepEqual(rated?.sections[0].spot, { rating: 4.6, cei: null, responses: 12, enrolled: 30 });
+
+    const unrated = await fixture.dataSource.getCourse("CSCE", "1030", 0, 5);
+    assert.equal(unrated?.sections.some((section) => "spot" in section), false);
   } finally {
     await fixture.close();
   }

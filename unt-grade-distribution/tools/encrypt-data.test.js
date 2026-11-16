@@ -2,6 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const {
+  attachSpot,
+  buildSpotIndex,
   courseWithGradedSections,
   manifestTokensForCourse,
   sectionHasGrades,
@@ -70,4 +72,28 @@ test('builds complete, unique instructor tokens without a cap', () => {
   assert.equal(tokens.filter((token) => token === 'Last 1,First 1').length, 1);
   assert.equal(tokens.some((token) => token === 'Staff'), false);
   assert.equal(tokens.some((token) => token === ',Unknown'), false);
+});
+
+test('attaches SPOT ratings to the single matching graded section', () => {
+  const spotIndex = buildSpotIndex([
+    { YEAR: '2026', TERM: 'Spring', PREFIX: 'CSCE', NUMBER: '1010', SECTION: '1', RATING: '4.6', CEI: '', RESPONSES: '12', ENROLLED: '30' },
+    { YEAR: '2026', TERM: 'Spring', PREFIX: 'CSCE', NUMBER: '1010', SECTION: '2', RATING: '3.9', CEI: '5.1', RESPONSES: '8', ENROLLED: '20' },
+    { YEAR: '2026', TERM: 'Spring', PREFIX: 'CSCE', NUMBER: '1010', SECTION: '3', RATING: '', CEI: '', RESPONSES: '0', ENROLLED: '9' },
+  ]);
+  const matched = { ...section({ A: 3 }), sectionNumber: '001', year: '2026', term: 'Spring' };
+  const otherSemester = { ...section({ A: 3 }), sectionNumber: '001', year: '2025', term: 'Fall' };
+  const splitA = { ...section({ A: 1 }), sectionNumber: '002', year: '2026', term: 'Spring' };
+  const splitB = { ...section({ B: 1 }), sectionNumber: '002', year: '2026', term: 'Spring' };
+
+  const attached = attachSpot(
+    [{ prefix: 'CSCE', number: '1010', sections: [matched, otherSemester, splitA, splitB] }],
+    spotIndex,
+  );
+
+  assert.equal(spotIndex.size, 2);
+  assert.equal(attached, 1);
+  assert.deepEqual(matched.spot, { rating: 4.6, cei: null, responses: 12, enrolled: 30 });
+  assert.equal(otherSemester.spot, undefined);
+  assert.equal(splitA.spot, undefined);
+  assert.equal(splitB.spot, undefined);
 });

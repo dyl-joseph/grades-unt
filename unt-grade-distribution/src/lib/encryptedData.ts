@@ -1,4 +1,5 @@
 import type { GradeCounts } from "./grades";
+import type { SpotSummary } from "./spot";
 
 export type ManifestEntry = {
   id: string;
@@ -12,6 +13,8 @@ export type EncryptedSection = {
   year: string | null;
   term: string | null;
   grades: GradeCounts;
+  /** Present only for sections with a published SPOT evaluation. */
+  spot?: SpotSummary;
 };
 
 export type EncryptedCourse = {
