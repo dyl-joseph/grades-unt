@@ -184,8 +184,8 @@ export default function InstructorClient() {
           <span>{normalizedSections.length} sections</span>
           <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
           <span>{allCourseCount} course{allCourseCount !== 1 ? "s" : ""} taught</span>
-          {overallSpot && <SpotRating spot={overallSpot} />}
         </div>
+        {overallSpot && <SpotRating spot={overallSpot} variant="summary" />}
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border p-4 border-ui-border bg-ui-surface sm:p-6">

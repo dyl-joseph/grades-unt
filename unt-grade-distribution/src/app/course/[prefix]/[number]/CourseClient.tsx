@@ -194,8 +194,8 @@ export default function CourseClient() {
           <span>{sections.length} sections</span>
           <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
           <span>{aggregate.totalEnroll.toLocaleString()} total students</span>
-          {overallSpot && <SpotRating spot={overallSpot} />}
         </div>
+        {overallSpot && <SpotRating spot={overallSpot} variant="summary" />}
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border p-4 border-ui-border bg-ui-surface sm:p-6">

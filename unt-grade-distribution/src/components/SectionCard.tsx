@@ -83,10 +83,10 @@ export default function SectionCard({
         </div>
       </div>
       <LazyChart data={chartData} height={200} />
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-ui-muted">
-        {section.spot ? <SpotRating spot={section.spot} /> : <span />}
-        <span className="ml-auto">{section.totalEnroll} students</span>
+      <div className="mt-2 text-right text-xs text-ui-muted">
+        {section.totalEnroll} students
       </div>
+      {section.spot && <SpotRating spot={section.spot} />}
     </div>
   );
 }
