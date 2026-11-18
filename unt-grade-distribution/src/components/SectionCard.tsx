@@ -7,6 +7,8 @@ import { calculateGPA, toChartData } from "@/lib/grades";
 import ShareButton from "./ShareButton";
 import { toInstructorSlug } from "@/lib/encryptedData";
 import { semesterLabel } from "@/lib/semester";
+import type { SpotSummary } from "@/lib/spot";
+import SpotRating from "./SpotRating";
 
 type SectionCardData = {
   id: number | string;
@@ -26,6 +28,7 @@ type SectionCardData = {
   gradeW: number;
   gradeI: number;
   totalEnroll: number;
+  spot?: SpotSummary | null;
 };
 
 interface SectionCardProps {
@@ -83,6 +86,7 @@ export default function SectionCard({
       <div className="mt-2 text-right text-xs text-ui-muted">
         {section.totalEnroll} students
       </div>
+      {section.spot && <SpotRating spot={section.spot} />}
     </div>
   );
 }

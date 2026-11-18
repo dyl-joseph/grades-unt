@@ -8,6 +8,7 @@
     "encrypt": "node ./tools/encrypt-data.js",
     "convert:relational": "node ./tools/convert-relational-to-encrypt-csv.js",
     "pivot:grades": "node ./tools/pivot-grade-sheet.js",
+    "convert:spot": "node ./tools/convert-spot.js",
     "start": "next start",
     "test": "node --import tsx --test 'src/**/*.test.ts' 'src/**/*.test.tsx' 'tools/**/*.test.js'",
     "lint": "eslint",

@@ -31,7 +31,7 @@ const handler = createMcpHandler((server) => {
 
   server.registerTool("get_course_grades", {
     title: "Get UNT course grade distributions",
-    description: "Get grade counts for a course's sections and aggregate GPA. GPA uses A through F only. Sections are paginated; use nextOffset to continue.",
+    description: "Get grade counts for a course's sections and aggregate GPA. GPA uses A through F only. A section may include spot, its Student Perceptions of Teaching evaluation: rating is the 0-5 median overall rating, cei the 1-7 challenge and engagement index, responses the completed questionnaires. Sections are paginated; use nextOffset to continue.",
     inputSchema: z.object({
       prefix: z.string().trim().min(1).max(12),
       number: z.string().trim().min(1).max(12),

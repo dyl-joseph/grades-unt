@@ -7,6 +7,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { parse } = require('csv-parse/sync');
 const { randomUUID } = require('crypto');
+const { spotKey } = require('./convert-spot');
 
 const GRADE_COLUMNS = ['A', 'B', 'C', 'D', 'F', 'P', 'NP', 'W', 'I'];
 
@@ -27,6 +28,7 @@ function courseWithGradedSections(course) {
 }
 
 const DATA_DIR = path.join(__dirname, '..', 'prisma', 'data');
+const SPOT_DIR = path.join(DATA_DIR, 'spot');
 const OUT_DIR = path.join(__dirname, '..', 'public', 'encrypted');
 
 const ITERATIONS = parseInt(process.env.PBKDF2_ITERATIONS || '200000', 10);
@@ -91,6 +93,77 @@ function manifestTokensForCourse(course) {
   ];
 }
 
+/** Index SPOT rows (see tools/convert-spot.js) by course, section and semester. */
+function buildSpotIndex(rows) {
+  const index = new Map();
+  for (const row of rows) {
+    const rating = Number(row.RATING);
+    const responses = Number(row.RESPONSES);
+    if (String(row.RATING ?? '').trim() === '' || !Number.isFinite(rating) || !(responses > 0)) continue;
+
+    const cei = String(row.CEI ?? '').trim() === '' ? NaN : Number(row.CEI);
+    const evaluationId = String(row.EVALUATION ?? '').trim();
+    index.set(
+      spotKey({ year: row.YEAR, term: row.TERM, prefix: row.PREFIX, number: row.NUMBER, section: row.SECTION }),
+      {
+        rating,
+        cei: Number.isFinite(cei) ? cei : null,
+        responses,
+        enrolled: Number(row.ENROLLED) || 0,
+        // Cross-listed sections share one evaluation; the key lets pages count it once.
+        ...(evaluationId
+          ? { evaluation: `${String(row.YEAR).trim()}-${String(row.TERM).trim().toLowerCase()}-${evaluationId}` }
+          : {}),
+      },
+    );
+  }
+  return index;
+}
+
+/**
+ * Attach SPOT ratings to the matching sections. A rating is only attached when
+ * exactly one graded row exists for the section, so a section split across
+ * several instructor rows never shows one evaluation under every name.
+ */
+function attachSpot(courses, spotIndex) {
+  if (spotIndex.size === 0) return 0;
+
+  const sectionsByKey = new Map();
+  for (const course of courses) {
+    for (const section of course.sections) {
+      const key = spotKey({
+        year: section.year,
+        term: section.term,
+        prefix: course.prefix,
+        number: course.number,
+        section: section.sectionNumber,
+      });
+      if (!sectionsByKey.has(key)) sectionsByKey.set(key, []);
+      sectionsByKey.get(key).push(section);
+    }
+  }
+
+  let attached = 0;
+  for (const [key, sections] of sectionsByKey) {
+    const spot = spotIndex.get(key);
+    if (!spot || sections.length !== 1) continue;
+    sections[0].spot = { ...spot };
+    attached++;
+  }
+  return attached;
+}
+
+function readSpotIndex() {
+  if (!fs.existsSync(SPOT_DIR)) return new Map();
+
+  const rows = [];
+  for (const file of fs.readdirSync(SPOT_DIR).filter((f) => f.endsWith('.csv'))) {
+    const csv = fs.readFileSync(path.join(SPOT_DIR, file), 'utf8');
+    rows.push(...parse(csv, { columns: true, skip_empty_lines: true, trim: true, bom: true }));
+  }
+  return buildSpotIndex(rows);
+}
+
 async function main() {
   if (!process.env.MASTER_PASSPHRASE) {
     console.error('Please set MASTER_PASSPHRASE environment variable to encrypt data.');
@@ -150,6 +223,16 @@ async function main() {
     }
   }
 
+  const spotIndex = readSpotIndex();
+  if (spotIndex.size > 0) {
+    const gradedCourses = Array.from(courseMap.values(), (course) => ({
+      ...course,
+      sections: course.sections.filter(sectionHasGrades),
+    }));
+    const attached = attachSpot(gradedCourses, spotIndex);
+    console.log(`Attached ${attached} of ${spotIndex.size} SPOT ratings to graded sections.`);
+  }
+
   const buildDir = path.join(path.dirname(OUT_DIR), `.encrypted-build-${process.pid}`);
   const buildBlobsDir = path.join(buildDir, 'blobs');
   fs.rmSync(buildDir, { recursive: true, force: true });
@@ -195,4 +278,10 @@ if (require.main === module) {
   });
 }
 
-module.exports = { courseWithGradedSections, sectionHasGrades, manifestTokensForCourse };
+module.exports = {
+  attachSpot,
+  buildSpotIndex,
+  courseWithGradedSections,
+  sectionHasGrades,
+  manifestTokensForCourse,
+};

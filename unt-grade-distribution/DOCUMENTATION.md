@@ -98,6 +98,7 @@ unt-grade-distribution/
 │       └── types.ts
 └── tools/
     ├── convert-relational-to-encrypt-csv.js
+    ├── convert-spot.js
     └── encrypt-data.js
 ```
 

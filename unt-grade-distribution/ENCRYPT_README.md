@@ -87,6 +87,32 @@ Use `--sheet-url` instead of `--input` to download a public Google Sheet. The co
 
 Keep legacy/default data and historical outputs as separate CSV files directly under `prisma/data`. The encryptor reads every CSV in that directory and merges matching courses into one encrypted course blob. Rows without `YEAR` or `TERM` continue to default to Fall 2025, while pivoted historical rows retain their source semester. Each run replaces the generated encrypted directory only after the complete new dataset has been built, so stale blobs are removed without exposing a partial build.
 
+## SPOT evaluation data
+
+SPOT (Student Perceptions of Teaching) is UNT's end-of-course evaluation, run on IASystem. The section-level report obtained through a public information request has one row per instructor and section with:
+
+- `Overall Summative Rating (Median)` — combined median of the four summative items, 0 (very poor) to 5 (excellent).
+- `Challenge and Engagement Index (CEI)` — 1 (much lower than other courses) to 7 (much higher). Blank for evaluation forms that do not ask those items.
+- `Number of Completed Questionnaires` and `Number of Enrolled Students`.
+
+The report identifies instructors only by `Username` and `Emp ID`. Do not commit the report or copy those columns anywhere. Convert it first:
+
+```bash
+npm run convert:spot -- --input "path/to/PIR Request - SPOT - 2026 Spring.xlsx"
+```
+
+This writes `prisma/data/spot/spot-<year>-<term>.csv` (git-ignored) with only `YEAR,TERM,PREFIX,NUMBER,SECTION,RATING,CEI,RESPONSES,ENROLLED,EVALUATION`. `EVALUATION` is IASystem's survey number for the evaluation, not a person identifier. `.xlsx` (first worksheet) and `.csv` inputs are accepted. The converter drops:
+
+- rows with no rating or no responses;
+- rows with fewer than three completed questionnaires (`--min-responses` changes the floor), because a median of a few answers is noisy and can expose one student's response;
+- sections evaluated separately for several instructors, because the report has no names to tell the ratings apart.
+
+Cross-listed sections share one evaluation, so each of them carries the same rating, the combined response count and the same `evaluation` key. Course and instructor summaries count each evaluation once.
+
+The next `npm run encrypt` reads every CSV in `prisma/data/spot/` and adds a `spot` object (`rating`, `cei`, `responses`, `enrolled`, `evaluation`) to the section with the same course, section number, year and term. The instructor name therefore comes from the grade data, and a rating is attached only when the grade data has exactly one graded row for that section. The encryptor logs how many ratings were attached; a low number usually means the grade CSV for that semester is missing. Sections without a match are unchanged, and the site shows SPOT figures only where they exist.
+
+Course and instructor pages show a response-weighted average of the section medians. It is a summary of medians, not a median of all answers.
+
 ## Client usage
 
 - `fetchManifest()` loads `/encrypted/manifest.json` once per browser session. Concurrent callers share the same in-flight request; a failed HTTP or JSON parse clears the cache so a later search can retry.

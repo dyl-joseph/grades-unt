@@ -10,6 +10,8 @@ import LazyChart, { preloadGradeChart } from "@/components/LazyChart";
 import { SemesterCheckboxGroup, type SemesterSelection } from "@/components/SemesterControls";
 import { fromInstructorSlug, loadInstructorSections } from "@/lib/encryptedData";
 import { groupBySemester, semesterLabel } from "@/lib/semester";
+import { aggregateSpot } from "@/lib/spot";
+import SpotRating from "@/components/SpotRating";
 
 type SectionWithCourse = Awaited<ReturnType<typeof loadInstructorSections>>[number];
 
@@ -64,6 +66,7 @@ export default function InstructorClient() {
         term: s.term,
         instructor: s.instructor,
         course: s.course,
+        spot: s.spot ?? null,
         ...toGradeData(s.grades),
       })),
     [sections]
@@ -71,6 +74,7 @@ export default function InstructorClient() {
 
   const overallAggregate = useMemo(() => aggregateGrades(normalizedSections), [normalizedSections]);
   const overallGPA = useMemo(() => calculateGPA(overallAggregate), [overallAggregate]);
+  const overallSpot = useMemo(() => aggregateSpot(normalizedSections), [normalizedSections]);
   const semesterGroups = useMemo(() => groupBySemester(normalizedSections), [normalizedSections]);
   const semesterLabels = useMemo(() => semesterGroups.map((group) => group.label), [semesterGroups]);
   const summarySemesterLabels = useMemo(() => [...semesterLabels].reverse(), [semesterLabels]);
@@ -181,6 +185,7 @@ export default function InstructorClient() {
           <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
           <span>{allCourseCount} course{allCourseCount !== 1 ? "s" : ""} taught</span>
         </div>
+        {overallSpot && <SpotRating spot={overallSpot} variant="summary" />}
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border p-4 border-ui-border bg-ui-surface sm:p-6">

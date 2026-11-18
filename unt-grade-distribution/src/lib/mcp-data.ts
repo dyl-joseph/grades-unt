@@ -30,6 +30,13 @@ const courseSchema = z.object({
     year: z.string().nullable(),
     term: z.string().nullable(),
     grades: gradesSchema,
+    spot: z.object({
+      rating: z.number(),
+      cei: z.number().nullable(),
+      responses: z.number().int().positive(),
+      enrolled: z.number().int().nonnegative(),
+      evaluation: z.string().optional(),
+    }).optional(),
   })),
 });
 const blobMetaSchema = z.object({

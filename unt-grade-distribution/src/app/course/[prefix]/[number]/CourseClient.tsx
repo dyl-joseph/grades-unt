@@ -11,6 +11,8 @@ import ShareButton from "@/components/ShareButton";
 import { SemesterCheckboxGroup, type SemesterSelection } from "@/components/SemesterControls";
 import { loadCourseByCode, type EncryptedCourse } from "@/lib/encryptedData";
 import { groupBySemester, semesterLabel } from "@/lib/semester";
+import { aggregateSpot } from "@/lib/spot";
+import SpotRating from "@/components/SpotRating";
 
 function toSectionModel(course: EncryptedCourse) {
   return course.sections.map((s, idx) => ({
@@ -20,6 +22,7 @@ function toSectionModel(course: EncryptedCourse) {
     term: s.term,
     instructor: s.instructor,
     course: { prefix: course.prefix, number: course.number, title: course.title },
+    spot: s.spot ?? null,
     ...toGradeData(s.grades),
   }));
 }
@@ -75,6 +78,7 @@ export default function CourseClient() {
   const sections = useMemo(() => (course ? toSectionModel(course) : []), [course]);
   const aggregate = useMemo(() => aggregateGrades(sections), [sections]);
   const overallGPA = useMemo(() => calculateGPA(aggregate), [aggregate]);
+  const overallSpot = useMemo(() => aggregateSpot(sections), [sections]);
   const semesterGroups = useMemo(() => groupBySemester(sections), [sections]);
   const semesterLabels = useMemo(() => semesterGroups.map((group) => group.label), [semesterGroups]);
   const summarySemesterLabels = useMemo(() => [...semesterLabels].reverse(), [semesterLabels]);
@@ -191,6 +195,7 @@ export default function CourseClient() {
           <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
           <span>{aggregate.totalEnroll.toLocaleString()} total students</span>
         </div>
+        {overallSpot && <SpotRating spot={overallSpot} variant="summary" />}
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border p-4 border-ui-border bg-ui-surface sm:p-6">
