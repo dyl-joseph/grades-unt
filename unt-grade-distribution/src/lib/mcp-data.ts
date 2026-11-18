@@ -35,6 +35,7 @@ const courseSchema = z.object({
       cei: z.number().nullable(),
       responses: z.number().int().positive(),
       enrolled: z.number().int().nonnegative(),
+      evaluation: z.string().optional(),
     }).optional(),
   })),
 });

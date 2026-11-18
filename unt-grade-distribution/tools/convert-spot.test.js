@@ -68,6 +68,7 @@ test('writes rounded ratings without instructor identifiers', () => {
     CEI: 5.2,
     RESPONSES: 12,
     ENROLLED: 30,
+    EVALUATION: '1',
   }]);
   assert.equal(stats.sections, 1);
   assert.doesNotMatch(toCsv(rows), /abc0001|10000001/);

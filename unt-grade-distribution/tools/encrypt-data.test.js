@@ -76,7 +76,7 @@ test('builds complete, unique instructor tokens without a cap', () => {
 
 test('attaches SPOT ratings to the single matching graded section', () => {
   const spotIndex = buildSpotIndex([
-    { YEAR: '2026', TERM: 'Spring', PREFIX: 'CSCE', NUMBER: '1010', SECTION: '1', RATING: '4.6', CEI: '', RESPONSES: '12', ENROLLED: '30' },
+    { YEAR: '2026', TERM: 'Spring', PREFIX: 'CSCE', NUMBER: '1010', SECTION: '1', RATING: '4.6', CEI: '', RESPONSES: '12', ENROLLED: '30', EVALUATION: '124624' },
     { YEAR: '2026', TERM: 'Spring', PREFIX: 'CSCE', NUMBER: '1010', SECTION: '2', RATING: '3.9', CEI: '5.1', RESPONSES: '8', ENROLLED: '20' },
     { YEAR: '2026', TERM: 'Spring', PREFIX: 'CSCE', NUMBER: '1010', SECTION: '3', RATING: '', CEI: '', RESPONSES: '0', ENROLLED: '9' },
   ]);
@@ -92,7 +92,7 @@ test('attaches SPOT ratings to the single matching graded section', () => {
 
   assert.equal(spotIndex.size, 2);
   assert.equal(attached, 1);
-  assert.deepEqual(matched.spot, { rating: 4.6, cei: null, responses: 12, enrolled: 30 });
+  assert.deepEqual(matched.spot, { rating: 4.6, cei: null, responses: 12, enrolled: 30, evaluation: '2026-spring-124624' });
   assert.equal(otherSemester.spot, undefined);
   assert.equal(splitA.spot, undefined);
   assert.equal(splitB.spot, undefined);

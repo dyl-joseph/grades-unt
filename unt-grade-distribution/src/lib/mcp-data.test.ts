@@ -57,7 +57,7 @@ const fixtureCourses = [
           year: "2024",
           term: "Fall",
           grades: { A: 2, B: 2, C: 0, D: 0, F: 0, P: 0, NP: 0, W: 0, I: 0 },
-          spot: { rating: 4.6, cei: null, responses: 12, enrolled: 30 },
+          spot: { rating: 4.6, cei: null, responses: 12, enrolled: 30, evaluation: "2024-fall-7" },
         },
       ],
     } satisfies EncryptedCourse,
@@ -183,7 +183,7 @@ test("course reads keep SPOT ratings on the sections that have them", async () =
   const fixture = await createFixture(dataKey);
   try {
     const rated = await fixture.dataSource.getCourse("MATH", "2000", 0, 5);
-    assert.deepEqual(rated?.sections[0].spot, { rating: 4.6, cei: null, responses: 12, enrolled: 30 });
+    assert.deepEqual(rated?.sections[0].spot, { rating: 4.6, cei: null, responses: 12, enrolled: 30, evaluation: "2024-fall-7" });
 
     const unrated = await fixture.dataSource.getCourse("CSCE", "1030", 0, 5);
     assert.equal(unrated?.sections.some((section) => "spot" in section), false);

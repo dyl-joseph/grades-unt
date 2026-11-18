@@ -11,7 +11,7 @@ const path = require('path');
 const zlib = require('zlib');
 const { parse } = require('csv-parse/sync');
 
-const OUTPUT_COLUMNS = ['YEAR', 'TERM', 'PREFIX', 'NUMBER', 'SECTION', 'RATING', 'CEI', 'RESPONSES', 'ENROLLED'];
+const OUTPUT_COLUMNS = ['YEAR', 'TERM', 'PREFIX', 'NUMBER', 'SECTION', 'RATING', 'CEI', 'RESPONSES', 'ENROLLED', 'EVALUATION'];
 const DEFAULT_MIN_RESPONSES = 3;
 
 const SOURCE = {
@@ -223,6 +223,7 @@ function convertSpotRows(rows, { minResponses = DEFAULT_MIN_RESPONSES } = {}) {
       CEI: record.cei === null ? '' : roundTenth(record.cei),
       RESPONSES: record.responses,
       ENROLLED: record.enrolled,
+      EVALUATION: record.evaluation,
     });
   }
   stats.sections = output.length;

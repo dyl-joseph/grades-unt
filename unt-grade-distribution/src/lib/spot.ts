@@ -12,6 +12,11 @@ export type SpotSummary = {
   responses: number;
   /** Students invited to respond; cross-listed sections share one evaluation. */
   enrolled: number;
+  /**
+   * Identifies the evaluation within its semester. Cross-listed sections carry
+   * the same key because they share one questionnaire and response count.
+   */
+  evaluation?: string;
 };
 
 export const SPOT_RATING_MAX = 5;
@@ -25,9 +30,10 @@ export type SpotAggregate = {
 };
 
 /**
- * Combine section ratings into one figure, weighting each section by its
- * number of responses. The source only publishes per-section medians, so this
- * is an average of medians, not a median of the underlying answers.
+ * Combine section ratings into one figure, weighting each evaluation by its
+ * number of responses. Sections that share an evaluation (cross-listings) are
+ * counted once. The source only publishes per-section medians, so this is an
+ * average of medians, not a median of the underlying answers.
  */
 export function aggregateSpot(items: Array<{ spot?: SpotSummary | null }>): SpotAggregate | null {
   let responses = 0;
@@ -35,9 +41,14 @@ export function aggregateSpot(items: Array<{ spot?: SpotSummary | null }>): Spot
   let ceiResponses = 0;
   let ceiTotal = 0;
   let sections = 0;
+  const counted = new Set<string>();
 
   for (const { spot } of items) {
     if (!spot || !(spot.responses > 0) || !Number.isFinite(spot.rating)) continue;
+    if (spot.evaluation) {
+      if (counted.has(spot.evaluation)) continue;
+      counted.add(spot.evaluation);
+    }
     sections++;
     responses += spot.responses;
     ratingTotal += spot.rating * spot.responses;

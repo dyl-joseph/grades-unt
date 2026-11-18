@@ -102,6 +102,7 @@ function buildSpotIndex(rows) {
     if (String(row.RATING ?? '').trim() === '' || !Number.isFinite(rating) || !(responses > 0)) continue;
 
     const cei = String(row.CEI ?? '').trim() === '' ? NaN : Number(row.CEI);
+    const evaluationId = String(row.EVALUATION ?? '').trim();
     index.set(
       spotKey({ year: row.YEAR, term: row.TERM, prefix: row.PREFIX, number: row.NUMBER, section: row.SECTION }),
       {
@@ -109,6 +110,10 @@ function buildSpotIndex(rows) {
         cei: Number.isFinite(cei) ? cei : null,
         responses,
         enrolled: Number(row.ENROLLED) || 0,
+        // Cross-listed sections share one evaluation; the key lets pages count it once.
+        ...(evaluationId
+          ? { evaluation: `${String(row.YEAR).trim()}-${String(row.TERM).trim().toLowerCase()}-${evaluationId}` }
+          : {}),
       },
     );
   }

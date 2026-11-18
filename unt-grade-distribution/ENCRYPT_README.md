@@ -101,15 +101,15 @@ The report identifies instructors only by `Username` and `Emp ID`. Do not commit
 npm run convert:spot -- --input "path/to/PIR Request - SPOT - 2026 Spring.xlsx"
 ```
 
-This writes `prisma/data/spot/spot-<year>-<term>.csv` (git-ignored) with only `YEAR,TERM,PREFIX,NUMBER,SECTION,RATING,CEI,RESPONSES,ENROLLED`. `.xlsx` (first worksheet) and `.csv` inputs are accepted. The converter drops:
+This writes `prisma/data/spot/spot-<year>-<term>.csv` (git-ignored) with only `YEAR,TERM,PREFIX,NUMBER,SECTION,RATING,CEI,RESPONSES,ENROLLED,EVALUATION`. `EVALUATION` is IASystem's survey number for the evaluation, not a person identifier. `.xlsx` (first worksheet) and `.csv` inputs are accepted. The converter drops:
 
 - rows with no rating or no responses;
 - rows with fewer than three completed questionnaires (`--min-responses` changes the floor), because a median of a few answers is noisy and can expose one student's response;
 - sections evaluated separately for several instructors, because the report has no names to tell the ratings apart.
 
-Cross-listed sections share one evaluation, so each of them carries the same rating and the combined response count.
+Cross-listed sections share one evaluation, so each of them carries the same rating, the combined response count and the same `evaluation` key. Course and instructor summaries count each evaluation once.
 
-The next `npm run encrypt` reads every CSV in `prisma/data/spot/` and adds a `spot` object (`rating`, `cei`, `responses`, `enrolled`) to the section with the same course, section number, year and term. The instructor name therefore comes from the grade data, and a rating is attached only when the grade data has exactly one graded row for that section. The encryptor logs how many ratings were attached; a low number usually means the grade CSV for that semester is missing. Sections without a match are unchanged, and the site shows SPOT figures only where they exist.
+The next `npm run encrypt` reads every CSV in `prisma/data/spot/` and adds a `spot` object (`rating`, `cei`, `responses`, `enrolled`, `evaluation`) to the section with the same course, section number, year and term. The instructor name therefore comes from the grade data, and a rating is attached only when the grade data has exactly one graded row for that section. The encryptor logs how many ratings were attached; a low number usually means the grade CSV for that semester is missing. Sections without a match are unchanged, and the site shows SPOT figures only where they exist.
 
 Course and instructor pages show a response-weighted average of the section medians. It is a summary of medians, not a median of all answers.
 

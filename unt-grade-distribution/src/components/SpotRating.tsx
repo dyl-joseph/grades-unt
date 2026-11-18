@@ -17,7 +17,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 /** SPOT evaluation figures with the response count that backs them. */
 export default function SpotRating({ spot, variant = "card" }: SpotRatingProps) {
   const averaged = spot.sections !== undefined && spot.sections > 1;
-  const title = `${averaged ? `Response-weighted average of ${spot.sections} section ratings. ` : ""}${spotDescription(spot)}.`;
+  const title = `${averaged ? `Response-weighted average of ${spot.sections} evaluations. ` : ""}${spotDescription(spot)}.`;
   const responses = `${spot.responses.toLocaleString()} response${spot.responses !== 1 ? "s" : ""}`;
   const stats = (
     <>
