@@ -166,26 +166,29 @@ export default function InstructorClient() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8">
-        <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
-          <h1 className="min-w-0 break-words text-2xl font-bold text-ui-text sm:text-3xl">{firstName} {lastName}</h1>
-          <div className="flex w-full flex-wrap items-start justify-end gap-2 sm:w-auto">
-            <a
-              href={`/compare?type=instructor&a=${encodeURIComponent(`${lastName},${firstName}`)}`}
-              className="inline-flex items-center whitespace-nowrap rounded-lg border px-3 py-1.5 font-medium transition-all border-ui-border bg-ui-selected text-ui-text hover:border-ui-accent hover:bg-ui-selected"
-              title="Compare with another instructor"
-            >
-              Compare
-            </a>
-          </div>
+      {/* Below sm the actions move under the summary so they never sit alone between the title and its stats. */}
+      <div className="mb-8 grid grid-cols-1 items-start sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-4">
+        <h1 className="min-w-0 break-words text-2xl font-bold text-ui-text sm:text-3xl">{firstName} {lastName}</h1>
+        <div className="order-last mt-4 flex flex-wrap items-start gap-2 sm:order-none sm:mt-0 sm:justify-end">
+          <a
+            href={`/compare?type=instructor&a=${encodeURIComponent(`${lastName},${firstName}`)}`}
+            className="inline-flex items-center whitespace-nowrap rounded-lg border px-3 py-1.5 font-medium transition-all border-ui-border bg-ui-selected text-ui-text hover:border-ui-accent hover:bg-ui-selected"
+            title="Compare with another instructor"
+          >
+            Compare
+          </a>
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-ui-muted">
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ui-muted sm:col-span-2">
           <span className="flex items-center gap-1.5">Overall GPA: <GpaBadge gpa={overallGPA} /></span>
           <span>{normalizedSections.length} sections</span>
           <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
           <span>{allCourseCount} course{allCourseCount !== 1 ? "s" : ""} taught</span>
         </div>
-        {overallSpot && <SpotRating spot={overallSpot} variant="summary" />}
+        {overallSpot && (
+          <div className="sm:col-span-2">
+            <SpotRating spot={overallSpot} variant="summary" />
+          </div>
+        )}
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border p-4 border-ui-border bg-ui-surface sm:p-6">
