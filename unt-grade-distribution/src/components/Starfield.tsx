@@ -1,6 +1,5 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 
 export const STARFIELD_WIDTH = 1440;
@@ -26,6 +25,34 @@ export const stars = (() => {
   });
 })();
 
+/** How many phase offsets each twinkle speed is split into. */
+const TWINKLE_PHASES = 8;
+const TWINKLE_DURATIONS = [3, 3.5, 4, 4.5, 5];
+
+/**
+ * Stars that share a twinkle speed and (roughly) a phase share one animated
+ * group, so about 40 groups animate instead of hundreds of circles. A group's
+ * opacity multiplies each circle's own fixed opacity, which gives every star
+ * the same 10%-to-full twinkle it would have on its own. Hundreds of separately
+ * animated SVG circles made every theme switch restyle them all on one frame.
+ */
+function twinkleGroups(visible: typeof stars) {
+  const groups = new Map<string, { duration: number; delay: number; members: typeof stars }>();
+  visible.forEach((star, index) => {
+    const speed = index % TWINKLE_DURATIONS.length;
+    const duration = TWINKLE_DURATIONS[speed];
+    const phase = Math.floor((((index * 7.919) % duration) / duration) * TWINKLE_PHASES);
+    const key = `${speed}-${phase}`;
+    let group = groups.get(key);
+    if (!group) {
+      group = { duration, delay: -((phase + 0.5) / TWINKLE_PHASES) * duration, members: [] };
+      groups.set(key, group);
+    }
+    group.members.push(star);
+  });
+  return [...groups.values()];
+}
+
 export default function Starfield() {
   const pathname = usePathname();
   const isHome = pathname === "/";
@@ -42,21 +69,16 @@ export default function Starfield() {
         preserveAspectRatio="xMidYMid slice"
         focusable="false"
       >
-        {visibleStars.map((star, index) => (
-          <circle
-            key={index}
-            cx={star.x}
-            cy={star.y}
-            r={star.radius}
-            fill="#fff"
-            opacity={star.opacity}
-            className="star"
-            style={{
-              animationDuration: `${3 + (index % 5) * 0.5}s`,
-              animationDelay: `-${(index * 7.919) % (3 + (index % 5) * 0.5)}s`,
-              "--star-opacity": star.opacity,
-            } as CSSProperties}
-          />
+        {twinkleGroups(visibleStars).map((group, groupIndex) => (
+          <g
+            key={groupIndex}
+            className="star-group"
+            style={{ animationDuration: `${group.duration}s`, animationDelay: `${group.delay}s` }}
+          >
+            {group.members.map((star, index) => (
+              <circle key={index} cx={star.x} cy={star.y} r={star.radius} fill="#fff" opacity={star.opacity} />
+            ))}
+          </g>
         ))}
       </svg>
     </div>
