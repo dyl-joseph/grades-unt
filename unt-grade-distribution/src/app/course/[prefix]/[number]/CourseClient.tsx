@@ -153,49 +153,52 @@ export default function CourseClient() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8">
-        <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
-          <h1 className="min-w-0 break-words text-2xl font-bold text-ui-text sm:text-3xl">
-            {course.prefix} {course.number} <span className="text-ui-muted">—</span> {course.title}
-          </h1>
-          <div className="flex w-full flex-wrap items-start justify-end gap-2 sm:w-auto">
-            <ShareButton url={`/course/${course.prefix}/${course.number}`} />
-            <CourseSaveButton
-              item={{
-                courseId: stableCourseId(course.prefix, course.number),
-                prefix: course.prefix,
-                number: course.number,
-                title: course.title,
-                gpa: overallGPA,
-                gradeA: aggregate.gradeA,
-                gradeB: aggregate.gradeB,
-                gradeC: aggregate.gradeC,
-                gradeD: aggregate.gradeD,
-                gradeF: aggregate.gradeF,
-                gradeP: aggregate.gradeP,
-                gradeNP: aggregate.gradeNP,
-                gradeW: aggregate.gradeW,
-                gradeI: aggregate.gradeI,
-                totalEnroll: aggregate.totalEnroll,
-                sectionCount: sections.length,
-              }}
-            />
-            <a
-              href={`/compare?type=course&a=${course.prefix}:${course.number}`}
-              className="inline-flex items-center whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-medium transition-all border-ui-border bg-ui-selected text-ui-text hover:border-ui-accent hover:bg-ui-selected"
-              title="Compare with another course"
-            >
-              Compare
-            </a>
-          </div>
+      {/* Below sm the actions move under the summary so they never sit alone between the title and its stats. */}
+      <div className="mb-8 grid grid-cols-1 items-start sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-4">
+        <h1 className="min-w-0 break-words text-2xl font-bold text-ui-text sm:text-3xl">
+          {course.prefix} {course.number} <span className="text-ui-muted">—</span> {course.title}
+        </h1>
+        <div className="order-last mt-4 flex flex-wrap items-start gap-2 sm:order-none sm:mt-0 sm:justify-end">
+          <ShareButton url={`/course/${course.prefix}/${course.number}`} />
+          <CourseSaveButton
+            item={{
+              courseId: stableCourseId(course.prefix, course.number),
+              prefix: course.prefix,
+              number: course.number,
+              title: course.title,
+              gpa: overallGPA,
+              gradeA: aggregate.gradeA,
+              gradeB: aggregate.gradeB,
+              gradeC: aggregate.gradeC,
+              gradeD: aggregate.gradeD,
+              gradeF: aggregate.gradeF,
+              gradeP: aggregate.gradeP,
+              gradeNP: aggregate.gradeNP,
+              gradeW: aggregate.gradeW,
+              gradeI: aggregate.gradeI,
+              totalEnroll: aggregate.totalEnroll,
+              sectionCount: sections.length,
+            }}
+          />
+          <a
+            href={`/compare?type=course&a=${course.prefix}:${course.number}`}
+            className="inline-flex items-center whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-medium transition-all border-ui-border bg-ui-selected text-ui-text hover:border-ui-accent hover:bg-ui-selected"
+            title="Compare with another course"
+          >
+            Compare
+          </a>
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-ui-muted">
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ui-muted sm:col-span-2">
           <span className="flex items-center gap-1.5">Overall GPA: <GpaBadge gpa={overallGPA} /></span>
           <span>{sections.length} sections</span>
           <span>{semesterGroups.length} semester{semesterGroups.length !== 1 ? "s" : ""}</span>
           <span>{aggregate.totalEnroll.toLocaleString()} total students</span>
         </div>
-        {overallSpot && <SpotRating spot={overallSpot} variant="summary" />}
+        {overallSpot && (
+          <div className="sm:col-span-2">
+            <SpotRating spot={overallSpot} variant="summary" />
+          </div>
+        )}
       </div>
 
       <div className="mb-10 min-w-0 rounded-xl border p-4 border-ui-border bg-ui-surface sm:p-6">
