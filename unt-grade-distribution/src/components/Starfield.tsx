@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 
 export const STARFIELD_WIDTH = 1440;
 export const STARFIELD_HEIGHT = 1000;
-/** How many stars the home page shows; other pages show all of them. */
+/** How many animated stars the home page shows. */
 export const HOME_STAR_COUNT = 360;
 
 // Fixed positions keep the sky stable across route changes and hydration.
@@ -55,13 +55,13 @@ function twinkleGroups(visible: typeof stars) {
 
 export default function Starfield() {
   const pathname = usePathname();
-  const isHome = pathname === "/";
-  const visibleStars = isHome ? stars.slice(0, HOME_STAR_COUNT) : stars;
+  if (pathname !== "/") return null;
+  const visibleStars = stars.slice(0, HOME_STAR_COUNT);
 
   return (
     <div
       aria-hidden="true"
-      className={`starfield-layer pointer-events-none fixed inset-0 z-[1] overflow-hidden ${isHome ? "" : "starfield-dim"}`}
+      className="starfield-layer pointer-events-none fixed inset-0 z-[1] overflow-hidden"
     >
       <svg
         className="starfield h-full w-full"

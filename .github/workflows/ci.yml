@@ -59,3 +59,24 @@ jobs:
         env:
           REDIS_TEST_CONTAINER: ${{ job.services.redis.id }}
         run: npm --prefix unt-grade-distribution run test:redis
+
+  browser-scroll:
+    name: Scroll regression (Chromium, Firefox, WebKit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: unt-grade-distribution/package-lock.json
+      - run: npm ci --prefix unt-grade-distribution
+      - run: npx playwright install --with-deps chromium firefox webkit
+        working-directory: unt-grade-distribution
+      - run: npm --prefix unt-grade-distribution run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: scroll-regression-traces
+          path: unt-grade-distribution/test-results

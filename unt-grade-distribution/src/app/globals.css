@@ -59,6 +59,18 @@ body {
   color: var(--color-ui-text);
 }
 
+/* Long pages use painted stars instead of fixed animated compositor layers. */
+.dark body:not(:has(.home-page)) {
+  background-image:
+    radial-gradient(1px 1px at 27px 19px, #ffffff70 98%, transparent),
+    radial-gradient(1px 1px at 123px 97px, #ffffff40 98%, transparent),
+    radial-gradient(1.5px 1.5px at 61px 173px, #ffffff60 98%, transparent),
+    radial-gradient(0.8px 0.8px at 197px 41px, #ffffff50 98%, transparent),
+    radial-gradient(1px 1px at 89px 231px, #ffffff60 98%, transparent),
+    radial-gradient(0.8px 0.8px at 213px 151px, #ffffff40 98%, transparent);
+  background-size: 271px 259px, 397px 307px, 337px 379px, 431px 289px, 467px 419px, 311px 443px;
+}
+
 :is(h1, h2, h3) {
   text-wrap: balance;
 }
@@ -515,10 +527,6 @@ div:has(> .semester-controls) {
    of the crossfade. */
 :root:active-view-transition:not(.dark) .starfield-layer {
   transition: none;
-}
-
-.dark .starfield-layer.starfield-dim {
-  opacity: 0.8;
 }
 
 @media (prefers-reduced-motion: reduce) {
