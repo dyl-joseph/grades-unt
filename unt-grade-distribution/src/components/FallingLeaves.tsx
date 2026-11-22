@@ -352,6 +352,8 @@ export default function FallingLeaves() {
     };
   }, [isHome]);
 
+  if (!isHome) return null;
+
   return (
     <canvas
       ref={canvasRef}
