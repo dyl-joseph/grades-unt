@@ -45,6 +45,7 @@ test("GitHub CI executes production Lua against an isolated Redis service", () =
 });
 
 test("GitHub CI exercises scrolling in all three browser engines", () => {
+  assert.match(workflow, /browser-scroll:\n\s+name: Scroll regression[^\n]*\n\s+runs-on: ubuntu-24\.04/);
   assert.match(workflow, /playwright install --with-deps chromium firefox webkit/);
   assert.match(workflow, /run: npm --prefix unt-grade-distribution run test:e2e/);
   assert.match(workflow, /name: scroll-regression-traces/);
