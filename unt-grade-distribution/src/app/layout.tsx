@@ -42,14 +42,14 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="font-sans antialiased bg-ui-page text-ui-text"
+        className="isolate font-sans antialiased bg-ui-page text-ui-text"
       >
-        {/* Ambient backgrounds: leaves in light mode, stars in dark mode */}
+        {/* Isolate negative background layers so long content needs no elevated stacking context. */}
         <FallingLeaves />
         <Starfield />
         <Providers>
           <Navbar />
-          <main className="relative z-20">{children}</main>
+          <main className="relative">{children}</main>
         </Providers>
         <KofiWidget />
         <Analytics />
