@@ -61,7 +61,7 @@ export default function Starfield() {
   return (
     <div
       aria-hidden="true"
-      className={`starfield-layer pointer-events-none fixed inset-0 -z-10 overflow-hidden ${isHome ? "" : "starfield-dim"}`}
+      className={`starfield-layer pointer-events-none fixed inset-0 z-[1] overflow-hidden ${isHome ? "" : "starfield-dim"}`}
     >
       <svg
         className="starfield h-full w-full"

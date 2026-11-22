@@ -35,8 +35,6 @@ for (const colorScheme of ["dark", "light"] as const) {
       await page.goto("/course/CSCE/1010");
       const cards = page.locator(".section-card");
       await expect(cards).toHaveCount(60);
-      // Keep animated viewport layers behind content without elevating the entire long page.
-      await expect(page.locator("body > main")).toHaveCSS("z-index", "auto");
       for (const index of [0, 29, 59, 10, 59, 0]) {
         const card = cards.nth(index);
         await card.scrollIntoViewIfNeeded();

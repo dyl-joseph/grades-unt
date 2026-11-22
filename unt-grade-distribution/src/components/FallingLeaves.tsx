@@ -355,7 +355,7 @@ export default function FallingLeaves() {
   return (
     <canvas
       ref={canvasRef}
-      className={`pointer-events-none fixed left-0 top-0 -z-10 ${
+      className={`pointer-events-none fixed left-0 top-0 z-[1] ${
         isHome ? "opacity-100" : "opacity-45"
       }`}
       aria-hidden="true"
