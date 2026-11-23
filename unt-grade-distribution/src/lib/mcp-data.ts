@@ -68,9 +68,12 @@ export function createGradeDataSource(directory: string, dataKey: () => string |
     const passphrase = dataKey()?.trim();
     if (!passphrase) throw new Error("NEXT_PUBLIC_DATA_KEY is required to read course grades");
 
+    // next.config.ts traces the complete MCP data directory.
+    const blobPath = path.join(/* turbopackIgnore: true */ directory, "blobs", id);
+    const metadataPath = blobPath.replace(/\.bin$/, ".meta.json");
     const [ciphertext, metaText] = await Promise.all([
-      readFile(path.join(directory, "blobs", id)),
-      readFile(path.join(directory, "blobs", id.replace(/\.bin$/, ".meta.json")), "utf8"),
+      readFile(/* turbopackIgnore: true */ blobPath),
+      readFile(/* turbopackIgnore: true */ metadataPath, "utf8"),
     ]);
     const meta = blobMetaSchema.parse(JSON.parse(metaText));
     const baseKey = await crypto.subtle.importKey(
